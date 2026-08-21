@@ -170,6 +170,7 @@ pub fn run() {
             stt::wake_pause,
             open::open_app,
             open::open_web,
+            open::app_installed,
             system::system_volume,
             system::system_media,
             system::system_power,

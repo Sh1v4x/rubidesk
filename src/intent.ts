@@ -175,6 +175,67 @@ export function extractActionVerb(text: string): string | null {
   return m ? m[0] : null;
 }
 
+export interface EliadexIntent {
+  query: string;
+  view: "items" | "boss" | "dungeons" | "sublimations" | null;
+}
+
+// Déclencheurs écrits avec leurs variantes accentuées : on parse un texte
+// en minuscules mais AVEC accents, pour que la requête envoyée à Eliadex
+// garde les siens (« gelée royale »).
+const ELIADEX_LOCATE =
+  /\bo[uù]\s+(?:est|sont|se\s+trouve(?:nt)?|(?:je\s+)?(?:trouve[rz]?|farme?[rz]?|drop(?:pe)?[rz]?|r[ée]cup[èe]re[rz]?|obtiens?))\b\s*(.*)$/;
+// tournure inversée : « la gelée royale, où je la trouve ? »
+const ELIADEX_LOCATE_TAIL =
+  /^(.+?)\s+o[uù]\s+(?:je\s+)?(?:l[ae]s?\s+)?(?:trouve[rz]?|farme?[rz]?|drop(?:pe)?[rz]?)\b/;
+const ELIADEX_RECIPE = /\brecettes?\s+(?:de\s+la\s+|de\s+|du\s+|des\s+|d['e]\s*)?(.+)$/;
+const ELIADEX_DIRECT = /\b(?:cherche[rz]?|recherche[rz]?|regarde[rz]?)\s+(.+?)\s+(?:sur|dans)\s+eliadex\b/;
+
+/** « où je trouve X », « où se trouve le boss Y », « recette de Z »… → Eliadex. */
+export function parseEliadex(text: string): EliadexIntent | null {
+  const soft = text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N} ]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  let rest: string | null = null;
+  let view: EliadexIntent["view"] = null;
+
+  const direct = soft.match(ELIADEX_DIRECT);
+  const recipe = soft.match(ELIADEX_RECIPE);
+  const locate = soft.match(ELIADEX_LOCATE);
+  const locateTail = soft.match(ELIADEX_LOCATE_TAIL);
+  if (direct) rest = direct[1];
+  else if (recipe) {
+    rest = recipe[1];
+    view = "items";
+  } else if (locate) rest = locate[1];
+  else if (locateTail) rest = locateTail[1];
+  else return null;
+
+  let words = rest.split(/\s+/).filter((w) => w.length > 0 && !STOP_WORDS.has(normalize(w)));
+  // « où est la lumière » : la domotique reste chez Home Assistant
+  if (words.some((w) => normalize(w) in DOMAIN_SYNONYMS)) return null;
+
+  if (view === null) {
+    if (words.some((w) => normalize(w) === "boss")) {
+      view = "boss";
+      words = words.filter((w) => normalize(w) !== "boss");
+    } else if (words.some((w) => normalize(w).startsWith("donjon"))) {
+      view = "dungeons";
+      words = words.filter((w) => !normalize(w).startsWith("donjon"));
+    } else if (words.some((w) => normalize(w).startsWith("sublimation"))) {
+      view = "sublimations";
+      words = words.filter((w) => !normalize(w).startsWith("sublimation"));
+    }
+  }
+
+  const query = words.join(" ");
+  if (!query) return null;
+  return { query, view };
+}
+
 export interface OpenIntent {
   kind: "url" | "app" | "search";
   target: string;

@@ -213,3 +213,9 @@ mod tests {
 pub fn open_web(url: String) -> Result<(), String> {
     tauri_plugin_opener::open_url(url, None::<String>).map_err(|e| e.to_string())
 }
+
+/// Une application correspondant à ce nom est-elle installée ?
+#[tauri::command]
+pub fn app_installed(name: String) -> bool {
+    find_app(&name).is_ok()
+}

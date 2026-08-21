@@ -126,6 +126,17 @@ export const replies = {
   updateRestart: (): string => "Mise à jour installée. Je reviens — ne t'enfuis pas.",
   askCity: (): string =>
     "Dis-moi ta ville une fois — « météo à Lyon » par exemple — et je m'en souviendrai.",
+  eliadexOpened: (query: string): string =>
+    pick([
+      `Regarde dans Eliadex, mortel : « ${query} », c'est affiché.`,
+      `Eliadex te montre ça. Heureusement que LUI, il travaille.`,
+      `« ${query} » — c'est ouvert dans Eliadex. Bonne chasse. Essaie de pas mourir.`,
+    ]),
+  eliadexMissing: (): string =>
+    pick([
+      "Il te faut Eliadex pour ça. Le seul outil de mortel que je respecte — installe-le.",
+      "Pas d'Eliadex sur cette machine. Sans lui, je ne connais pas le Monde des Douze par cœur, moi.",
+    ]),
   opened: (name: string): string =>
     pick([
       `J'ouvre ${name}. Portier, maintenant. Formidable.`,

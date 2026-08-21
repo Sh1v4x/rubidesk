@@ -13,10 +13,12 @@ import {
   parseTimer,
   parseOpen,
   parseSystem,
+  parseEliadex,
   extractActionVerb,
   formatDuration,
   type Action,
   type SystemIntent,
+  type EliadexIntent,
 } from "./intent";
 import { checkForUpdates } from "./updater";
 import * as ha from "./ha";
@@ -314,6 +316,25 @@ async function handleSystem(intent: SystemIntent): Promise<void> {
   }
 }
 
+/** Ouvre Eliadex sur la recherche demandée via son deep link `eliadex://`. */
+async function handleEliadex(intent: EliadexIntent): Promise<void> {
+  const installed = await invoke<boolean>("app_installed", { name: "eliadex" }).catch(() => false);
+  if (!installed) {
+    say(replies.eliadexMissing(), "error");
+    return;
+  }
+  const url =
+    `eliadex://search?q=${encodeURIComponent(intent.query)}` +
+    (intent.view ? `&view=${intent.view}` : "");
+  try {
+    await invoke("open_web", { url });
+    say(replies.eliadexOpened(intent.query));
+  } catch (e) {
+    console.error(e);
+    say(replies.eliadexMissing(), "error");
+  }
+}
+
 /** Découpe « fais A et B puis C » et exécute chaque commande, en héritant du verbe. */
 async function handleInput(text: string): Promise<void> {
   const parts = text
@@ -352,6 +373,13 @@ async function handleCommand(text: string): Promise<void> {
   const system = parseSystem(text);
   if (system) {
     await handleSystem(system);
+    return;
+  }
+
+  // Eliadex : où trouver un item, un boss, un donjon, une recette…
+  const eliadex = parseEliadex(text);
+  if (eliadex) {
+    await handleEliadex(eliadex);
     return;
   }
 

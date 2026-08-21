@@ -25,7 +25,8 @@ const INITIAL_PROMPT: &str = "Commande en français : allume, éteins, bascule \
 la lumière, la lampe, le ventilateur, la prise, le volet, la télé \
 du salon, de la chambre, de la cuisine, du bureau, de la salle de bain. \
 Ouvre Spotify, lance Discord, va sur YouTube, recherche la météo. \
-Minuteur de dix minutes, rappelle-moi dans une heure.";
+Minuteur de dix minutes, rappelle-moi dans une heure. \
+Où je trouve la gelée royale ? Où se trouve le boss ? Recette du pain d'Incarnam.";
 
 static STOP_FLAG: AtomicBool = AtomicBool::new(false);
 static WHISPER_CTX: Mutex<Option<Arc<WhisperContext>>> = Mutex::new(None);
