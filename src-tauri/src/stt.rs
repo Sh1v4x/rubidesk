@@ -14,10 +14,11 @@ const MODEL_URL: &str =
     "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin";
 const MODEL_FILE: &str = "ggml-large-v3-turbo-q5_0.bin";
 
-/// Mot d'éveil : détection continue avec un modèle tiny, léger et rapide.
+/// Mot d'éveil : détection continue avec un modèle base — deux fois plus
+/// précis que tiny sur les noms propres, toujours léger (~60 Mo).
 const WAKE_MODEL_URL: &str =
-    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny-q5_1.bin";
-const WAKE_MODEL_FILE: &str = "ggml-tiny-q5_1.bin";
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base-q5_1.bin";
+const WAKE_MODEL_FILE: &str = "ggml-base-q5_1.bin";
 const WAKE_WORD: &str = "rubilax";
 
 /// Vocabulaire d'amorçage : oriente whisper vers le lexique domotique attendu.
@@ -72,6 +73,7 @@ pub fn warm_up(app: &AppHandle) {
         if let Ok(path) = model_path(&app) {
             if let Some(dir) = path.parent() {
                 let _ = std::fs::remove_file(dir.join("ggml-small-q5_1.bin"));
+                let _ = std::fs::remove_file(dir.join("ggml-tiny-q5_1.bin"));
             }
             if path.exists() {
                 if let Err(e) = get_ctx(&path) {
@@ -428,9 +430,10 @@ fn wake_loop(app: &AppHandle, model: &Path) -> Result<(), String> {
             } else {
                 (new.iter().map(|s| s * s).sum::<f32>() / new.len() as f32).sqrt()
             };
-            // hors parole, ne garder que la dernière demi-seconde (pré-roll)
-            if !speech_started && buf.len() > sample_rate {
-                let excess = buf.len() - sample_rate / 2;
+            // hors parole, garder une seconde de pré-roll : l'attaque du
+            // « Ru- » précède souvent le franchissement du seuil
+            if !speech_started && buf.len() > sample_rate * 2 {
+                let excess = buf.len() - sample_rate;
                 buf.drain(0..excess);
             }
             processed = buf.len();
@@ -494,7 +497,11 @@ fn wake_loop(app: &AppHandle, model: &Path) -> Result<(), String> {
 
 fn wake_transcribe(ctx: &WhisperContext, audio: &[f32]) -> Result<String, String> {
     let mut state = ctx.create_state().map_err(|e| e.to_string())?;
-    let mut params = FullParams::new(SamplingStrategy::Greedy { best_of: 1 });
+    // faisceau court : nettement meilleur que greedy sur un nom propre isolé
+    let mut params = FullParams::new(SamplingStrategy::BeamSearch {
+        beam_size: 3,
+        patience: -1.0,
+    });
     params.set_language(Some("fr"));
     params.set_translate(false);
     params.set_print_progress(false);
@@ -517,9 +524,9 @@ fn wake_transcribe(ctx: &WhisperContext, audio: &[f32]) -> Result<String, String
     Ok(text)
 }
 
-/// « Rubilax » avec tolérance : accents/espaces ignorés, distance
-/// d'édition ≤ 2 sur une fenêtre glissante (attrape « roubilax »,
-/// « ruby lax », « rubilaxe »…).
+/// « Rubilax » avec tolérance aux transcriptions approximatives : accents,
+/// espaces et ponctuation ignorés, distance d'édition sur fenêtre glissante,
+/// et repli sur la fin distinctive « -bilax » quand l'attaque est coupée.
 fn matches_wake_word(text: &str) -> bool {
     let clean: String = text
         .to_lowercase()
@@ -532,24 +539,76 @@ fn matches_wake_word(text: &str) -> bool {
             'ô' | 'ö' => Some('o'),
             'û' | 'ù' | 'ü' => Some('u'),
             'ç' => Some('c'),
+            'y' => Some('i'), // « ruby lax » → « rubilax »
+            'k' => Some('x'), // « rubilaks »
             _ => None,
         })
         .collect();
-    if clean.contains(WAKE_WORD) {
+    if clean.contains(WAKE_WORD) || clean.contains("roubilax") {
+        return true;
+    }
+    // le début « Ru- » est souvent avalé : la fin « -bilax » suffit
+    if clean.contains("bilax") || clean.contains("bilas") {
         return true;
     }
     let n = WAKE_WORD.len();
-    for w in (n - 1)..=(n + 1) {
+    for w in (n - 2)..=(n + 2) {
         if clean.len() < w {
             continue;
         }
         for i in 0..=clean.len() - w {
-            if levenshtein(&clean[i..i + w], WAKE_WORD) <= 2 {
+            let win = &clean[i..i + w];
+            let d = levenshtein(win, WAKE_WORD);
+            if d <= 2 {
+                return true;
+            }
+            // un peu plus laxiste quand l'attaque « Rub- » colle exactement
+            // (pas sur la fin seule : « relaxe » est un mot courant)
+            if d == 3 && (win.starts_with("rub") || win.starts_with("roub")) {
                 return true;
             }
         }
     }
     false
+}
+
+#[cfg(test)]
+mod wake_tests {
+    use super::matches_wake_word;
+
+    #[test]
+    fn variantes_acceptees() {
+        for heard in [
+            "Rubilax !",
+            "Hé Rubilax",
+            "roubilax",
+            "Ruby lax",
+            "Ruby Lax.",
+            "rubilaks",
+            "Rubilaxe",
+            "rubila",
+            "et bilax ?",
+            "Hubilax",
+            "rue Bilas",
+            "Roubila",
+        ] {
+            assert!(matches_wake_word(heard), "aurait dû matcher : {heard:?}");
+        }
+    }
+
+    #[test]
+    fn phrases_normales_refusees() {
+        for heard in [
+            "allume la lumière du salon",
+            "quel temps fait-il demain",
+            "c'est une publication",
+            "il relaxe tranquillement",
+            "la rubrique du jour",
+            "minuteur de dix minutes",
+        ] {
+            assert!(!matches_wake_word(heard), "n'aurait pas dû matcher : {heard:?}");
+        }
+    }
 }
 
 pub(crate) fn levenshtein(a: &str, b: &str) -> usize {

@@ -604,7 +604,7 @@ async function setWakeMode(on: boolean): Promise<void> {
   if (on) {
     const ready = await invoke<boolean>("wake_model_ready");
     if (!ready) {
-      bubble.textContent = "Je télécharge mes petites oreilles de veille (~32 Mo)…";
+      bubble.textContent = "Je télécharge mes petites oreilles de veille (~60 Mo)…";
       bubble.classList.remove("hidden");
       await invoke("wake_download_model");
       bubble.classList.add("hidden");
