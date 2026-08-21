@@ -22,11 +22,16 @@ jobs:
     env:
       # whisper.cpp utilise std::filesystem, indisponible sous la cible 10.13 par défaut
       MACOSX_DEPLOYMENT_TARGET: "12.0"
-      # bindgen (whisper-rs-sys) a besoin de libclang sur les runners Windows
-      LIBCLANG_PATH: ${{ matrix.platform == 'windows-latest' && 'C:\Program Files\LLVM\bin' || '' }}
 
     steps:
       - uses: actions/checkout@v4
+
+      # bindgen (whisper-rs-sys) a besoin de libclang sur les runners Windows ;
+      # sur macOS il la trouve seul — ne surtout pas définir la variable à vide.
+      - name: Configurer libclang (Windows)
+        if: matrix.platform == 'windows-latest'
+        shell: bash
+        run: echo 'LIBCLANG_PATH=C:\Program Files\LLVM\bin' >> "$GITHUB_ENV"
 
       - uses: actions/setup-node@v4
         with:
