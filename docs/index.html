@@ -64,13 +64,13 @@
     h1 { font-size: clamp(44px, 7vw, 72px); font-weight: 600; letter-spacing: -0.01em; margin: 10px 0 4px; }
     h1 .dot { color: var(--braise); }
     .tagline { font-size: clamp(17px, 2.4vw, 21px); color: #d9c9ae; max-width: 30em; font-weight: 300; }
-    .badges { display: flex; flex-wrap: wrap; gap: 12px; margin: 28px 0 34px; }
+    .badges { display: flex; flex-wrap: wrap; gap: 14px; margin: 30px 0 38px; }
     .badge {
       font-family: "JetBrains Mono", monospace; font-size: 11.5px; letter-spacing: 0.06em;
       padding: 5px 12px; border: 1px solid var(--ligne); border-radius: 999px; color: var(--mut);
     }
     .badge b { color: var(--vert); font-weight: 600; }
-    .dl { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+    .dl { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }
     .btn {
       display: inline-flex; align-items: center; gap: 10px;
       font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 600;
@@ -97,9 +97,9 @@
     /* ---- sections ---- */
     section { padding: 76px 0; border-top: 1px solid var(--ligne); }
     h2 { font-size: 15px; font-family: "JetBrains Mono", monospace; letter-spacing: 0.22em; text-transform: uppercase; color: var(--braise2); margin-bottom: 38px; font-weight: 600; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 22px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 32px; }
     .card {
-      background: var(--panel); border: 1px solid var(--ligne); border-radius: 14px; padding: 26px 28px;
+      background: var(--panel); border: 1px solid var(--ligne); border-radius: 14px; padding: 30px 32px;
     }
     .card h3 { font-size: 16.5px; font-weight: 600; margin-bottom: 10px; }
     .card h3 .ic { margin-right: 8px; }
@@ -141,8 +141,8 @@
     .bug-form { background: rgba(10, 8, 6, 0.6); border: 1px solid var(--ligne); border-radius: 16px; padding: 26px; }
     .bug-form .lbl { font-family: "JetBrains Mono", monospace; font-size: 11.5px; letter-spacing: 0.08em;
       text-transform: uppercase; color: var(--mut); margin: 0 0 8px; }
-    .bug-form .lbl + .lbl, .bug-types + .lbl, .bug-form input + .lbl, .bug-form textarea + .lbl { margin-top: 16px; }
-    .bug-types { display: flex; gap: 8px; }
+    .bug-form .lbl + .lbl, .bug-types + .lbl, .bug-form input + .lbl, .bug-form textarea + .lbl { margin-top: 22px; }
+    .bug-types { display: flex; gap: 12px; }
     .bug-types button { font-family: "JetBrains Mono", monospace; font-size: 12.5px; padding: 8px 14px;
       border-radius: 10px; border: 1px solid var(--ligne); background: transparent; color: var(--mut); cursor: pointer; }
     .bug-types button.on { border-color: var(--braise); background: rgba(226, 112, 58, 0.16); color: var(--braise2); }
