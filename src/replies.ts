@@ -132,6 +132,11 @@ export const replies = {
       `Eliadex te montre ça. Heureusement que LUI, il travaille.`,
       `« ${query} » — c'est ouvert dans Eliadex. Bonne chasse. Essaie de pas mourir.`,
     ]),
+  eliadexOldVersion: (query: string): string =>
+    pick([
+      `Ta version d'Eliadex ne comprend pas encore mes liens. Je te l'ouvre — cherche « ${query} » toi-même, et mets-le à jour.`,
+      `Eliadex est trop vieux pour qu'on discute, lui et moi. Je l'ouvre quand même — « ${query} », c'est à toi de taper. Mets-le à jour, mortel.`,
+    ]),
   eliadexMissing: (): string =>
     pick([
       "Il te faut Eliadex pour ça. Le seul outil de mortel que je respecte — installe-le.",

@@ -327,11 +327,19 @@ async function handleEliadex(intent: EliadexIntent): Promise<void> {
     `eliadex://search?q=${encodeURIComponent(intent.query)}` +
     (intent.view ? `&view=${intent.view}` : "");
   try {
+    // le deep link lance Eliadex s'il est fermé, et route s'il est ouvert
     await invoke("open_web", { url });
     say(replies.eliadexOpened(intent.query));
-  } catch (e) {
-    console.error(e);
-    say(replies.eliadexMissing(), "error");
+  } catch {
+    // schéma inconnu : la version installée d'Eliadex est antérieure aux
+    // deep links — on ouvre l'app classiquement, sans routage
+    try {
+      await invoke("open_app", { name: "eliadex" });
+      say(replies.eliadexOldVersion(intent.query), "error");
+    } catch (e) {
+      console.error(e);
+      say(replies.eliadexMissing(), "error");
+    }
   }
 }
 
