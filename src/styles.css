@@ -67,8 +67,8 @@ body {
 
 #avatar {
   position: relative;
-  height: 520px;
-  width: 186px;
+  height: 620px;
+  width: 184px;
   cursor: grab;
   filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.5));
 }
@@ -87,9 +87,9 @@ body {
 #poke-zone {
   position: absolute;
   left: 50%;
-  top: 51.9%;
-  width: 82px;
-  height: 82px;
+  top: 63.9%; /* repositionné par élément dans sword.ts */
+  width: 66px;
+  height: 66px;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   cursor: pointer;
@@ -106,9 +106,18 @@ body {
 @keyframes triumph { 0% { transform: translateY(0) rotate(0deg); } 28% { transform: translateY(-24px) rotate(-2.2deg) scale(1.035); } 58% { transform: translateY(-7px) rotate(1.6deg); } 100% { transform: translateY(-11px) rotate(0deg); } }
 @keyframes scan { 0%, 100% { transform: translate(-11px, 4px); } 50% { transform: translate(11px, -4px); } }
 @keyframes ring_pulse { 0%, 100% { opacity: 0.24; transform: scale(1); } 50% { opacity: 0.9; transform: scale(1.1); } }
-@keyframes ember { 0% { opacity: 0; transform: translate(0, 0) scale(0.5); } 18% { opacity: 0.95; } 100% { opacity: 0; transform: translate(-16px, -110px) scale(1.15); } }
-@keyframes sheen { 0% { transform: translateY(-260px); } 100% { transform: translateY(700px); } }
+@keyframes ember { 0% { opacity: 0; transform: translate(0, 0) scale(0.5); } 18% { opacity: 0.95; } 100% { opacity: 0; transform: translate(-16px, -120px) scale(1.2); } }
+@keyframes ember_big { 0% { opacity: 0; transform: translate(0, 0) scale(0.4); } 14% { opacity: 1; } 100% { opacity: 0; transform: translate(-30px, -210px) scale(1.5); } }
+@keyframes leaf_drift { 0% { opacity: 0; transform: translate(0, 0) rotate(0deg); } 15% { opacity: 0.9; } 100% { opacity: 0; transform: translate(46px, -180px) rotate(220deg); } }
+@keyframes gust { 0% { opacity: 0; stroke-dashoffset: 120; } 30% { opacity: 0.7; } 100% { opacity: 0; stroke-dashoffset: -120; } }
+@keyframes sheen { 0% { transform: translateY(-300px); } 100% { transform: translateY(860px); } }
 @keyframes flicker { 0%, 100% { opacity: 0.5; } 43% { opacity: 0.78; } 71% { opacity: 0.42; } }
+@keyframes lava { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+@keyframes burst_flash { 0% { opacity: 0; transform: scale(0.1); } 10% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(2.2); } }
+@keyframes burst_ring { 0% { opacity: 0; transform: scale(0.05); } 12% { opacity: 1; } 100% { opacity: 0; transform: scale(3.4); } }
+@keyframes burst_ring2 { 0% { opacity: 0; transform: scale(0.05); } 22% { opacity: 0.9; } 100% { opacity: 0; transform: scale(5.2); } }
+@keyframes shard_out { 0% { opacity: 0; transform: scale(0.1); } 15% { opacity: 1; } 100% { opacity: 0; transform: scale(2.9); } }
+@keyframes shock { 0% { opacity: 0; transform: scale(0.2); } 20% { opacity: 0.85; } 100% { opacity: 0; transform: scale(2.6); } }
 
 #composer {
   display: flex;

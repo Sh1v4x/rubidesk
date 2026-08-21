@@ -635,7 +635,8 @@ const MINI_PREF = "rubilax.mini";
 async function setMini(on: boolean): Promise<void> {
   document.body.classList.toggle("mini", on);
   localStorage.setItem(MINI_PREF, on ? "1" : "0");
-  await getCurrentWindow().setSize(new LogicalSize(340, on ? 580 : 720));
+  sword.setEnv({ mini: on });
+  await getCurrentWindow().setSize(new LogicalSize(340, on ? 660 : 720));
 }
 
 // ---- menu contextuel (clic droit sur la lame) ----
@@ -672,6 +673,7 @@ ctxMenu.addEventListener("click", (e) => {
       break;
     case "mute":
       setMuted(!isMuted());
+      sword.setEnv({ muted: isMuted() });
       break;
     case "settings":
       if (document.body.classList.contains("mini")) void setMini(false);
@@ -750,8 +752,29 @@ async function runOnboarding(): Promise<void> {
   bubbleTimer = window.setTimeout(() => bubble.classList.add("hidden"), 2500);
 }
 
+// ---- élément automatique : Wakfu lancé → forme feu ----
+
+let gameWasRunning = false;
+
+async function pollGame(): Promise<void> {
+  try {
+    const running = await invoke<boolean>("process_running", { name: "wakfu" });
+    if (running && !gameWasRunning) {
+      window.setTimeout(() => say(replies.gameDetected(), "angry"), 1000);
+    }
+    gameWasRunning = running;
+    sword.setEnv({ game: running });
+  } catch {
+    // commande indisponible : on reste sur la forme courante
+  }
+}
+
+window.setInterval(() => void pollGame(), 30_000);
+void pollGame();
+
 // ---- démarrage ----
 
+sword.setEnv({ muted: isMuted(), mini: localStorage.getItem(MINI_PREF) === "1" });
 if (localStorage.getItem(MINI_PREF) === "1") void setMini(true);
 restoreTimers();
 

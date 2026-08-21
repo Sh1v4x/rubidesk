@@ -126,6 +126,11 @@ export const replies = {
   updateRestart: (): string => "Mise à jour installée. Je reviens — ne t'enfuis pas.",
   askCity: (): string =>
     "Dis-moi ta ville une fois — « météo à Lyon » par exemple — et je m'en souviendrai.",
+  gameDetected: (): string =>
+    pick([
+      "Wakfu ?! ENFIN ! Fais chauffer la lame, mortel !",
+      "Le Monde des Douze t'appelle. Et moi je m'embrase. Allons cogner.",
+    ]),
   eliadexOpened: (query: string): string =>
     pick([
       `Regarde dans Eliadex, mortel : « ${query} », c'est affiché.`,

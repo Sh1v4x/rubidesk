@@ -196,6 +196,26 @@ pub fn system_screenshot() -> Result<String, String> {
     }
 }
 
+/// Un processus dont le nom contient `name` tourne-t-il ? (insensible à la casse)
+#[tauri::command]
+pub fn process_running(name: String) -> bool {
+    #[cfg(target_os = "macos")]
+    {
+        Command::new("pgrep")
+            .args(["-if", &name])
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false)
+    }
+    #[cfg(target_os = "windows")]
+    {
+        Command::new("tasklist")
+            .output()
+            .map(|o| String::from_utf8_lossy(&o.stdout).to_lowercase().contains(&name.to_lowercase()))
+            .unwrap_or(false)
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Météo — Open-Meteo, gratuit et sans clé
 // ---------------------------------------------------------------------------

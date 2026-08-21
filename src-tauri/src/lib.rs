@@ -175,6 +175,7 @@ pub fn run() {
             system::system_media,
             system::system_power,
             system::system_screenshot,
+            system::process_running,
             system::weather,
             system::note_add,
             system::note_list,

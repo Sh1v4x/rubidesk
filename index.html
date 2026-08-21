@@ -11,178 +11,327 @@
 
       <div id="bubble" class="hidden"></div>
 
-      <!-- Le Fendoir — design importé du canvas « Rubilax pour application Tauri » -->
+      <!-- Le Fendoir — trois formes (design « Rubilax Trois Formes.dc.html ») -->
       <div id="avatar" data-tauri-drag-region>
-        <svg id="sword-svg" viewBox="0 0 220 620" role="img" aria-label="Le Fendoir">
+        <svg id="sword-svg" viewBox="0 0 260 880" role="img" aria-label="Le Fendoir">
           <defs>
-            <linearGradient id="fBlade" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stop-color="#6e6249" />
-              <stop offset="0.14" stop-color="#b5a985" />
-              <stop offset="0.42" stop-color="#dfd4b6" />
-              <stop offset="0.6" stop-color="#c7bb9a" />
-              <stop offset="0.9" stop-color="#8b7f61" />
-              <stop offset="1" stop-color="#5d5340" />
+            <linearGradient id="tBlade" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#6e6249" /><stop offset="0.14" stop-color="#b5a985" />
+              <stop offset="0.42" stop-color="#dfd4b6" /><stop offset="0.6" stop-color="#c7bb9a" />
+              <stop offset="0.9" stop-color="#8b7f61" /><stop offset="1" stop-color="#5d5340" />
             </linearGradient>
-            <linearGradient id="fCore" x1="0" y1="0" x2="1" y2="0.4">
-              <stop offset="0" stop-color="#1d1913" />
-              <stop offset="0.5" stop-color="#33291f" />
-              <stop offset="1" stop-color="#151109" />
+            <linearGradient id="tCore" x1="0" y1="0" x2="1" y2="0.4">
+              <stop offset="0" stop-color="#1d1913" /><stop offset="0.5" stop-color="#33291f" /><stop offset="1" stop-color="#151109" />
             </linearGradient>
-            <linearGradient id="fGrip" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stop-color="#0c0a08" />
-              <stop offset="0.3" stop-color="#2f2820" />
-              <stop offset="0.55" stop-color="#3b332a" />
-              <stop offset="0.8" stop-color="#191510" />
-              <stop offset="1" stop-color="#080706" />
+            <linearGradient id="tGrip" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#0c0a08" /><stop offset="0.3" stop-color="#2f2820" />
+              <stop offset="0.55" stop-color="#3b332a" /><stop offset="0.8" stop-color="#191510" /><stop offset="1" stop-color="#080706" />
             </linearGradient>
-            <linearGradient id="fMane" x1="0.2" y1="0" x2="0.8" y2="1">
-              <stop offset="0" stop-color="#2e2620" />
-              <stop offset="0.55" stop-color="#1b1712" />
-              <stop offset="1" stop-color="#0c0a08" />
+            <linearGradient id="tMane" x1="0.2" y1="0" x2="0.8" y2="1">
+              <stop offset="0" stop-color="#2e2620" /><stop offset="0.55" stop-color="#1b1712" /><stop offset="1" stop-color="#0c0a08" />
             </linearGradient>
-            <linearGradient id="fBone" x1="0" y1="0" x2="1" y2="0.3">
-              <stop offset="0" stop-color="#f1e8cf" />
-              <stop offset="0.5" stop-color="#d3c7a6" />
-              <stop offset="1" stop-color="#9e9276" />
+            <linearGradient id="tBone" x1="0" y1="0" x2="1" y2="0.3">
+              <stop offset="0" stop-color="#f1e8cf" /><stop offset="0.5" stop-color="#d3c7a6" /><stop offset="1" stop-color="#9e9276" />
             </linearGradient>
-            <linearGradient id="fRing" x1="0.1" y1="0" x2="0.8" y2="1">
-              <stop offset="0" stop-color="#d3612f" />
-              <stop offset="0.34" stop-color="#a93a17" />
-              <stop offset="0.72" stop-color="#7a260d" />
-              <stop offset="1" stop-color="#4c1608" />
+            <linearGradient id="tRing" x1="0.1" y1="0" x2="0.8" y2="1">
+              <stop offset="0" stop-color="#d3612f" /><stop offset="0.34" stop-color="#a93a17" />
+              <stop offset="0.72" stop-color="#7a260d" /><stop offset="1" stop-color="#4c1608" />
             </linearGradient>
-            <radialGradient id="fSclera" cx="0.34" cy="0.28" r="0.88">
-              <stop offset="0" stop-color="#faf5e4" />
-              <stop offset="0.6" stop-color="#e3d8ba" />
-              <stop offset="0.88" stop-color="#c0b391" />
-              <stop offset="1" stop-color="#8e8265" />
+            <radialGradient id="tSclera" cx="0.34" cy="0.28" r="0.88">
+              <stop offset="0" stop-color="#faf5e4" /><stop offset="0.6" stop-color="#e3d8ba" />
+              <stop offset="0.88" stop-color="#c0b391" /><stop offset="1" stop-color="#8e8265" />
             </radialGradient>
-            <radialGradient id="fIris" cx="0.42" cy="0.34" r="0.74">
-              <stop offset="0" stop-color="#ffe0a2" />
-              <stop offset="0.3" stop-color="#f59a2c" />
-              <stop offset="0.66" stop-color="#c9490f" />
-              <stop offset="0.92" stop-color="#7d2606" />
-              <stop offset="1" stop-color="#3d1103" />
+            <radialGradient id="tIris" cx="0.42" cy="0.34" r="0.74">
+              <stop offset="0" stop-color="#ffe0a2" /><stop offset="0.3" stop-color="#f59a2c" />
+              <stop offset="0.66" stop-color="#c9490f" /><stop offset="0.92" stop-color="#7d2606" /><stop offset="1" stop-color="#3d1103" />
             </radialGradient>
-            <radialGradient id="fGlow" cx="0.5" cy="0.5" r="0.5">
+            <radialGradient id="tGlow" cx="0.5" cy="0.5" r="0.5">
               <stop offset="0" stop-color="#ff7c26" stop-opacity="0.6" />
-              <stop offset="0.55" stop-color="#ff5f18" stop-opacity="0.18" />
-              <stop offset="1" stop-color="#ff5f18" stop-opacity="0" />
+              <stop offset="0.55" stop-color="#ff5f18" stop-opacity="0.18" /><stop offset="1" stop-color="#ff5f18" stop-opacity="0" />
             </radialGradient>
-            <linearGradient id="fSheen" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#fff" stop-opacity="0" />
-              <stop offset="0.5" stop-color="#fff" stop-opacity="0.4" />
-              <stop offset="1" stop-color="#fff" stop-opacity="0" />
+            <linearGradient id="tSheen" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#fff" stop-opacity="0" /><stop offset="0.5" stop-color="#fff" stop-opacity="0.4" /><stop offset="1" stop-color="#fff" stop-opacity="0" />
             </linearGradient>
-            <filter id="fGrain" x="0" y="0" width="100%" height="100%">
+            <linearGradient id="aBladeG" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#4f6323" /><stop offset="0.16" stop-color="#7d9a3a" />
+              <stop offset="0.46" stop-color="#9cb84c" /><stop offset="0.62" stop-color="#7f9c3b" />
+              <stop offset="0.88" stop-color="#4a5c20" /><stop offset="1" stop-color="#334115" />
+            </linearGradient>
+            <linearGradient id="aCream" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#cdc39c" /><stop offset="0.4" stop-color="#f3ecd2" /><stop offset="1" stop-color="#b9ae87" />
+            </linearGradient>
+            <linearGradient id="aHorn" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#f0e9cd" /><stop offset="0.62" stop-color="#cfc59d" /><stop offset="1" stop-color="#8a9a47" />
+            </linearGradient>
+            <radialGradient id="aGlowG" cx="0.5" cy="0.5" r="0.5">
+              <stop offset="0" stop-color="#a8e05a" stop-opacity="0.55" /><stop offset="1" stop-color="#a8e05a" stop-opacity="0" />
+            </radialGradient>
+            <linearGradient id="fStone" x1="0" y1="0" x2="1" y2="0.2">
+              <stop offset="0" stop-color="#3b2c22" /><stop offset="0.2" stop-color="#6b5140" />
+              <stop offset="0.5" stop-color="#8a6a52" /><stop offset="0.78" stop-color="#5f4735" /><stop offset="1" stop-color="#2e211a" />
+            </linearGradient>
+            <linearGradient id="fLava" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#fff1a8" /><stop offset="0.4" stop-color="#ffb01f" /><stop offset="1" stop-color="#e0400c" />
+            </linearGradient>
+            <radialGradient id="fGlowG" cx="0.5" cy="0.5" r="0.5">
+              <stop offset="0" stop-color="#ff6a12" stop-opacity="0.6" /><stop offset="1" stop-color="#ff6a12" stop-opacity="0" />
+            </radialGradient>
+            <filter id="tGrain" x="0" y="0" width="100%" height="100%">
               <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" result="n" />
-              <feColorMatrix type="saturate" values="0" in="n" result="d" />
+              <feColorMatrix type="saturate" values="0" in="n" />
             </filter>
-            <filter id="fSoft" x="-60%" y="-60%" width="220%" height="220%">
-              <feGaussianBlur stdDeviation="5" />
-            </filter>
-            <clipPath id="fEyeClip"><circle cx="110" cy="322" r="45" /></clipPath>
-            <clipPath id="fBladeClip">
-              <path d="M62,300 L158,300 L158,418 C158,470 138,540 110,600 C82,540 62,470 62,418 Z" />
-            </clipPath>
-            <clipPath id="fGripClip"><path d="M74,118 L146,118 L150,304 L70,304 Z" /></clipPath>
+            <filter id="tSoft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5" /></filter>
+            <filter id="fHot" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="4" /></filter>
+            <clipPath id="nEyeClip"><circle cx="110" cy="322" r="45" /></clipPath>
+            <clipPath id="aEyeClip2"><circle cx="110" cy="196" r="34" /></clipPath>
+            <clipPath id="fEyeClip2"><circle cx="110" cy="212" r="33" /></clipPath>
+            <clipPath id="nBladeClip"><path d="M62,300 L158,300 L158,418 C158,470 138,540 110,600 C82,540 62,470 62,418 Z" /></clipPath>
+            <clipPath id="nGripClip"><path d="M74,118 L146,118 L150,304 L70,304 Z" /></clipPath>
+            <clipPath id="aBladeClip"><path d="M64,214 C50,268 44,330 46,404 L110,700 L174,404 C176,330 170,268 156,214 Z" /></clipPath>
+            <clipPath id="fBladeClip2"><path d="M56,238 L164,238 L160,470 L154,596 L110,780 L66,596 L60,470 Z" /></clipPath>
           </defs>
 
-          <ellipse cx="110" cy="604" rx="52" ry="8" fill="#000" opacity="0.55" filter="url(#fSoft)" />
+          <ellipse id="shadow" cx="130" cy="846" rx="52" ry="9" fill="#000" opacity="0.55" filter="url(#tSoft)" />
 
-          <g id="mane">
-            <path d="M78,116 C56,92 26,54 16,18 C40,10 66,48 84,88 L86,116 Z" fill="url(#fMane)" />
-            <path d="M16,18 C10,32 12,46 20,56 C28,48 26,32 22,20 Z" fill="#151210" />
-            <path d="M78,116 C62,94 42,62 36,32 C48,34 66,64 80,94 Z" fill="#332b23" opacity="0.7" />
-            <path d="M142,116 C164,92 194,54 204,18 C180,10 154,48 136,88 L134,116 Z" fill="url(#fMane)" />
-            <path d="M204,18 C210,32 208,46 200,56 C192,48 194,32 198,20 Z" fill="#151210" />
-            <path d="M142,116 C158,94 178,62 184,32 C172,34 154,64 140,94 Z" fill="#332b23" opacity="0.7" />
-            <path d="M92,112 C82,72 78,28 96,4 C114,26 116,72 108,112 Z" fill="#221c16" />
-            <path d="M99,106 C92,70 92,34 101,14 C108,36 108,72 105,106 Z" fill="#3a3128" opacity="0.72" />
-            <path d="M118,114 C122,80 130,44 148,26 C152,50 140,90 126,114 Z" fill="#1a1611" />
-            <path d="M102,114 C96,84 86,50 68,30 C62,54 78,92 92,114 Z" fill="#1a1611" />
-            <path d="M96,6 C92,14 92,22 96,28 C100,22 100,14 99,6 Z" fill="#0d0b09" />
-          </g>
-
-          <path d="M68,112 L152,112 L154,142 L66,142 Z" fill="url(#fBone)" />
-          <path d="M68,112 L152,112 L152,120 L67,120 Z" fill="#f6efd8" opacity="0.85" />
-          <path d="M110,112 L152,112 L154,142 L110,142 Z" fill="#000" opacity="0.13" />
-          <path d="M66,142 L154,142 L153,148 L67,148 Z" fill="#3c3428" />
-
-          <path d="M74,140 L146,140 L150,304 L70,304 Z" fill="url(#fGrip)" />
-          <g clip-path="url(#fGripClip)">
-            <rect x="60" y="110" width="100" height="200" filter="url(#fGrain)" opacity="0.16" />
-            <path d="M88,140 C84,190 84,250 86,304" fill="none" stroke="#4e4437" stroke-width="3" opacity="0.55" />
-            <path d="M132,140 C136,190 136,250 134,304" fill="none" stroke="#000" stroke-width="4" opacity="0.35" />
-            <path d="M74,140 L80,140 L76,304 L70,304 Z" fill="#5c5142" opacity="0.5" />
-          </g>
-          <path d="M70,196 L150,196 L150,214 L70,214 Z" fill="#b9ac8c" opacity="0.5" />
-
-          <path d="M62,300 L158,300 L158,418 C158,470 138,540 110,600 C82,540 62,470 62,418 Z" fill="url(#fBlade)" />
-          <g clip-path="url(#fBladeClip)">
-            <path d="M110,318 L142,430 L110,562 L78,430 Z" fill="url(#fCore)" />
-            <path d="M110,336 L130,430 L110,528 L90,430 Z" fill="#0f0c08" opacity="0.45" />
-            <path d="M62,300 L72,300 L70,420 C70,468 88,536 110,588 L110,600 C82,540 62,470 62,418 Z" fill="#f6eed8" opacity="0.42" />
-            <path d="M158,300 L158,418 C158,470 138,540 110,600 L110,588 C132,536 150,468 150,420 L148,300 Z" fill="#000" opacity="0.26" />
-            <path d="M62,300 L158,300 L158,316 L62,316 Z" fill="#000" opacity="0.2" />
-            <rect x="55" y="290" width="112" height="320" filter="url(#fGrain)" opacity="0.1" />
-            <path d="M74,306 C68,352 72,402 84,444" fill="none" stroke="#6b6047" stroke-width="1.6" opacity="0.45" />
-            <path d="M146,306 C152,352 148,402 136,444" fill="none" stroke="#6b6047" stroke-width="1.6" opacity="0.4" />
-            <rect id="sheen" x="55" y="0" width="112" height="70" fill="url(#fSheen)" />
-          </g>
-
-          <path d="M64,286 C34,278 10,296 2,332 C10,352 30,362 50,358 C56,340 58,314 64,300 Z" fill="#1b1712" />
-          <path d="M62,294 C40,290 20,304 12,328 C22,342 38,348 52,344 C54,326 56,306 62,296 Z" fill="#302820" opacity="0.85" />
-          <path d="M2,332 C6,344 12,354 20,360" fill="none" stroke="#000" stroke-width="2" opacity="0.4" />
-          <path d="M10,338 C4,362 10,388 26,402 C36,382 32,356 22,340 Z" fill="url(#fBone)" />
-          <path d="M11,340 C7,360 11,380 21,392 C26,376 22,354 16,342 Z" fill="#f2e9d1" opacity="0.7" />
-          <path d="M156,286 C186,278 210,296 218,332 C210,352 190,362 170,358 C164,340 162,314 156,300 Z" fill="#1b1712" />
-          <path d="M158,294 C180,290 200,304 208,328 C198,342 182,348 168,344 C166,326 164,306 158,296 Z" fill="#302820" opacity="0.85" />
-          <path d="M210,338 C216,362 210,388 194,402 C184,382 188,356 198,340 Z" fill="url(#fBone)" />
-          <path d="M209,340 C213,360 209,380 199,392 C194,376 198,354 204,342 Z" fill="#f2e9d1" opacity="0.7" />
-
-          <g id="embers">
-            <circle cx="82" cy="352" r="2.6" fill="#ffab4a" style="animation: ember 2.6s ease-out infinite" />
-            <circle cx="140" cy="366" r="2" fill="#ff8a2c" style="animation: ember 3.1s ease-out 0.7s infinite" />
-            <circle cx="66" cy="336" r="1.6" fill="#ffd27a" style="animation: ember 2.2s ease-out 1.3s infinite" />
-            <circle cx="154" cy="340" r="2.2" fill="#ff9b3a" style="animation: ember 3.4s ease-out 1.9s infinite" />
-            <circle cx="110" cy="378" r="1.8" fill="#ffc266" style="animation: ember 2.9s ease-out 2.4s infinite" />
-          </g>
-
-          <circle id="glow" cx="110" cy="322" r="80" fill="url(#fGlow)" />
-          <circle id="pulse-ring" cx="110" cy="322" r="62" fill="none" stroke="#e2703a" stroke-width="2.4" />
-
-          <circle cx="110" cy="322" r="57" fill="#140d08" />
-          <circle cx="110" cy="322" r="55" fill="url(#fRing)" />
-          <path d="M110,267 A55,55 0 0 1 158,296 L149,301 A45,45 0 0 0 110,277 Z" fill="#ef9552" opacity="0.72" />
-          <path d="M110,377 A55,55 0 0 1 62,348 L71,343 A45,45 0 0 0 110,367 Z" fill="#340e04" opacity="0.66" />
-          <path d="M158,300 L166,296 L165,318 L157,316 Z" fill="#f0a24f" />
-          <path d="M160,320 L166,320 L164,338 L157,334 Z" fill="#8f3113" />
-          <path d="M55,304 C52,316 52,330 54,342 L62,340 C60,328 60,316 62,306 Z" fill="#f2a55c" opacity="0.35" />
-          <path d="M76,283 C68,290 62,298 58,308" fill="none" stroke="#2a0b03" stroke-width="3" opacity="0.5" />
-
-          <circle cx="110" cy="322" r="45" fill="url(#fSclera)" />
-          <path d="M78,300 C88,312 90,332 84,350" fill="none" stroke="#ab452a" stroke-width="1.9" opacity="0.48" />
-          <path d="M136,344 C129,334 127,318 132,304" fill="none" stroke="#ab452a" stroke-width="1.6" opacity="0.4" />
-          <path d="M92,357 C102,362 118,362 128,356" fill="none" stroke="#ab452a" stroke-width="1.3" opacity="0.32" />
-
-          <g clip-path="url(#fEyeClip)">
-            <g id="iris-g">
-              <circle cx="110" cy="322" r="29" fill="url(#fIris)" />
-              <path d="M110,293 L114,313 L110,322 L106,313 Z" fill="#ffd28a" opacity="0.35" />
-              <path d="M139,322 L119,326 L110,322 L119,318 Z" fill="#ffd28a" opacity="0.28" />
-              <path d="M110,351 L106,331 L110,322 L114,331 Z" fill="#7d2606" opacity="0.4" />
-              <circle cx="110" cy="322" r="29" fill="none" stroke="#3d1103" stroke-width="2.4" opacity="0.65" />
-              <ellipse id="pupil" cx="110" cy="322" rx="12" ry="12.5" fill="#0a0604" />
-              <ellipse cx="99" cy="310" rx="8" ry="6.6" fill="#fff" opacity="0.92" />
-              <ellipse cx="120" cy="336" rx="4" ry="3.2" fill="#fff" opacity="0.26" />
+          <g id="form-normal">
+          <g transform="translate(20,240)">
+            <g id="mane-n">
+              <path d="M78,116 C56,92 26,54 16,18 C40,10 66,48 84,88 L86,116 Z" fill="url(#tMane)" />
+              <path d="M16,18 C10,32 12,46 20,56 C28,48 26,32 22,20 Z" fill="#151210" />
+              <path d="M78,116 C62,94 42,62 36,32 C48,34 66,64 80,94 Z" fill="#332b23" opacity="0.7" />
+              <path d="M142,116 C164,92 194,54 204,18 C180,10 154,48 136,88 L134,116 Z" fill="url(#tMane)" />
+              <path d="M204,18 C210,32 208,46 200,56 C192,48 194,32 198,20 Z" fill="#151210" />
+              <path d="M142,116 C158,94 178,62 184,32 C172,34 154,64 140,94 Z" fill="#332b23" opacity="0.7" />
+              <path d="M92,112 C82,72 78,28 96,4 C114,26 116,72 108,112 Z" fill="#221c16" />
+              <path d="M99,106 C92,70 92,34 101,14 C108,36 108,72 105,106 Z" fill="#3a3128" opacity="0.72" />
+              <path d="M118,114 C122,80 130,44 148,26 C152,50 140,90 126,114 Z" fill="#1a1611" />
+              <path d="M102,114 C96,84 86,50 68,30 C62,54 78,92 92,114 Z" fill="#1a1611" />
             </g>
-            <path class="lid-top" d="M63,190 H157 V312 Q110,340 63,312 Z" fill="#231c15" />
-            <path class="lid-bot" d="M63,470 H157 V332 Q110,304 63,332 Z" fill="#231c15" />
-            <path class="lid-top" d="M63,190 H157 V306 Q110,334 63,306 Z" fill="#3a2f24" opacity="0.5" />
+            <path d="M68,112 L152,112 L154,142 L66,142 Z" fill="url(#tBone)" />
+            <path d="M68,112 L152,112 L152,120 L67,120 Z" fill="#f6efd8" opacity="0.85" />
+            <path d="M110,112 L152,112 L154,142 L110,142 Z" fill="#000" opacity="0.13" />
+            <path d="M66,142 L154,142 L153,148 L67,148 Z" fill="#3c3428" />
+            <path d="M74,140 L146,140 L150,304 L70,304 Z" fill="url(#tGrip)" />
+            <g clip-path="url(#nGripClip)">
+              <rect x="60" y="110" width="100" height="200" filter="url(#tGrain)" opacity="0.16" />
+              <path d="M88,140 C84,190 84,250 86,304" fill="none" stroke="#4e4437" stroke-width="3" opacity="0.55" />
+              <path d="M132,140 C136,190 136,250 134,304" fill="none" stroke="#000" stroke-width="4" opacity="0.35" />
+              <path d="M74,140 L80,140 L76,304 L70,304 Z" fill="#5c5142" opacity="0.5" />
+            </g>
+            <path d="M70,196 L150,196 L150,214 L70,214 Z" fill="#b9ac8c" opacity="0.5" />
+            <path d="M62,300 L158,300 L158,418 C158,470 138,540 110,600 C82,540 62,470 62,418 Z" fill="url(#tBlade)" />
+            <g clip-path="url(#nBladeClip)">
+              <path d="M110,318 L142,430 L110,562 L78,430 Z" fill="url(#tCore)" />
+              <path d="M110,336 L130,430 L110,528 L90,430 Z" fill="#0f0c08" opacity="0.45" />
+              <path d="M62,300 L72,300 L70,420 C70,468 88,536 110,588 L110,600 C82,540 62,470 62,418 Z" fill="#f6eed8" opacity="0.42" />
+              <path d="M158,300 L158,418 C158,470 138,540 110,600 L110,588 C132,536 150,468 150,420 L148,300 Z" fill="#000" opacity="0.26" />
+              <rect x="55" y="290" width="112" height="320" filter="url(#tGrain)" opacity="0.1" />
+              <rect class="sheen" x="55" y="0" width="112" height="70" fill="url(#tSheen)" />
+            </g>
+            <path d="M64,286 C34,278 10,296 2,332 C10,352 30,362 50,358 C56,340 58,314 64,300 Z" fill="#1b1712" />
+            <path d="M62,294 C40,290 20,304 12,328 C22,342 38,348 52,344 C54,326 56,306 62,296 Z" fill="#302820" opacity="0.85" />
+            <path d="M10,338 C4,362 10,388 26,402 C36,382 32,356 22,340 Z" fill="url(#tBone)" />
+            <path d="M11,340 C7,360 11,380 21,392 C26,376 22,354 16,342 Z" fill="#f2e9d1" opacity="0.7" />
+            <path d="M156,286 C186,278 210,296 218,332 C210,352 190,362 170,358 C164,340 162,314 156,300 Z" fill="#1b1712" />
+            <path d="M158,294 C180,290 200,304 208,328 C198,342 182,348 168,344 C166,326 164,306 158,296 Z" fill="#302820" opacity="0.85" />
+            <path d="M210,338 C216,362 210,388 194,402 C184,382 188,356 198,340 Z" fill="url(#tBone)" />
+            <path d="M209,340 C213,360 209,380 199,392 C194,376 198,354 204,342 Z" fill="#f2e9d1" opacity="0.7" />
+            <g id="embers-n">
+              <circle cx="82" cy="352" r="2.6" fill="#ffab4a" style="animation: ember 2.6s ease-out infinite" />
+              <circle cx="140" cy="366" r="2" fill="#ff8a2c" style="animation: ember 3.1s ease-out 0.7s infinite" />
+              <circle cx="66" cy="336" r="1.6" fill="#ffd27a" style="animation: ember 2.2s ease-out 1.3s infinite" />
+              <circle cx="154" cy="340" r="2.2" fill="#ff9b3a" style="animation: ember 3.4s ease-out 1.9s infinite" />
+            </g>
+            <circle id="glow-n" cx="110" cy="322" r="80" fill="url(#tGlow)" />
+            <circle id="pulse-n" cx="110" cy="322" r="62" fill="none" stroke="#e2703a" stroke-width="2.4" />
+            <circle cx="110" cy="322" r="57" fill="#140d08" />
+            <circle cx="110" cy="322" r="55" fill="url(#tRing)" />
+            <path d="M110,267 A55,55 0 0 1 158,296 L149,301 A45,45 0 0 0 110,277 Z" fill="#ef9552" opacity="0.72" />
+            <path d="M110,377 A55,55 0 0 1 62,348 L71,343 A45,45 0 0 0 110,367 Z" fill="#340e04" opacity="0.66" />
+            <path d="M158,300 L166,296 L165,318 L157,316 Z" fill="#f0a24f" />
+            <circle cx="110" cy="322" r="45" fill="url(#tSclera)" />
+            <path d="M78,300 C88,312 90,332 84,350" fill="none" stroke="#ab452a" stroke-width="1.9" opacity="0.48" />
+            <path d="M136,344 C129,334 127,318 132,304" fill="none" stroke="#ab452a" stroke-width="1.6" opacity="0.4" />
+            <g clip-path="url(#nEyeClip)">
+              <g id="iris-n">
+                <circle cx="110" cy="322" r="29" fill="url(#tIris)" />
+                <path d="M110,293 L114,313 L110,322 L106,313 Z" fill="#ffd28a" opacity="0.35" />
+                <path d="M139,322 L119,326 L110,322 L119,318 Z" fill="#ffd28a" opacity="0.28" />
+                <circle cx="110" cy="322" r="29" fill="none" stroke="#3d1103" stroke-width="2.4" opacity="0.65" />
+                <ellipse id="pupil-n" cx="110" cy="322" rx="12" ry="12.5" fill="#0a0604" />
+                <ellipse cx="99" cy="310" rx="8" ry="6.6" fill="#fff" opacity="0.92" />
+                <ellipse cx="120" cy="336" rx="4" ry="3.2" fill="#fff" opacity="0.26" />
+              </g>
+              <path id="lid-top-n" d="M63,190 H157 V312 Q110,340 63,312 Z" fill="#231c15" />
+              <path id="lid-bot-n" d="M63,470 H157 V332 Q110,304 63,332 Z" fill="#231c15" />
+            </g>
+            <circle cx="110" cy="322" r="45" fill="none" stroke="#2c0d03" stroke-width="3" opacity="0.5" />
+            <circle cx="110" cy="322" r="55" fill="none" stroke="#1b0803" stroke-width="2.5" opacity="0.55" />
           </g>
-          <circle cx="110" cy="322" r="45" fill="none" stroke="#2c0d03" stroke-width="3" opacity="0.5" />
-          <circle cx="110" cy="322" r="55" fill="none" stroke="#1b0803" stroke-width="2.5" opacity="0.55" />
+          </g>
+
+          <g id="form-air">
+          <g transform="translate(20,140)">
+            <g id="mane-a">
+              <path d="M96,74 C82,58 74,34 80,10 C94,20 104,46 106,70 Z" fill="url(#aHorn)" />
+              <path d="M80,10 C72,4 64,6 60,14 C68,20 76,20 82,16 Z" fill="#7d9a3a" />
+              <path d="M96,74 C88,58 84,38 86,22 C94,32 100,50 102,70 Z" fill="#fbf6e2" opacity="0.55" />
+              <path d="M124,74 C138,58 146,34 140,10 C126,20 116,46 114,70 Z" fill="url(#aHorn)" />
+              <path d="M140,10 C148,4 156,6 160,14 C152,20 144,20 138,16 Z" fill="#7d9a3a" />
+              <path d="M124,74 C132,58 136,38 134,22 C126,32 120,50 118,70 Z" fill="#fbf6e2" opacity="0.55" />
+              <path d="M100,72 C98,52 102,32 110,22 C118,32 122,52 120,72 Z" fill="#8ba743" />
+            </g>
+            <path d="M94,66 L126,66 L131,182 L89,182 Z" fill="#191614" />
+            <path d="M110,66 L126,66 L131,182 L110,182 Z" fill="#000" opacity="0.3" />
+            <path d="M96,74 L124,74 L124,82 L96,82 Z" fill="#8ba743" opacity="0.8" />
+            <path d="M98,70 L104,70 L101,182 L95,182 Z" fill="#3b3733" opacity="0.7" />
+            <path d="M104,150 C74,144 40,150 8,166 C6,172 10,178 18,180 C52,186 84,184 106,178 Z" fill="#14120f" />
+            <path d="M104,158 C76,154 46,160 20,172 C50,176 82,176 105,172 Z" fill="#2b2723" opacity="0.75" />
+            <path d="M42,178 C38,190 38,202 44,210 C50,202 50,188 48,178 Z" fill="url(#aHorn)" />
+            <path d="M116,150 C146,144 180,150 212,166 C214,172 210,178 202,180 C168,186 136,184 114,178 Z" fill="#14120f" />
+            <path d="M116,158 C144,154 174,160 200,172 C170,176 138,176 115,172 Z" fill="#2b2723" opacity="0.75" />
+            <path d="M178,178 C182,190 182,202 176,210 C170,202 170,188 172,178 Z" fill="url(#aHorn)" />
+            <path d="M64,214 C50,268 44,330 46,404 L110,700 L174,404 C176,330 170,268 156,214 Z" fill="url(#aBladeG)" />
+            <g clip-path="url(#aBladeClip)">
+              <path d="M84,206 C76,262 74,330 78,396 L110,560 L142,396 C146,330 144,262 136,206 Z" fill="url(#aCream)" opacity="0.9" />
+              <path d="M100,206 C96,264 96,336 100,402 L110,470 L120,402 C124,336 124,264 120,206 Z" fill="#6f8a32" opacity="0.55" />
+              <path d="M92,470 L136,442 L152,520 L104,556 Z" fill="#fdfbee" opacity="0.9" />
+              <path d="M100,478 L130,458 L140,512 L108,538 Z" fill="#e9e4c8" opacity="0.7" />
+              <path d="M46,214 L58,214 C48,280 44,350 48,406 L110,690 L110,700 L46,404 Z" fill="#d7e9a4" opacity="0.3" />
+              <path d="M174,404 L110,700 L110,690 L172,406 C176,350 172,280 162,214 L174,214 Z" fill="#000" opacity="0.3" />
+              <rect x="40" y="200" width="140" height="510" filter="url(#tGrain)" opacity="0.08" />
+              <rect class="sheen" x="40" y="0" width="140" height="80" fill="url(#tSheen)" />
+            </g>
+            <path d="M66,214 C56,240 50,266 47,292" fill="none" stroke="#3d4c19" stroke-width="2" opacity="0.5" />
+            <g id="wind">
+              <path d="M40,340 C64,318 96,314 122,326" fill="none" stroke="#d6ec9a" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="60 200" style="animation: gust 2.8s linear infinite" />
+              <path d="M186,412 C160,394 128,392 104,404" fill="none" stroke="#c2e07e" stroke-width="2" stroke-linecap="round" stroke-dasharray="50 200" style="animation: gust 3.4s linear 0.9s infinite" />
+              <path d="M52,470 C78,452 108,450 132,462" fill="none" stroke="#e6f3bb" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="44 200" style="animation: gust 3.1s linear 1.7s infinite" />
+              <ellipse cx="70" cy="380" rx="4" ry="2.4" fill="#a9c95c" style="animation: leaf_drift 3.6s ease-out infinite" />
+              <ellipse cx="150" cy="430" rx="3.4" ry="2" fill="#cbe089" style="animation: leaf_drift 4.2s ease-out 1.2s infinite" />
+              <ellipse cx="96" cy="500" rx="3" ry="1.8" fill="#8fae46" style="animation: leaf_drift 3.9s ease-out 2.3s infinite" />
+            </g>
+            <circle id="glow-a" cx="110" cy="196" r="62" fill="url(#aGlowG)" />
+            <circle id="pulse-a" cx="110" cy="196" r="48" fill="none" stroke="#b6e162" stroke-width="2" />
+            <circle cx="110" cy="196" r="44" fill="#1a0d0a" />
+            <circle cx="110" cy="196" r="42" fill="#c5342c" />
+            <path d="M110,154 A42,42 0 0 1 147,176 L140,180 A34,34 0 0 0 110,162 Z" fill="#ea6a52" opacity="0.8" />
+            <path d="M110,238 A42,42 0 0 1 73,216 L80,212 A34,34 0 0 0 110,230 Z" fill="#6d1610" opacity="0.7" />
+            <circle cx="110" cy="196" r="34" fill="url(#tSclera)" />
+            <g clip-path="url(#aEyeClip2)">
+              <g id="iris-a">
+                <circle cx="110" cy="196" r="20" fill="#171310" />
+                <circle cx="110" cy="196" r="20" fill="none" stroke="#2c1008" stroke-width="2" opacity="0.7" />
+                <ellipse id="pupil-a" cx="110" cy="196" rx="10" ry="10.5" fill="#050303" />
+                <ellipse cx="102" cy="187" rx="6.4" ry="5.2" fill="#fff" opacity="0.92" />
+                <ellipse cx="118" cy="207" rx="3" ry="2.4" fill="#fff" opacity="0.24" />
+              </g>
+              <path id="lid-top-a" d="M74,90 H146 V188 Q110,212 74,188 Z" fill="#2a231a" />
+              <path id="lid-bot-a" d="M74,306 H146 V206 Q110,182 74,206 Z" fill="#2a231a" />
+            </g>
+            <circle cx="110" cy="196" r="34" fill="none" stroke="#5c1a12" stroke-width="2.6" opacity="0.5" />
+            <circle cx="110" cy="196" r="42" fill="none" stroke="#3d0d08" stroke-width="2.4" opacity="0.6" />
+            <path d="M86,178 C74,196 70,222 74,246 C82,240 90,222 92,200 Z" fill="url(#aHorn)" />
+            <path d="M86,182 C78,198 76,218 78,236 C84,228 88,212 89,196 Z" fill="#fbf7e6" opacity="0.6" />
+            <path d="M74,246 C70,254 66,258 60,258 C64,250 68,246 74,242 Z" fill="#efe7cb" />
+            <path d="M134,178 C146,196 150,222 146,246 C138,240 130,222 128,200 Z" fill="url(#aHorn)" />
+            <path d="M134,182 C142,198 144,218 142,236 C136,228 132,212 131,196 Z" fill="#fbf7e6" opacity="0.6" />
+            <path d="M146,246 C150,254 154,258 160,258 C156,250 152,246 146,242 Z" fill="#efe7cb" />
+          </g>
+          </g>
+
+          <g id="form-fire">
+          <g transform="translate(20,60)">
+            <g id="mane-f">
+              <path d="M104,88 C98,60 96,30 104,6 C114,26 116,58 112,88 Z" fill="#2a1a12" />
+              <path d="M104,10 C96,16 92,26 94,36 C100,30 104,20 105,10 Z" fill="#4a2c1c" />
+              <path d="M116,14 C124,20 128,30 126,40 C120,34 116,24 115,14 Z" fill="#4a2c1c" />
+            </g>
+            <path d="M96,74 C90,100 92,128 100,150 L120,150 C126,126 124,98 118,74 Z" fill="#241610" />
+            <path d="M94,86 C104,94 116,94 120,86" fill="none" stroke="#4d3323" stroke-width="4" opacity="0.8" />
+            <path d="M93,106 C103,114 117,114 122,106" fill="none" stroke="#4d3323" stroke-width="4" opacity="0.75" />
+            <path d="M94,126 C104,134 116,134 121,126" fill="none" stroke="#4d3323" stroke-width="4" opacity="0.7" />
+            <path d="M96,146 C106,154 116,154 121,146" fill="none" stroke="#4d3323" stroke-width="4" opacity="0.6" />
+            <path d="M100,150 L122,150 L128,238 L94,238 Z" fill="#3a2418" />
+            <path d="M104,196 C72,190 38,198 6,220 C6,228 12,234 22,236 C56,240 88,234 108,224 Z" fill="#12100f" />
+            <path d="M104,206 C74,202 44,210 20,226 C52,230 84,226 105,218 Z" fill="#272220" opacity="0.8" />
+            <path d="M116,196 C148,190 182,198 214,220 C214,228 208,234 198,236 C164,240 132,234 112,224 Z" fill="#12100f" />
+            <path d="M116,206 C146,202 176,210 200,226 C168,230 136,226 115,218 Z" fill="#272220" opacity="0.8" />
+            <path d="M62,196 C56,182 54,170 58,160 C64,170 66,184 66,196 Z" fill="#c9bda2" />
+            <path d="M158,196 C164,182 166,170 162,160 C156,170 154,184 154,196 Z" fill="#c9bda2" />
+            <path d="M56,238 L164,238 L160,470 L154,596 L110,780 L66,596 L60,470 Z" fill="url(#fStone)" />
+            <g clip-path="url(#fBladeClip2)">
+              <path d="M56,238 L110,238 L108,470 L110,780 L66,596 L60,470 Z" fill="#7a5c47" opacity="0.35" />
+              <path d="M164,238 L160,470 L154,596 L110,780 L112,470 L110,238 Z" fill="#000" opacity="0.28" />
+              <path d="M56,238 L164,238 L150,300 L64,296 Z" fill="#8b6b52" opacity="0.3" />
+              <path d="M64,340 L156,346 L152,430 L62,424 Z" fill="#4a382c" opacity="0.4" />
+              <path d="M62,500 L154,494 L150,590 L66,596 Z" fill="#7d6049" opacity="0.28" />
+              <path d="M66,596 L154,596 L110,780 Z" fill="#3a2b21" opacity="0.35" />
+              <path d="M56,238 L66,238 L64,472 L74,600 L110,764 L110,780 L66,596 L60,470 Z" fill="#c4a98e" opacity="0.35" />
+              <rect x="50" y="230" width="120" height="560" filter="url(#tGrain)" opacity="0.16" />
+              <g id="lava">
+                <g filter="url(#fHot)" opacity="0.85">
+                  <path d="M132,248 C118,290 96,316 78,346 C96,382 122,400 140,438 C126,478 100,506 84,548 C96,592 116,620 124,660" fill="none" stroke="#ff7a10" stroke-width="11" stroke-linecap="round" />
+                  <path d="M70,268 C86,300 108,320 126,352" fill="none" stroke="#ff5c0a" stroke-width="8" stroke-linecap="round" />
+                </g>
+                <path d="M132,248 C118,290 96,316 78,346 C96,382 122,400 140,438 C126,478 100,506 84,548 C96,592 116,620 124,660" fill="none" stroke="url(#fLava)" stroke-width="5" stroke-linecap="round" />
+                <path d="M70,268 C86,300 108,320 126,352" fill="none" stroke="url(#fLava)" stroke-width="3.6" stroke-linecap="round" />
+                <path d="M132,248 C120,288 100,314 82,344" fill="none" stroke="#fff3b0" stroke-width="1.8" stroke-linecap="round" opacity="0.9" />
+                <path d="M140,438 C128,474 104,502 88,542" fill="none" stroke="#fff3b0" stroke-width="1.6" stroke-linecap="round" opacity="0.75" />
+                <path d="M96,432 C88,452 84,472 86,492" fill="none" stroke="#ffae1c" stroke-width="2.6" stroke-linecap="round" opacity="0.8" />
+                <path d="M142,540 C136,564 132,586 134,608" fill="none" stroke="#ff8c12" stroke-width="2.2" stroke-linecap="round" opacity="0.7" />
+              </g>
+              <rect class="sheen" x="50" y="0" width="120" height="90" fill="url(#tSheen)" />
+            </g>
+            <path d="M56,238 L164,238 L163,246 L57,246 Z" fill="#1d1512" opacity="0.7" />
+            <g id="embers-f">
+              <circle cx="86" cy="360" r="3.2" fill="#ffb43c" style="animation: ember_big 2.4s ease-out infinite" />
+              <circle cx="146" cy="430" r="2.6" fill="#ff7a12" style="animation: ember_big 3s ease-out 0.6s infinite" />
+              <circle cx="70" cy="520" r="2.2" fill="#ffd77e" style="animation: ember_big 2.7s ease-out 1.2s infinite" />
+              <circle cx="158" cy="300" r="2.8" fill="#ff9124" style="animation: ember_big 3.3s ease-out 1.8s infinite" />
+              <circle cx="110" cy="600" r="2.4" fill="#ffc35c" style="animation: ember_big 2.9s ease-out 2.4s infinite" />
+              <circle cx="126" cy="470" r="1.8" fill="#fff0b8" style="animation: ember_big 3.6s ease-out 3s infinite" />
+            </g>
+            <circle id="glow-f" cx="110" cy="212" r="72" fill="url(#fGlowG)" />
+            <circle id="pulse-f" cx="110" cy="212" r="48" fill="none" stroke="#ff7a2a" stroke-width="2.2" />
+            <circle cx="110" cy="212" r="43" fill="#150a06" />
+            <circle cx="110" cy="212" r="41" fill="#b83220" />
+            <path d="M110,171 A41,41 0 0 1 146,192 L139,196 A33,33 0 0 0 110,179 Z" fill="#e56a3e" opacity="0.78" />
+            <path d="M110,253 A41,41 0 0 1 74,232 L81,228 A33,33 0 0 0 110,245 Z" fill="#5c1305" opacity="0.7" />
+            <circle cx="110" cy="212" r="33" fill="url(#tSclera)" />
+            <path d="M84,196 C92,206 94,222 89,236" fill="none" stroke="#ab452a" stroke-width="1.7" opacity="0.45" />
+            <g clip-path="url(#fEyeClip2)">
+              <g id="iris-f">
+                <circle cx="110" cy="212" r="21" fill="url(#tIris)" />
+                <circle cx="110" cy="212" r="21" fill="none" stroke="#3d1103" stroke-width="2.2" opacity="0.7" />
+                <ellipse id="pupil-f" cx="110" cy="212" rx="9" ry="9.5" fill="#0a0604" />
+                <ellipse cx="102" cy="203" rx="6" ry="5" fill="#fff" opacity="0.92" />
+                <ellipse cx="118" cy="223" rx="3" ry="2.4" fill="#fff" opacity="0.25" />
+              </g>
+              <path id="lid-top-f" d="M75,106 H145 V204 Q110,228 75,204 Z" fill="#231610" />
+              <path id="lid-bot-f" d="M75,320 H145 V222 Q110,198 75,222 Z" fill="#231610" />
+            </g>
+            <circle cx="110" cy="212" r="33" fill="none" stroke="#54160a" stroke-width="2.6" opacity="0.5" />
+            <circle cx="110" cy="212" r="41" fill="none" stroke="#310a04" stroke-width="2.4" opacity="0.6" />
+          </g>
+          </g>
+
+          <g id="burst">
+            <circle id="burst-flash" cx="0" cy="0" r="26" fill="#e2703a" opacity="0.9" />
+            <circle id="burst-ring1" cx="0" cy="0" r="46" fill="none" stroke="#e2703a" stroke-width="6" />
+            <circle id="burst-ring2" cx="0" cy="0" r="46" fill="none" stroke="#fff" stroke-width="2" />
+            <g id="burst-shards">
+              <path class="shard" d="M0,-58 L7,-30 L0,-22 L-7,-30 Z" fill="#e2703a" />
+              <path class="shard" d="M41,-41 L23,-19 L14,-20 L18,-31 Z" fill="#e2703a" />
+              <path class="shard" d="M58,0 L30,7 L22,0 L30,-7 Z" fill="#e2703a" />
+              <path class="shard" d="M41,41 L19,23 L20,14 L31,18 Z" fill="#e2703a" />
+              <path class="shard" d="M0,58 L-7,30 L0,22 L7,30 Z" fill="#e2703a" />
+              <path class="shard" d="M-41,41 L-23,19 L-14,20 L-18,31 Z" fill="#e2703a" />
+              <path class="shard" d="M-58,0 L-30,-7 L-22,0 L-30,7 Z" fill="#e2703a" />
+              <path class="shard" d="M-41,-41 L-19,-23 L-20,-14 L-31,-18 Z" fill="#e2703a" />
+            </g>
+          </g>
+          <ellipse id="shock" cx="130" cy="846" rx="34" ry="7" fill="none" stroke="#e2703a" stroke-width="3" opacity="0" />
         </svg>
         <div id="poke-zone" title="Toucher l'œil. À tes risques et périls."></div>
       </div>
