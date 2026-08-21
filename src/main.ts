@@ -1,4 +1,5 @@
 import "./styles.css";
+import { getVersion } from "@tauri-apps/api/app";
 import { invoke } from "@tauri-apps/api/core";
 import { LogicalSize } from "@tauri-apps/api/dpi";
 import { listen } from "@tauri-apps/api/event";
@@ -641,6 +642,15 @@ $("btn-settings").addEventListener("click", () => {
   refreshElementButtons();
   refreshModuleButtons();
   settingsPanel.classList.toggle("hidden");
+});
+
+// ouvre le formulaire du site vitrine, version et OS pré-remplis
+$("btn-bug").addEventListener("click", async () => {
+  const version = await getVersion().catch(() => "?");
+  const os = navigator.userAgent.includes("Mac") ? "macOS" : "Windows";
+  void invoke("open_web", {
+    url: `https://sh1v4x.github.io/rubidesk/?v=${encodeURIComponent(version)}&os=${os}#bug`,
+  }).catch(console.error);
 });
 
 $("modules").addEventListener("click", (e) => {

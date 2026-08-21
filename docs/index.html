@@ -54,8 +54,8 @@
     .wrap { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
 
     /* ---- héros ---- */
-    header { padding: 72px 0 40px; }
-    .hero { display: flex; flex-wrap: wrap; align-items: center; gap: 48px; }
+    header { padding: 110px 0 76px; }
+    .hero { display: flex; flex-wrap: wrap; align-items: center; gap: 72px; }
     .hero-text { flex: 1 1 460px; }
     .kicker {
       font-family: "JetBrains Mono", monospace; font-size: 12px;
@@ -64,7 +64,7 @@
     h1 { font-size: clamp(44px, 7vw, 72px); font-weight: 600; letter-spacing: -0.01em; margin: 10px 0 4px; }
     h1 .dot { color: var(--braise); }
     .tagline { font-size: clamp(17px, 2.4vw, 21px); color: #d9c9ae; max-width: 30em; font-weight: 300; }
-    .badges { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 28px; }
+    .badges { display: flex; flex-wrap: wrap; gap: 12px; margin: 28px 0 34px; }
     .badge {
       font-family: "JetBrains Mono", monospace; font-size: 11.5px; letter-spacing: 0.06em;
       padding: 5px 12px; border: 1px solid var(--ligne); border-radius: 999px; color: var(--mut);
@@ -95,13 +95,13 @@
     .lid-b { transform: translateY(76px); animation: blinkB 6.5s ease-in-out infinite; }
 
     /* ---- sections ---- */
-    section { padding: 46px 0; border-top: 1px solid var(--ligne); }
-    h2 { font-size: 15px; font-family: "JetBrains Mono", monospace; letter-spacing: 0.22em; text-transform: uppercase; color: var(--braise2); margin-bottom: 26px; font-weight: 600; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
+    section { padding: 76px 0; border-top: 1px solid var(--ligne); }
+    h2 { font-size: 15px; font-family: "JetBrains Mono", monospace; letter-spacing: 0.22em; text-transform: uppercase; color: var(--braise2); margin-bottom: 38px; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 22px; }
     .card {
-      background: var(--panel); border: 1px solid var(--ligne); border-radius: 14px; padding: 20px 22px;
+      background: var(--panel); border: 1px solid var(--ligne); border-radius: 14px; padding: 26px 28px;
     }
-    .card h3 { font-size: 16.5px; font-weight: 600; margin-bottom: 6px; }
+    .card h3 { font-size: 16.5px; font-weight: 600; margin-bottom: 10px; }
     .card h3 .ic { margin-right: 8px; }
     .card p { font-size: 14.5px; color: var(--mut); }
     .card b, .card code { color: #d9c9ae; font-weight: 500; }
@@ -110,7 +110,7 @@
     .band {
       display: flex; flex-wrap: wrap; gap: 26px; align-items: center;
       background: linear-gradient(150deg, rgba(46, 30, 14, 0.55), rgba(16, 20, 10, 0.85));
-      border: 1px solid rgba(185, 212, 86, 0.2); border-radius: 16px; padding: 28px 30px;
+      border: 1px solid rgba(185, 212, 86, 0.2); border-radius: 16px; padding: 38px 42px;
     }
     .band-icon { font-size: 40px; }
     .band h3 { font-size: 19px; margin-bottom: 4px; }
@@ -127,11 +127,43 @@
       border: 1px solid rgba(122, 232, 224, 0.4); border-radius: 10px; color: #7ae8e0; white-space: nowrap;
     }
 
-    footer { border-top: 1px solid var(--ligne); padding: 34px 0 46px; font-size: 13px; color: #6f6252; }
+
+    /* ---- formulaire de bug ---- */
+    .bug-wrap { display: grid; grid-template-columns: 1fr 1.1fr; gap: 44px; align-items: start;
+      background: linear-gradient(150deg, rgba(46, 30, 14, 0.55), rgba(14, 12, 8, 0.9));
+      border: 1px solid rgba(240, 162, 79, 0.25); border-radius: 20px; padding: 44px; }
+    @media (max-width: 800px) { .bug-wrap { grid-template-columns: 1fr; } }
+    .bug-pitch .pill { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 12.5px;
+      padding: 6px 14px; border-radius: 999px; background: rgba(226, 112, 58, 0.14);
+      border: 1px solid rgba(226, 112, 58, 0.4); color: var(--braise2); margin-bottom: 18px; }
+    .bug-pitch h3 { font-size: 30px; font-weight: 600; line-height: 1.15; margin-bottom: 14px; }
+    .bug-pitch p { color: var(--mut); font-size: 15.5px; }
+    .bug-form { background: rgba(10, 8, 6, 0.6); border: 1px solid var(--ligne); border-radius: 16px; padding: 26px; }
+    .bug-form .lbl { font-family: "JetBrains Mono", monospace; font-size: 11.5px; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--mut); margin: 0 0 8px; }
+    .bug-form .lbl + .lbl, .bug-types + .lbl, .bug-form input + .lbl, .bug-form textarea + .lbl { margin-top: 16px; }
+    .bug-types { display: flex; gap: 8px; }
+    .bug-types button { font-family: "JetBrains Mono", monospace; font-size: 12.5px; padding: 8px 14px;
+      border-radius: 10px; border: 1px solid var(--ligne); background: transparent; color: var(--mut); cursor: pointer; }
+    .bug-types button.on { border-color: var(--braise); background: rgba(226, 112, 58, 0.16); color: var(--braise2); }
+    .bug-form input, .bug-form textarea { width: 100%; background: rgba(226, 112, 58, 0.05);
+      border: 1px solid rgba(226, 112, 58, 0.2); border-radius: 11px; padding: 11px 12px; color: var(--creme);
+      font-family: "Spectral", serif; font-size: 14.5px; outline: none; }
+    .bug-form input:focus, .bug-form textarea:focus { border-color: rgba(226, 112, 58, 0.55); }
+    .bug-form textarea { height: 110px; resize: none; }
+    #bugsend { margin-top: 18px; width: 100%; padding: 14px; border-radius: 12px; border: none;
+      background: linear-gradient(135deg, var(--braise), #b4451c); color: #fff4e8;
+      font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: 14.5px; cursor: pointer; }
+    #bugsend:disabled { opacity: 0.6; cursor: wait; }
+    #bugstatus { font-size: 13px; color: var(--mut); margin-top: 10px; min-height: 18px; }
+    .hp { position: absolute; left: -9999px; opacity: 0; height: 0; width: 0; }
+
+    footer { border-top: 1px solid var(--ligne); padding: 54px 0 64px; font-size: 13px; color: #6f6252; }
     footer p { max-width: 74em; }
     footer .links { margin-bottom: 14px; font-family: "JetBrains Mono", monospace; font-size: 12.5px; }
     footer .heart { text-align: center; margin-top: 22px; color: var(--mut); }
   </style>
+  <script src="config.js"></script>
 </head>
 <body>
 
@@ -284,12 +316,36 @@
   </div>
 </section>
 
+
+<section id="bug" class="wrap">
+  <div class="bug-wrap">
+    <div class="bug-pitch">
+      <span class="pill">Un bug ? Une idée ?</span>
+      <h3>Aide à dresser le shushu</h3>
+      <p>Un crash, une commande mal comprise, une idée de réplique ou de fonctionnalité ? Remplis le formulaire et clique « Envoyer » — Rubilax râlera, mais on s'en occupe.</p>
+    </div>
+    <div class="bug-form">
+      <p class="lbl">Type de signalement</p>
+      <div class="bug-types" id="bugtypes"></div>
+      <p class="lbl">Pseudo (optionnel)</p>
+      <input id="bugpseudo" placeholder="Ton pseudo" />
+      <p class="lbl">Titre</p>
+      <input id="bugtitle" placeholder="Résumé court" />
+      <p class="lbl">Description</p>
+      <textarea id="bugtext" placeholder="Décris le problème, les étapes, le comportement attendu…"></textarea>
+      <input id="bughp" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <button id="bugsend">Envoyer</button>
+      <p id="bugstatus"></p>
+    </div>
+  </div>
+</section>
+
 <footer>
   <div class="wrap">
     <div class="links">
       <a href="https://github.com/Sh1v4x/rubidesk">Code source</a> &nbsp;·&nbsp;
       <a href="https://github.com/Sh1v4x/rubidesk/releases">Versions</a> &nbsp;·&nbsp;
-      <a href="https://github.com/Sh1v4x/rubidesk/issues/new">Signaler un bug</a> &nbsp;·&nbsp;
+      <a href="#bug">Signaler un bug</a> &nbsp;·&nbsp;
       <a href="https://sh1v4x.github.io/eliadex/">Eliadex</a>
     </div>
     <p>Outil communautaire <b>non officiel</b>, à usage strictement non commercial et sans collecte de données. WAKFU® et l'ensemble des noms, personnages, illustrations et éléments associés — dont le personnage de Rubilax — sont la propriété exclusive d'<b>Ankama</b> ; Rubidesk n'est ni affilié à, ni approuvé par Ankama. Tout contenu sera retiré à la demande d'un ayant droit. Wakfu © Ankama — tous droits réservés.</p>
@@ -312,5 +368,72 @@
     .catch(() => {});
 </script>
 
+
+<script>
+  (function () {
+    var c = window.RUBIDESK || {};
+    var repo = "https://github.com/" + (c.owner || "Sh1v4x") + "/" + (c.repo || "rubidesk");
+    var params = new URLSearchParams(location.search);
+    var types = [
+      { key: "bug", label: "🐞 Bug", prefix: "[Bug] ", tag: "bug" },
+      { key: "idee", label: "✨ Idée", prefix: "[Idée] ", tag: "enhancement" },
+      { key: "autre", label: "💬 Autre", prefix: "[Autre] ", tag: "question" },
+    ];
+    var picked = 0;
+    var typesEl = document.getElementById("bugtypes");
+    function renderTypes() {
+      typesEl.innerHTML = "";
+      types.forEach(function (t, i) {
+        var b = document.createElement("button");
+        b.type = "button"; b.textContent = t.label;
+        b.className = i === picked ? "on" : "";
+        b.onclick = function () { picked = i; renderTypes(); };
+        typesEl.appendChild(b);
+      });
+    }
+    renderTypes();
+
+    var statusEl = document.getElementById("bugstatus");
+    var sendBtn = document.getElementById("bugsend");
+    function setStatus(msg, color) { statusEl.textContent = msg; statusEl.style.color = color || ""; }
+
+    sendBtn.onclick = async function () {
+      var t = types[picked];
+      var title = (document.getElementById("bugtitle").value || "").trim();
+      var desc = (document.getElementById("bugtext").value || "").trim();
+      var pseudo = (document.getElementById("bugpseudo").value || "").trim();
+      var hp = document.getElementById("bughp").value; // honeypot (doit rester vide)
+      if (!title || desc.length < 5) { setStatus("Ajoute un titre et une description (min. 5 caractères).", "#f0a24f"); return; }
+      var v = params.get("v") || "—", os = params.get("os") || "—";
+      var body = desc + "\n\n---\n" + (pseudo ? "- Pseudo : " + pseudo + "\n" : "") + "- Version : " + v + "\n- Système : " + os + "\n";
+      var fullTitle = t.prefix + title;
+
+      if (c.bugEndpoint) {
+        sendBtn.disabled = true; setStatus("Envoi…");
+        try {
+          var r = await fetch(c.bugEndpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: fullTitle, body: body, label: t.tag, website: hp }),
+          });
+          var d = await r.json().catch(function () { return {}; });
+          if (r.ok && d.ok) {
+            setStatus("Merci, mortel ! Signalement envoyé ✓" + (d.number ? " (#" + d.number + ")" : ""), "#b9d456");
+            document.getElementById("bugtitle").value = "";
+            document.getElementById("bugtext").value = "";
+          } else {
+            setStatus("Échec de l'envoi. Réessaie un peu plus tard.", "#f87171");
+          }
+        } catch (e) {
+          setStatus("Réseau indisponible. Réessaie plus tard.", "#f87171");
+        } finally { sendBtn.disabled = false; }
+      } else {
+        var url = repo + "/issues/new?labels=" + encodeURIComponent(t.tag) +
+          "&title=" + encodeURIComponent(fullTitle) + "&body=" + encodeURIComponent(body);
+        window.open(url, "_blank", "noopener");
+      }
+    };
+  })();
+</script>
 </body>
 </html>
