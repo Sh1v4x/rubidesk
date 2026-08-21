@@ -291,12 +291,13 @@ export class Sword {
     // explosion au niveau de l'œil de la nouvelle forme
     this.fireBurst(def);
 
-    // phase 2 — la nouvelle forme retombe avec rebond
+    // phase 2 — la nouvelle forme retombe avec rebond ; l'interface suit
     window.setTimeout(() => {
       nextForm.style.transition = "all .5s cubic-bezier(.18,1.28,.4,1)";
       nextForm.style.opacity = "1";
       nextForm.style.transform = "scale(1.05)";
       nextForm.style.filter = "blur(0px) brightness(1.55)";
+      this.applyBodyTheme(next);
     }, 300);
 
     // phase 3 — stabilisation
@@ -361,7 +362,14 @@ export class Sword {
     const def = ELEMENTS[el];
     this.shadow.setAttribute("rx", String(def.shadow));
     this.movePokeZone(def);
+    this.applyBodyTheme(el);
     this.burst.style.opacity = "0";
+  }
+
+  /** Accent de l'interface (barre, bulle, menus) assorti à la forme. */
+  private applyBodyTheme(el: SwordElement): void {
+    document.body.classList.toggle("el-air", el === "air");
+    document.body.classList.toggle("el-fire", el === "fire");
   }
 
   private movePokeZone(def: ElementDef): void {
