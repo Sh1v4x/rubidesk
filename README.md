@@ -16,6 +16,8 @@ Compagnon animé, commande vocale 100 % locale, domotique, minuteurs & lanceur d
 
 <a href="https://github.com/Sh1v4x/rubidesk/releases/latest"><img src="https://api.iconify.design/lucide:download.svg?color=%23b9d456&width=18" align="top"> <b>Télécharger</b></a>
 &nbsp;·&nbsp;
+<a href="https://sh1v4x.github.io/rubidesk/"><img src="https://api.iconify.design/lucide:globe.svg?color=%23b9d456&width=18" align="top"> <b>Site officiel</b></a>
+&nbsp;·&nbsp;
 <a href="https://github.com/Sh1v4x/rubidesk/issues/new"><img src="https://api.iconify.design/lucide:bug.svg?color=%23b9d456&width=18" align="top"> <b>Signaler un bug</b></a>
 
 </div>

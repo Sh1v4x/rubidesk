@@ -39,6 +39,40 @@ const tokenInput = $<HTMLInputElement>("ha-token");
 let bubbleTimer: number | undefined;
 let statesCache: { at: number; entities: HaEntity[] } | null = null;
 
+// ---- modules activables ----
+
+interface Features {
+  domotique: boolean;
+  apps: boolean;
+  eliadex: boolean;
+}
+
+const FEATURES_KEY = "rubilax.features";
+
+function loadFeatures(): Features {
+  try {
+    return { domotique: true, apps: true, eliadex: true, ...JSON.parse(localStorage.getItem(FEATURES_KEY) ?? "{}") };
+  } catch {
+    return { domotique: true, apps: true, eliadex: true };
+  }
+}
+
+const features = loadFeatures();
+
+function setFeature(key: keyof Features, on: boolean): void {
+  features[key] = on;
+  localStorage.setItem(FEATURES_KEY, JSON.stringify(features));
+  refreshModuleButtons();
+}
+
+function refreshModuleButtons(): void {
+  for (const btn of document.querySelectorAll<HTMLButtonElement>("#modules button")) {
+    btn.classList.toggle("active", features[btn.dataset.mod as keyof Features]);
+  }
+  // la config Home Assistant (URL + token) n'apparaît que si la domotique est active
+  document.getElementById("ha-section")?.classList.toggle("hidden", !features.domotique);
+}
+
 // ---- minuteurs persistants ----
 
 interface StoredTimer {
@@ -409,6 +443,10 @@ async function handleCommand(text: string): Promise<void> {
   // Eliadex : où trouver un item, un boss, un donjon, une recette…
   const eliadex = parseEliadex(text);
   if (eliadex) {
+    if (!features.eliadex) {
+      say(replies.moduleDisabled("Eliadex"), "error");
+      return;
+    }
     await handleEliadex(eliadex);
     return;
   }
@@ -423,6 +461,10 @@ async function handleCommand(text: string): Promise<void> {
   // applications, sites web, recherches
   const open = parseOpen(text);
   if (open) {
+    if (!features.apps) {
+      say(replies.moduleDisabled("L'ouverture d'applications"), "error");
+      return;
+    }
     await handleOpen(open);
     return;
   }
@@ -430,6 +472,11 @@ async function handleCommand(text: string): Promise<void> {
   const intent = parseIntent(text);
   if (!intent) {
     say(replies.noIntent(), "error");
+    return;
+  }
+
+  if (!features.domotique) {
+    say(replies.moduleDisabled("La domotique"), "error");
     return;
   }
 
@@ -592,7 +639,15 @@ $("btn-settings").addEventListener("click", () => {
   }
   settingsStatus.textContent = "";
   refreshElementButtons();
+  refreshModuleButtons();
   settingsPanel.classList.toggle("hidden");
+});
+
+$("modules").addEventListener("click", (e) => {
+  const mod = (e.target as HTMLElement).dataset.mod as keyof Features | undefined;
+  if (mod === "domotique" || mod === "apps" || mod === "eliadex") {
+    setFeature(mod, !features[mod]);
+  }
 });
 
 $("element-pref").addEventListener("click", (e) => {

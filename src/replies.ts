@@ -126,6 +126,11 @@ export const replies = {
   updateRestart: (): string => "Mise à jour installée. Je reviens — ne t'enfuis pas.",
   askCity: (): string =>
     "Dis-moi ta ville une fois — « météo à Lyon » par exemple — et je m'en souviendrai.",
+  moduleDisabled: (label: string): string =>
+    pick([
+      `${label} ? Module éteint, mortel. Rallume-le dans mes réglages si tu y tiens.`,
+      `Non. ${label}, c'est désactivé. C'est toi qui as coupé, c'est toi qui rallumes.`,
+    ]),
   elementChanged: (choice: "normal" | "air" | "fire" | "auto"): string => {
     switch (choice) {
       case "fire":

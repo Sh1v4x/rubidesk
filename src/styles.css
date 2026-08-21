@@ -277,6 +277,11 @@ body.el-fire {
   margin: 10px 0 6px;
 }
 
+#ha-section.hidden {
+  display: none;
+}
+
+#modules button.active,
 #element-pref button.active {
   background: rgba(var(--accent-rgb), 0.35);
   color: var(--accent);

@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Rubidesk — Rubilax sur ton bureau</title>
+  <meta name="description" content="Rubidesk : le shushu Rubilax de Wakfu vit sur ton bureau. Compagnon animé, commande vocale 100 % locale, domotique Home Assistant, minuteurs, lanceur d'applications, intégration Eliadex. Gratuit, Windows & macOS." />
+  <meta name="keywords" content="rubidesk, rubilax, wakfu, assistant vocal, compagnon bureau, home assistant, shushu, wakfu app, eliadex" />
+  <meta name="author" content="Shivax" />
+  <meta name="application-name" content="Rubidesk" />
+  <link rel="canonical" href="https://sh1v4x.github.io/rubidesk/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Rubidesk" />
+  <meta property="og:locale" content="fr_FR" />
+  <meta property="og:title" content="Rubidesk — Rubilax sur ton bureau" />
+  <meta property="og:description" content="Le shushu le plus grognon du Monde des Douze, posé sur ton bureau : voix 100 % locale, domotique, minuteurs, apps. Gratuit, Windows & macOS." />
+  <meta property="og:url" content="https://sh1v4x.github.io/rubidesk/" />
+  <meta property="og:image" content="https://sh1v4x.github.io/rubidesk/logo.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Rubidesk — Rubilax sur ton bureau" />
+  <meta name="twitter:image" content="https://sh1v4x.github.io/rubidesk/logo.png" />
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"Rubidesk","applicationCategory":"UtilitiesApplication","operatingSystem":"Windows, macOS","description":"Compagnon de bureau animé : le shushu Rubilax de Wakfu, commande vocale 100 % locale, domotique Home Assistant, minuteurs, lanceur d'applications.","url":"https://sh1v4x.github.io/rubidesk/","image":"https://sh1v4x.github.io/rubidesk/logo.png","inLanguage":"fr","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}}
+  </script>
+
+  <link rel="icon" type="image/png" href="logo.png" />
+  <link rel="apple-touch-icon" href="logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@300;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --braise: #e2703a;
+      --braise2: #f0a24f;
+      --vert: #b9d456;
+      --creme: #f2ead9;
+      --mut: #9b8c76;
+      --ligne: #241f18;
+      --panel: rgba(24, 19, 14, 0.72);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: radial-gradient(1400px 900px at 50% -10%, #241a12 0%, #0a0908 60%) #0a0908;
+      color: var(--creme);
+      font-family: "Spectral", Georgia, serif;
+      line-height: 1.6;
+    }
+    .mono { font-family: "JetBrains Mono", monospace; }
+    a { color: var(--braise2); text-decoration: none; }
+    a:hover { color: #ffc37e; }
+    .wrap { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+
+    /* ---- héros ---- */
+    header { padding: 72px 0 40px; }
+    .hero { display: flex; flex-wrap: wrap; align-items: center; gap: 48px; }
+    .hero-text { flex: 1 1 460px; }
+    .kicker {
+      font-family: "JetBrains Mono", monospace; font-size: 12px;
+      letter-spacing: 0.22em; text-transform: uppercase; color: var(--mut);
+    }
+    h1 { font-size: clamp(44px, 7vw, 72px); font-weight: 600; letter-spacing: -0.01em; margin: 10px 0 4px; }
+    h1 .dot { color: var(--braise); }
+    .tagline { font-size: clamp(17px, 2.4vw, 21px); color: #d9c9ae; max-width: 30em; font-weight: 300; }
+    .badges { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 28px; }
+    .badge {
+      font-family: "JetBrains Mono", monospace; font-size: 11.5px; letter-spacing: 0.06em;
+      padding: 5px 12px; border: 1px solid var(--ligne); border-radius: 999px; color: var(--mut);
+    }
+    .badge b { color: var(--vert); font-weight: 600; }
+    .dl { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 600;
+      padding: 14px 22px; border-radius: 12px; transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-win { background: linear-gradient(135deg, var(--braise), #b4451c); color: #fff4e8; box-shadow: 0 8px 26px rgba(226, 112, 58, 0.25); }
+    .btn-mac { background: linear-gradient(135deg, #3d4a2a, #232b16); color: var(--vert); border: 1px solid rgba(185, 212, 86, 0.35); }
+    .dl-note { width: 100%; font-size: 13px; color: var(--mut); }
+    .dl-note a { color: var(--mut); text-decoration: underline; }
+
+    /* ---- l'épée ---- */
+    .hero-sword { flex: 0 0 240px; margin: 0 auto; filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.6)); }
+    .hero-sword svg { width: 240px; height: auto; display: block; animation: breathe 5.2s ease-in-out infinite; transform-origin: 50% 96%; }
+    @keyframes breathe { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-8px) rotate(-1.1deg); } }
+    @keyframes ember { 0% { opacity: 0; transform: translate(0, 0) scale(0.5); } 18% { opacity: 0.95; } 100% { opacity: 0; transform: translate(-16px, -120px) scale(1.2); } }
+    @keyframes sheen { 0% { transform: translateY(-260px); } 100% { transform: translateY(700px); } }
+    @keyframes flicker { 0%, 100% { opacity: 0.4; } 43% { opacity: 0.65; } 71% { opacity: 0.35; } }
+    @keyframes blink { 0%, 92%, 100% { transform: translateY(-76px); } 95.5% { transform: translateY(-6px); } }
+    @keyframes blinkB { 0%, 92%, 100% { transform: translateY(76px); } 95.5% { transform: translateY(10px); } }
+    .lid-t { transform: translateY(-76px); animation: blink 6.5s ease-in-out infinite; }
+    .lid-b { transform: translateY(76px); animation: blinkB 6.5s ease-in-out infinite; }
+
+    /* ---- sections ---- */
+    section { padding: 46px 0; border-top: 1px solid var(--ligne); }
+    h2 { font-size: 15px; font-family: "JetBrains Mono", monospace; letter-spacing: 0.22em; text-transform: uppercase; color: var(--braise2); margin-bottom: 26px; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
+    .card {
+      background: var(--panel); border: 1px solid var(--ligne); border-radius: 14px; padding: 20px 22px;
+    }
+    .card h3 { font-size: 16.5px; font-weight: 600; margin-bottom: 6px; }
+    .card h3 .ic { margin-right: 8px; }
+    .card p { font-size: 14.5px; color: var(--mut); }
+    .card b, .card code { color: #d9c9ae; font-weight: 500; }
+    .card code { font-family: "JetBrains Mono", monospace; font-size: 13px; }
+
+    .band {
+      display: flex; flex-wrap: wrap; gap: 26px; align-items: center;
+      background: linear-gradient(150deg, rgba(46, 30, 14, 0.55), rgba(16, 20, 10, 0.85));
+      border: 1px solid rgba(185, 212, 86, 0.2); border-radius: 16px; padding: 28px 30px;
+    }
+    .band-icon { font-size: 40px; }
+    .band h3 { font-size: 19px; margin-bottom: 4px; }
+    .band p { color: var(--mut); font-size: 15px; max-width: 52em; }
+    .band p b { color: var(--vert); }
+
+    .eliadex {
+      border-color: rgba(122, 232, 224, 0.25);
+      background: linear-gradient(150deg, rgba(10, 31, 42, 0.7), rgba(10, 15, 12, 0.85));
+    }
+    .eliadex b { color: #7ae8e0; }
+    .eliadex a.btn-mini {
+      font-family: "JetBrains Mono", monospace; font-size: 13px; padding: 10px 16px;
+      border: 1px solid rgba(122, 232, 224, 0.4); border-radius: 10px; color: #7ae8e0; white-space: nowrap;
+    }
+
+    footer { border-top: 1px solid var(--ligne); padding: 34px 0 46px; font-size: 13px; color: #6f6252; }
+    footer p { max-width: 74em; }
+    footer .links { margin-bottom: 14px; font-family: "JetBrains Mono", monospace; font-size: 12.5px; }
+    footer .heart { text-align: center; margin-top: 22px; color: var(--mut); }
+  </style>
+</head>
+<body>
+
+<header class="wrap">
+  <div class="hero">
+    <div class="hero-text">
+      <div class="kicker">Compagnon de bureau · Wakfu · Windows &amp; macOS</div>
+      <h1>Rubidesk<span class="dot">.</span></h1>
+      <p class="tagline">Rubilax, le shushu le plus grognon du Monde des Douze, posé sur ton bureau. Il t'écoute, il obéit, il râle.</p>
+      <div class="badges">
+        <span class="badge">version <b id="version">…</b></span>
+        <span class="badge"><b>100 %</b> vocal local</span>
+        <span class="badge"><b>0</b> compte · <b>0</b> pub</span>
+      </div>
+      <div class="dl">
+        <a id="dl-win" class="btn btn-win" href="https://github.com/Sh1v4x/rubidesk/releases/latest">⊞&nbsp; Télécharger pour Windows</a>
+        <a id="dl-mac" class="btn btn-mac" href="https://github.com/Sh1v4x/rubidesk/releases/latest">&nbsp; Télécharger pour macOS</a>
+        <span class="dl-note">Binaires non signés (outil indépendant) : Windows → <i>Informations complémentaires</i> → <i>Exécuter quand même</i> · macOS → clic droit → <i>Ouvrir</i>. <a href="https://github.com/Sh1v4x/rubidesk/releases">Toutes les versions</a>.</span>
+      </div>
+    </div>
+
+    <div class="hero-sword" aria-hidden="true">
+      <svg viewBox="0 0 220 620" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="fBlade" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#6e6249"/><stop offset="0.14" stop-color="#b5a985"/>
+            <stop offset="0.42" stop-color="#dfd4b6"/><stop offset="0.6" stop-color="#c7bb9a"/>
+            <stop offset="0.9" stop-color="#8b7f61"/><stop offset="1" stop-color="#5d5340"/>
+          </linearGradient>
+          <linearGradient id="fCore" x1="0" y1="0" x2="1" y2="0.4">
+            <stop offset="0" stop-color="#1d1913"/><stop offset="0.5" stop-color="#33291f"/><stop offset="1" stop-color="#151109"/>
+          </linearGradient>
+          <linearGradient id="fGrip" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#0c0a08"/><stop offset="0.3" stop-color="#2f2820"/>
+            <stop offset="0.55" stop-color="#3b332a"/><stop offset="0.8" stop-color="#191510"/><stop offset="1" stop-color="#080706"/>
+          </linearGradient>
+          <linearGradient id="fMane" x1="0.2" y1="0" x2="0.8" y2="1">
+            <stop offset="0" stop-color="#2e2620"/><stop offset="0.55" stop-color="#1b1712"/><stop offset="1" stop-color="#0c0a08"/>
+          </linearGradient>
+          <linearGradient id="fBone" x1="0" y1="0" x2="1" y2="0.3">
+            <stop offset="0" stop-color="#f1e8cf"/><stop offset="0.5" stop-color="#d3c7a6"/><stop offset="1" stop-color="#9e9276"/>
+          </linearGradient>
+          <linearGradient id="fRing" x1="0.1" y1="0" x2="0.8" y2="1">
+            <stop offset="0" stop-color="#d3612f"/><stop offset="0.34" stop-color="#a93a17"/>
+            <stop offset="0.72" stop-color="#7a260d"/><stop offset="1" stop-color="#4c1608"/>
+          </linearGradient>
+          <radialGradient id="fSclera" cx="0.34" cy="0.28" r="0.88">
+            <stop offset="0" stop-color="#faf5e4"/><stop offset="0.6" stop-color="#e3d8ba"/>
+            <stop offset="0.88" stop-color="#c0b391"/><stop offset="1" stop-color="#8e8265"/>
+          </radialGradient>
+          <radialGradient id="fIris" cx="0.42" cy="0.34" r="0.74">
+            <stop offset="0" stop-color="#ffe0a2"/><stop offset="0.3" stop-color="#f59a2c"/>
+            <stop offset="0.66" stop-color="#c9490f"/><stop offset="0.92" stop-color="#7d2606"/><stop offset="1" stop-color="#3d1103"/>
+          </radialGradient>
+          <radialGradient id="fGlow" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#ff7c26" stop-opacity="0.6"/>
+            <stop offset="0.55" stop-color="#ff5f18" stop-opacity="0.18"/><stop offset="1" stop-color="#ff5f18" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="fSheen" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.4"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+          </linearGradient>
+          <filter id="fSoft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5"/></filter>
+          <clipPath id="fEyeClip"><circle cx="110" cy="322" r="45"/></clipPath>
+          <clipPath id="fBladeClip"><path d="M62,300 L158,300 L158,418 C158,470 138,540 110,600 C82,540 62,470 62,418 Z"/></clipPath>
+        </defs>
+        <ellipse cx="110" cy="604" rx="52" ry="8" fill="#000" opacity="0.55" filter="url(#fSoft)"/>
+        <g>
+          <path d="M78,116 C56,92 26,54 16,18 C40,10 66,48 84,88 L86,116 Z" fill="url(#fMane)"/>
+          <path d="M142,116 C164,92 194,54 204,18 C180,10 154,48 136,88 L134,116 Z" fill="url(#fMane)"/>
+          <path d="M92,112 C82,72 78,28 96,4 C114,26 116,72 108,112 Z" fill="#221c16"/>
+          <path d="M118,114 C122,80 130,44 148,26 C152,50 140,90 126,114 Z" fill="#1a1611"/>
+          <path d="M102,114 C96,84 86,50 68,30 C62,54 78,92 92,114 Z" fill="#1a1611"/>
+        </g>
+        <path d="M68,112 L152,112 L154,142 L66,142 Z" fill="url(#fBone)"/>
+        <path d="M66,142 L154,142 L153,148 L67,148 Z" fill="#3c3428"/>
+        <path d="M74,140 L146,140 L150,304 L70,304 Z" fill="url(#fGrip)"/>
+        <path d="M70,196 L150,196 L150,214 L70,214 Z" fill="#b9ac8c" opacity="0.5"/>
+        <path d="M62,300 L158,300 L158,418 C158,470 138,540 110,600 C82,540 62,470 62,418 Z" fill="url(#fBlade)"/>
+        <g clip-path="url(#fBladeClip)">
+          <path d="M110,318 L142,430 L110,562 L78,430 Z" fill="url(#fCore)"/>
+          <path d="M62,300 L72,300 L70,420 C70,468 88,536 110,588 L110,600 C82,540 62,470 62,418 Z" fill="#f6eed8" opacity="0.42"/>
+          <path d="M158,300 L158,418 C158,470 138,540 110,600 L110,588 C132,536 150,468 150,420 L148,300 Z" fill="#000" opacity="0.26"/>
+          <rect x="55" y="0" width="112" height="70" fill="url(#fSheen)" style="animation: sheen 7.5s linear infinite"/>
+        </g>
+        <path d="M64,286 C34,278 10,296 2,332 C10,352 30,362 50,358 C56,340 58,314 64,300 Z" fill="#1b1712"/>
+        <path d="M10,338 C4,362 10,388 26,402 C36,382 32,356 22,340 Z" fill="url(#fBone)"/>
+        <path d="M156,286 C186,278 210,296 218,332 C210,352 190,362 170,358 C164,340 162,314 156,300 Z" fill="#1b1712"/>
+        <path d="M210,338 C216,362 210,388 194,402 C184,382 188,356 198,340 Z" fill="url(#fBone)"/>
+        <g>
+          <circle cx="82" cy="352" r="2.6" fill="#ffab4a" style="animation: ember 2.6s ease-out infinite"/>
+          <circle cx="140" cy="366" r="2" fill="#ff8a2c" style="animation: ember 3.1s ease-out 0.7s infinite"/>
+          <circle cx="66" cy="336" r="1.6" fill="#ffd27a" style="animation: ember 2.2s ease-out 1.3s infinite"/>
+          <circle cx="154" cy="340" r="2.2" fill="#ff9b3a" style="animation: ember 3.4s ease-out 1.9s infinite"/>
+        </g>
+        <circle cx="110" cy="322" r="80" fill="url(#fGlow)" style="animation: flicker 1.7s ease-in-out infinite"/>
+        <circle cx="110" cy="322" r="57" fill="#140d08"/>
+        <circle cx="110" cy="322" r="55" fill="url(#fRing)"/>
+        <path d="M110,267 A55,55 0 0 1 158,296 L149,301 A45,45 0 0 0 110,277 Z" fill="#ef9552" opacity="0.72"/>
+        <path d="M158,300 L166,296 L165,318 L157,316 Z" fill="#f0a24f"/>
+        <circle cx="110" cy="322" r="45" fill="url(#fSclera)"/>
+        <g clip-path="url(#fEyeClip)">
+          <g>
+            <circle cx="110" cy="322" r="29" fill="url(#fIris)"/>
+            <circle cx="110" cy="322" r="29" fill="none" stroke="#3d1103" stroke-width="2.4" opacity="0.65"/>
+            <ellipse cx="110" cy="322" rx="12" ry="12.5" fill="#0a0604"/>
+            <ellipse cx="99" cy="310" rx="8" ry="6.6" fill="#fff" opacity="0.92"/>
+          </g>
+          <path class="lid-t" d="M63,190 H157 V312 Q110,340 63,312 Z" fill="#231c15"/>
+          <path class="lid-b" d="M63,470 H157 V332 Q110,304 63,332 Z" fill="#231c15"/>
+        </g>
+        <circle cx="110" cy="322" r="45" fill="none" stroke="#2c0d03" stroke-width="3" opacity="0.5"/>
+        <circle cx="110" cy="322" r="55" fill="none" stroke="#1b0803" stroke-width="2.5" opacity="0.55"/>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<section class="wrap">
+  <h2>✦ Ce qu'il sait faire</h2>
+  <div class="grid">
+    <div class="card"><h3><span class="ic">👁️</span>Le Fendoir, vivant</h3><p>Épée-shushu animée en fenêtre transparente au-dessus de tout : <b>trois formes</b> (normale, air, feu) qu'il change tout seul, 8 humeurs, clignements, braises — et son œil te suit partout sur l'écran.</p></div>
+    <div class="card"><h3><span class="ic">🎙️</span>Voix 100 % locale</h3><p>Reconnaissance vocale <b>whisper.cpp embarquée</b> (GPU sur Mac) : ta voix ne quitte jamais ta machine. Dis <code>« Hé Rubilax »</code> et il se réveille — de mauvaise humeur, évidemment.</p></div>
+    <div class="card"><h3><span class="ic">🏠</span>Domotique Home Assistant</h3><p><code>« Allume la lumière du salon »</code>, <code>« éteins le ventilo »</code> — reconnaissance floue de tes appareils, à la voix ou au clavier. Module optionnel, désactivable.</p></div>
+    <div class="card"><h3><span class="ic">⏲️</span>Minuteurs &amp; rappels</h3><p><code>« Rappelle-moi dans 20 minutes de sortir le four »</code> — il compte, même après un redémarrage, puis il te hurle dessus. C'est sa façon d'aider.</p></div>
+    <div class="card"><h3><span class="ic">🚀</span>Lanceur d'apps &amp; web</h3><p><code>« Ouvre Spotify »</code>, <code>« va sur youtube.com »</code>, <code>« recherche recette tartiflette »</code> — matching flou des applications installées.</p></div>
+    <div class="card"><h3><span class="ic">🎛️</span>Contrôle de la machine</h3><p><code>« Baisse le son »</code>, <code>« mets pause »</code>, <code>« musique suivante »</code>, <code>« verrouille l'écran »</code>, <code>« capture d'écran »</code>, météo, notes rapides…</p></div>
+    <div class="card"><h3><span class="ic">⚔️</span>Trois formes élémentaires</h3><p>Lance Wakfu et il <b>s'embrase</b>. Coupe sa voix et il passe en forme air. Et parfois il se transforme juste parce que ça lui chante — ou sur ordre : <code>« passe en forme feu »</code>.</p></div>
+    <div class="card"><h3><span class="ic">💢</span>Un vrai caractère</h3><p>Répliques de shushu grognon, réaction quand tu le déplaces ou touches son œil, mise à jour automatique, raccourci global, easter eggs Wakfu — parle-lui de Pinpin.</p></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="band">
+    <div class="band-icon">🔒</div>
+    <div>
+      <h3>Ta voix reste chez toi</h3>
+      <p>La reconnaissance vocale tourne <b>entièrement en local</b> (modèles whisper téléchargés une fois, ~580 Mo). Aucun compte, aucune pub, aucune collecte. Les seules requêtes réseau : ta domotique locale, la météo si tu la demandes, et les mises à jour de l'app.</p>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="band eliadex">
+    <div class="band-icon">🗡️</div>
+    <div style="flex:1">
+      <h3>Tu joues à Wakfu ?</h3>
+      <p>Rubidesk est le compagnon d'<b>Eliadex</b>, l'app de recherche d'items, crafts et builds. Ensemble : demande <code>« où je trouve la gelée royale ? »</code> et Eliadex s'ouvre sur la réponse.</p>
+    </div>
+    <a class="btn-mini" href="https://sh1v4x.github.io/eliadex/">Découvrir Eliadex →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="links">
+      <a href="https://github.com/Sh1v4x/rubidesk">Code source</a> &nbsp;·&nbsp;
+      <a href="https://github.com/Sh1v4x/rubidesk/releases">Versions</a> &nbsp;·&nbsp;
+      <a href="https://github.com/Sh1v4x/rubidesk/issues/new">Signaler un bug</a> &nbsp;·&nbsp;
+      <a href="https://sh1v4x.github.io/eliadex/">Eliadex</a>
+    </div>
+    <p>Outil communautaire <b>non officiel</b>, à usage strictement non commercial et sans collecte de données. WAKFU® et l'ensemble des noms, personnages, illustrations et éléments associés — dont le personnage de Rubilax — sont la propriété exclusive d'<b>Ankama</b> ; Rubidesk n'est ni affilié à, ni approuvé par Ankama. Tout contenu sera retiré à la demande d'un ayant droit. Wakfu © Ankama — tous droits réservés.</p>
+    <div class="heart">Développé avec ❤️ par <b>Shivax</b></div>
+  </div>
+</footer>
+
+<script>
+  // liens de téléchargement directs + version, depuis la dernière release GitHub
+  fetch("https://api.github.com/repos/Sh1v4x/rubidesk/releases/latest")
+    .then((r) => r.json())
+    .then((rel) => {
+      document.getElementById("version").textContent = rel.tag_name || "?";
+      const assets = rel.assets || [];
+      const win = assets.find((a) => a.name.endsWith("-setup.exe"));
+      const mac = assets.find((a) => a.name.endsWith(".dmg"));
+      if (win) document.getElementById("dl-win").href = win.browser_download_url;
+      if (mac) document.getElementById("dl-mac").href = mac.browser_download_url;
+    })
+    .catch(() => {});
+</script>
+
+</body>
+</html>

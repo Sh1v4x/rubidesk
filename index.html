@@ -357,16 +357,25 @@
       </div>
 
       <div id="settings" class="hidden">
-        <h3>Home Assistant</h3>
-        <label>URL
-          <input id="ha-url" type="text" placeholder="http://homeassistant.local:8123" autocomplete="off" />
-        </label>
-        <label>Token (long-lived)
-          <input id="ha-token" type="password" placeholder="eyJhbGciOi…" autocomplete="off" />
-        </label>
-        <div class="row">
-          <button id="btn-save">Enregistrer</button>
-          <button id="btn-test">Tester</button>
+        <h3>Paramètres</h3>
+        <span class="field-label">Modules</span>
+        <div class="row" id="modules">
+          <button data-mod="domotique">Domotique</button>
+          <button data-mod="apps">Apps &amp; web</button>
+          <button data-mod="eliadex">Eliadex</button>
+        </div>
+        <div id="ha-section">
+          <span class="field-label">Home Assistant</span>
+          <label>URL
+            <input id="ha-url" type="text" placeholder="http://homeassistant.local:8123" autocomplete="off" />
+          </label>
+          <label>Token (long-lived)
+            <input id="ha-token" type="password" placeholder="eyJhbGciOi…" autocomplete="off" />
+          </label>
+          <div class="row">
+            <button id="btn-save">Enregistrer</button>
+            <button id="btn-test">Tester</button>
+          </div>
         </div>
         <span class="field-label">Forme du Fendoir</span>
         <div class="row" id="element-pref">
