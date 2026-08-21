@@ -53,12 +53,12 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: "Rubilax ${{ github.ref_name }}"
+          releaseName: "Rubidesk ${{ github.ref_name }}"
           releaseBody: |
             Packages compilés automatiquement par la CI.
 
-            - **Windows** : `Rubilax_x.y.z_x64-setup.exe`
-            - **macOS** (Apple Silicon) : `Rubilax_x.y.z_aarch64.dmg`
+            - **Windows** : `Rubidesk_x.y.z_x64-setup.exe`
+            - **macOS** (Apple Silicon) : `Rubidesk_x.y.z_aarch64.dmg`
 
             Binaires non signés : voir le README pour la première ouverture.
           releaseDraft: false

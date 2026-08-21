@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Rubilax",
+  "productName": "Rubidesk",
   "version": "0.2.0",
   "identifier": "ai.landcapital.rubilax",
   "build": {
@@ -15,7 +15,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Rubilax",
+        "title": "Rubidesk",
         "width": 340,
         "height": 720,
         "transparent": true,
@@ -33,7 +33,7 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEU3OUVGM0E0NEMxRDc5OTEKUldTUmVSMU1wUE9lNTlFSDY4a0k0KzlEVWltOVRuMmowRWcrYkFoOU1PTVZ0M3JXWFR0Z1UzTUsK",
       "endpoints": [
-        "https://github.com/Sh1v4x/rubilax/releases/latest/download/latest.json"
+        "https://github.com/Sh1v4x/rubidesk/releases/latest/download/latest.json"
       ]
     }
   },

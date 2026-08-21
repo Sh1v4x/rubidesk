@@ -1,22 +1,22 @@
 <div align="center">
 
-# Rubilax
+# Rubidesk
 
-**Le shushu le plus grognon du Monde des Douze, posé sur ton bureau.**
+**Rubilax, le shushu le plus grognon du Monde des Douze, posé sur ton bureau.**
 Compagnon animé, commande vocale 100 % locale, domotique, minuteurs & lanceur d'apps — Windows & macOS.
 
 <br>
 
-[![Version](https://img.shields.io/github/v/release/Sh1v4x/rubilax?style=for-the-badge&label=version&labelColor=141a10&color=b9d456)](https://github.com/Sh1v4x/rubilax/releases/latest)
+[![Version](https://img.shields.io/github/v/release/Sh1v4x/rubidesk?style=for-the-badge&label=version&labelColor=141a10&color=b9d456)](https://github.com/Sh1v4x/rubidesk/releases/latest)
 ![Windows](https://img.shields.io/badge/Windows-x64-b9d456?style=for-the-badge&labelColor=141a10&logo=windows11&logoColor=b9d456)
 ![macOS](https://img.shields.io/badge/macOS-Apple%20Silicon-b9d456?style=for-the-badge&labelColor=141a10&logo=apple&logoColor=b9d456)
 ![Tauri](https://img.shields.io/badge/Tauri-v2-f0a24f?style=for-the-badge&labelColor=141a10&logo=tauri&logoColor=f0a24f)
 
 <br>
 
-<a href="https://github.com/Sh1v4x/rubilax/releases/latest"><img src="https://api.iconify.design/lucide:download.svg?color=%23b9d456&width=18" align="top"> <b>Télécharger</b></a>
+<a href="https://github.com/Sh1v4x/rubidesk/releases/latest"><img src="https://api.iconify.design/lucide:download.svg?color=%23b9d456&width=18" align="top"> <b>Télécharger</b></a>
 &nbsp;·&nbsp;
-<a href="https://github.com/Sh1v4x/rubilax/issues/new"><img src="https://api.iconify.design/lucide:bug.svg?color=%23b9d456&width=18" align="top"> <b>Signaler un bug</b></a>
+<a href="https://github.com/Sh1v4x/rubidesk/issues/new"><img src="https://api.iconify.design/lucide:bug.svg?color=%23b9d456&width=18" align="top"> <b>Signaler un bug</b></a>
 
 </div>
 
@@ -36,15 +36,15 @@ Compagnon animé, commande vocale 100 % locale, domotique, minuteurs & lanceur d
 
 ## <img src="https://api.iconify.design/lucide:download.svg?color=%23f0a24f&width=26" align="top"> Installation
 
-Télécharge la dernière version depuis la **[page des releases](https://github.com/Sh1v4x/rubilax/releases/latest)** :
+Télécharge la dernière version depuis la **[page des releases](https://github.com/Sh1v4x/rubidesk/releases/latest)** :
 
 | Plateforme | Fichier |
 |:--|:--|
-| <img src="https://api.iconify.design/lucide:monitor.svg?color=%23b9d456&width=16" align="top"> **Windows** (x64) | `Rubilax_x.y.z_x64-setup.exe` |
-| <img src="https://api.iconify.design/lucide:apple.svg?color=%23b9d456&width=16" align="top"> **macOS** (Apple Silicon) | `Rubilax_x.y.z_aarch64.dmg` |
+| <img src="https://api.iconify.design/lucide:monitor.svg?color=%23b9d456&width=16" align="top"> **Windows** (x64) | `Rubidesk_x.y.z_x64-setup.exe` |
+| <img src="https://api.iconify.design/lucide:apple.svg?color=%23b9d456&width=16" align="top"> **macOS** (Apple Silicon) | `Rubidesk_x.y.z_aarch64.dmg` |
 
 > [!NOTE]
-> Rubilax est distribué **sans certificat de signature payant** : ton système peut afficher un avertissement à la première ouverture — c'est normal pour un outil indépendant, sans risque pour ta machine.
+> Rubidesk est distribué **sans certificat de signature payant** : ton système peut afficher un avertissement à la première ouverture — c'est normal pour un outil indépendant, sans risque pour ta machine.
 >
 > - **Windows** : clique sur *Informations complémentaires* → *Exécuter quand même*.
 > - **macOS** : *clic droit* sur l'app → *Ouvrir* → *Ouvrir*.
@@ -57,7 +57,7 @@ Télécharge la dernière version depuis la **[page des releases](https://github
 ## <img src="https://api.iconify.design/lucide:home.svg?color=%23f0a24f&width=26" align="top"> Connecter Home Assistant
 
 1. Dans Home Assistant : profil → **Sécurité** → **Jetons d'accès longue durée** → *Créer un jeton*.
-2. Dans Rubilax : engrenage ⚙️ → colle l'**URL** de ton instance (ex. `http://homeassistant.local:8123`) et le **jeton** → *Tester*.
+2. Dans Rubidesk : engrenage ⚙️ → colle l'**URL** de ton instance (ex. `http://homeassistant.local:8123`) et le **jeton** → *Tester*.
 3. Parle-lui : « allume la lumière du salon », « éteins le ventilateur »…
 
 Sans Home Assistant, tout le reste (voix, minuteurs, apps, web) fonctionne normalement.
