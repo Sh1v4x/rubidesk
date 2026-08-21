@@ -14,6 +14,7 @@ import {
   parseOpen,
   parseSystem,
   parseEliadex,
+  parseElement,
   extractActionVerb,
   formatDuration,
   type Action,
@@ -316,6 +317,20 @@ async function handleSystem(intent: SystemIntent): Promise<void> {
   }
 }
 
+/** Applique un choix de forme (commande vocale ou paramètres). */
+function applyElementChoice(choice: "normal" | "air" | "fire" | "auto", spoken = false): void {
+  const noChange = choice !== "auto" && sword.currentElement === choice && sword.elementPreference === choice;
+  sword.setPreference(choice);
+  refreshElementButtons();
+  if (spoken) say(noChange ? replies.elementAlready() : replies.elementChanged(choice));
+}
+
+function refreshElementButtons(): void {
+  for (const btn of document.querySelectorAll<HTMLButtonElement>("#element-pref button")) {
+    btn.classList.toggle("active", btn.dataset.el === sword.elementPreference);
+  }
+}
+
 /** Ouvre Eliadex sur la recherche demandée via son deep link `eliadex://`. */
 async function handleEliadex(intent: EliadexIntent): Promise<void> {
   const installed = await invoke<boolean>("app_installed", { name: "eliadex" }).catch(() => false);
@@ -374,6 +389,13 @@ async function handleCommand(text: string): Promise<void> {
   }
   if (timer) {
     scheduleTimer(timer.ms, timer.label);
+    return;
+  }
+
+  // changement de forme manuel
+  const element = parseElement(text);
+  if (element) {
+    applyElementChoice(element, true);
     return;
   }
 
@@ -569,7 +591,15 @@ $("btn-settings").addEventListener("click", () => {
     tokenInput.value = cfg.token;
   }
   settingsStatus.textContent = "";
+  refreshElementButtons();
   settingsPanel.classList.toggle("hidden");
+});
+
+$("element-pref").addEventListener("click", (e) => {
+  const el = (e.target as HTMLElement).dataset.el;
+  if (el === "auto" || el === "normal" || el === "air" || el === "fire") {
+    applyElementChoice(el);
+  }
 });
 
 $("btn-save").addEventListener("click", () => {

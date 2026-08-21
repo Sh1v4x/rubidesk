@@ -98,6 +98,19 @@ export function formatDuration(ms: number): string {
   return parts.join(" ") || "0 seconde";
 }
 
+export type ElementChoice = "normal" | "air" | "fire" | "auto";
+
+/** « passe en forme feu », « mode air », « redeviens normal », « forme auto »… */
+export function parseElement(text: string): ElementChoice | null {
+  const norm = normalize(text).replace(/[^a-z0-9 ]/g, " ");
+  if (!/\b(forme|mode|transforme|transformes?|redeviens?|element)\b/.test(norm)) return null;
+  if (/\b(feu|flammes?|embrase[a-z]*)\b/.test(norm)) return "fire";
+  if (/\b(air|vent)\b/.test(norm)) return "air";
+  if (/\b(normale?|petite|base)\b/.test(norm)) return "normal";
+  if (/\b(auto|automatique|libre)\b/.test(norm)) return "auto";
+  return null;
+}
+
 export type SystemIntent =
   | { kind: "volume"; action: string }
   | { kind: "media"; action: "playpause" | "next" | "previous" }

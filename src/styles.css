@@ -70,7 +70,16 @@ body.el-fire {
 }
 
 #bubble {
+  /* hors flux : flotte par-dessus la lame, jamais coupée quelle que soit la forme */
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
   max-width: 300px;
+  max-height: 45vh;
+  overflow-y: auto;
+  z-index: 15;
   background: var(--panel);
   color: var(--ink);
   border: 1px solid rgba(var(--accent-rgb), 0.35);
@@ -259,6 +268,19 @@ body.el-fire {
   border-radius: 8px;
   padding: 6px 12px;
   font-size: 12px;
+}
+
+#settings .field-label {
+  display: block;
+  font-size: 11px;
+  opacity: 0.8;
+  margin: 10px 0 6px;
+}
+
+#element-pref button.active {
+  background: rgba(var(--accent-rgb), 0.35);
+  color: var(--accent);
+  font-weight: 600;
 }
 
 #settings-status {

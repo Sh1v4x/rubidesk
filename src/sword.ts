@@ -149,6 +149,11 @@ export class Sword {
 
   private env: SwordEnv = { game: false, muted: false, mini: false };
   private angerUntil = 0;
+  /** Préférence utilisateur : forme imposée, ou "auto" (défaut). */
+  private preference: SwordElement | "auto" = "auto";
+  /** En mode auto, errance : de temps en temps il change de forme sans raison. */
+  private wanderElement: SwordElement | null = null;
+  private nextWanderAt = Date.now() + Sword.wanderDelay();
 
   private sleepTimer: number | undefined;
   private wakeChain: number | undefined;
@@ -188,6 +193,12 @@ export class Sword {
     window.addEventListener("mousemove", (e) => this.updateGaze(e.clientX, e.clientY));
     this.startGlobalGaze();
 
+    const savedPref = localStorage.getItem("rubilax.element");
+    if (savedPref === "normal" || savedPref === "air" || savedPref === "fire") {
+      this.preference = savedPref;
+      this.element = savedPref;
+    }
+
     this.showElement(this.element, true);
     this.apply(STATES.idle);
     this.scheduleBlink();
@@ -208,6 +219,22 @@ export class Sword {
   setEnv(env: Partial<SwordEnv>): void {
     Object.assign(this.env, env);
     this.refreshElement();
+  }
+
+  get elementPreference(): SwordElement | "auto" {
+    return this.preference;
+  }
+
+  /** Impose une forme (ou "auto" pour rendre la main à la logique automatique). */
+  setPreference(pref: SwordElement | "auto"): void {
+    this.preference = pref;
+    localStorage.setItem("rubilax.element", pref);
+    if (pref === "auto") this.nextWanderAt = Date.now() + Sword.wanderDelay();
+    this.refreshElement();
+  }
+
+  private static wanderDelay(): number {
+    return (10 + Math.random() * 15) * 60_000; // 10 à 25 minutes
   }
 
   /** Change d'état. S'il dormait, réveil brutal d'abord. */
@@ -250,15 +277,25 @@ export class Sword {
   // Élément : résolution automatique + transformation
   // -------------------------------------------------------------------------
 
-  /** feu si Wakfu tourne ou colère récente ; air si discret ou endormi. */
+  /**
+   * Préférence utilisateur d'abord ; sinon : feu si Wakfu tourne ou colère
+   * récente, air si discret ou endormi, et à défaut la forme d'errance —
+   * de temps en temps, il se transforme juste parce que ça lui chante.
+   */
   private desiredElement(): SwordElement {
+    if (this.preference !== "auto") return this.preference;
     if (this.env.game) return "fire";
     if (this.env.muted || this.env.mini || this.current === "sleep") return "air";
     if (Date.now() < this.angerUntil) return "fire";
-    return "normal";
+    return this.wanderElement ?? "normal";
   }
 
   refreshElement(): void {
+    if (this.preference === "auto" && Date.now() >= this.nextWanderAt) {
+      const pool: SwordElement[] = ["normal", "normal", "air", "fire"]; // normal favorisé
+      this.wanderElement = pool[Math.floor(Math.random() * pool.length)];
+      this.nextWanderAt = Date.now() + Sword.wanderDelay();
+    }
     const want = this.desiredElement();
     if (want !== this.element && !this.morphing) this.morph(want);
   }

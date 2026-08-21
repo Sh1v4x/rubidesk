@@ -126,6 +126,31 @@ export const replies = {
   updateRestart: (): string => "Mise à jour installée. Je reviens — ne t'enfuis pas.",
   askCity: (): string =>
     "Dis-moi ta ville une fois — « météo à Lyon » par exemple — et je m'en souviendrai.",
+  elementChanged: (choice: "normal" | "air" | "fire" | "auto"): string => {
+    switch (choice) {
+      case "fire":
+        return pick([
+          "LA FLAMME ! Enfin un peu d'allure.",
+          "Forme feu. Recule, mortel, ça va chauffer.",
+        ]);
+      case "air":
+        return pick([
+          "Forme air. Léger. Silencieux. Presque zen. Presque.",
+          "Le vent se lève. Et moi avec, tout en finesse.",
+        ]);
+      case "normal":
+        return pick([
+          "Retour à la petite forme. Confortable, ne le répète pas.",
+          "Forme normale. La lame de tous les jours.",
+        ]);
+      default:
+        return pick([
+          "Je reprends ma liberté de forme. Enfin, façon de parler.",
+          "Mode libre. Je changerai quand ça ME chante.",
+        ]);
+    }
+  },
+  elementAlready: (): string => "C'est déjà le cas, mortel. Ouvre l'œil — moi je n'ai que ça.",
   gameDetected: (): string =>
     pick([
       "Wakfu ?! ENFIN ! Fais chauffer la lame, mortel !",
