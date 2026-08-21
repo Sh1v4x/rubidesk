@@ -267,6 +267,16 @@ body {
   background: rgba(185, 212, 86, 0.15);
 }
 
+/* Mise en avant pendant l'onboarding */
+.spotlight {
+  box-shadow: 0 0 0 3px rgba(240, 162, 79, 0.9), 0 0 18px rgba(240, 162, 79, 0.6) !important;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+#bubble {
+  white-space: pre-line;
+}
+
 /* Mode mini : seulement la lame */
 body.mini #composer,
 body.mini #settings,

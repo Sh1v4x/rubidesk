@@ -1,5 +1,6 @@
 mod open;
 mod stt;
+mod system;
 
 use serde_json::{json, Value};
 use std::time::Duration;
@@ -126,6 +127,8 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         // ne restaure que la position : la taille dépend du mode mini, géré côté front
         .plugin(
             tauri_plugin_window_state::Builder::new()
@@ -166,7 +169,15 @@ pub fn run() {
             stt::wake_stop,
             stt::wake_pause,
             open::open_app,
-            open::open_web
+            open::open_web,
+            system::system_volume,
+            system::system_media,
+            system::system_power,
+            system::system_screenshot,
+            system::weather,
+            system::note_add,
+            system::note_list,
+            system::note_clear
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

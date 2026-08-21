@@ -12,9 +12,13 @@ import {
   normalize,
   parseTimer,
   parseOpen,
+  parseSystem,
+  extractActionVerb,
   formatDuration,
   type Action,
+  type SystemIntent,
 } from "./intent";
+import { checkForUpdates } from "./updater";
 import * as ha from "./ha";
 import type { HaEntity } from "./ha";
 
@@ -31,17 +35,68 @@ const tokenInput = $<HTMLInputElement>("ha-token");
 
 let bubbleTimer: number | undefined;
 let statesCache: { at: number; entities: HaEntity[] } | null = null;
-const timers: number[] = [];
+
+// ---- minuteurs persistants ----
+
+interface StoredTimer {
+  id: number;
+  fireAt: number;
+  label: string;
+}
+
+const TIMERS_KEY = "rubilax.timers";
+let timerSeq = Date.now();
+let storedTimers: StoredTimer[] = [];
+const timerHandles = new Map<number, number>();
+
+function saveTimers(): void {
+  localStorage.setItem(TIMERS_KEY, JSON.stringify(storedTimers));
+}
+
+function armTimer(timer: StoredTimer): void {
+  const handle = window.setTimeout(() => {
+    storedTimers = storedTimers.filter((t) => t.id !== timer.id);
+    timerHandles.delete(timer.id);
+    saveTimers();
+    sword.set("wake");
+    window.setTimeout(() => say(replies.timerFired(timer.label), "angry"), 900);
+  }, Math.max(0, timer.fireAt - Date.now()));
+  timerHandles.set(timer.id, handle);
+}
 
 function scheduleTimer(ms: number, label: string): void {
-  const id = window.setTimeout(() => {
-    const idx = timers.indexOf(id);
-    if (idx >= 0) timers.splice(idx, 1);
-    sword.set("wake");
-    window.setTimeout(() => say(replies.timerFired(label), "angry"), 900);
-  }, ms);
-  timers.push(id);
+  const timer: StoredTimer = { id: ++timerSeq, fireAt: Date.now() + ms, label };
+  storedTimers.push(timer);
+  saveTimers();
+  armTimer(timer);
   say(replies.timerSet(formatDuration(ms)), "success");
+}
+
+function cancelAllTimers(): number {
+  const count = storedTimers.length;
+  for (const handle of timerHandles.values()) window.clearTimeout(handle);
+  timerHandles.clear();
+  storedTimers = [];
+  saveTimers();
+  return count;
+}
+
+/** Recharge les minuteurs sauvegardés ; signale ceux qui ont sonné dans le vide. */
+function restoreTimers(): void {
+  try {
+    storedTimers = JSON.parse(localStorage.getItem(TIMERS_KEY) ?? "[]") as StoredTimer[];
+  } catch {
+    storedTimers = [];
+  }
+  const now = Date.now();
+  const missed = storedTimers.filter((t) => t.fireAt <= now);
+  storedTimers = storedTimers.filter((t) => t.fireAt > now);
+  saveTimers();
+  for (const t of storedTimers) armTimer(t);
+  if (missed.length > 0) {
+    const labels = missed.map((t) => t.label || "sans nom").join(", ");
+    window.setTimeout(() => say(replies.missedTimers(labels), "error"), 4000);
+  }
 }
 
 /** Affiche la bulle et fait parler Rubilax, avec l'état du Fendoir assorti. */
@@ -122,19 +177,181 @@ async function handleOpen(open: { kind: "url" | "app" | "search"; target: string
   }
 }
 
+/** Libellés français des codes météo WMO d'Open-Meteo. */
+function weatherLabel(code: number): string {
+  if (code === 0) return "ciel dégagé";
+  if (code <= 2) return "peu nuageux";
+  if (code === 3) return "couvert";
+  if (code <= 48) return "brouillard";
+  if (code <= 57) return "bruine";
+  if (code <= 67) return "pluie";
+  if (code <= 77) return "neige";
+  if (code <= 82) return "averses";
+  if (code <= 86) return "averses de neige";
+  return "orage";
+}
+
+const CITY_KEY = "rubilax.city";
+
+async function handleSystem(intent: SystemIntent): Promise<void> {
+  try {
+    switch (intent.kind) {
+      case "volume": {
+        const result = await invoke<string>("system_volume", { action: intent.action });
+        say(replies.volume(result));
+        return;
+      }
+      case "media": {
+        try {
+          await invoke("system_media", { action: intent.action });
+          say(replies.media());
+        } catch {
+          say(replies.mediaFailed(), "error");
+        }
+        return;
+      }
+      case "power": {
+        say(intent.action === "lock" ? replies.locking() : replies.sleeping());
+        // laisser la réplique partir avant que la session ne se fige
+        window.setTimeout(() => void invoke("system_power", { action: intent.action }), 1800);
+        return;
+      }
+      case "screenshot": {
+        // petite pause pour que la bulle ne soit pas sur la capture
+        bubble.classList.add("hidden");
+        await new Promise((r) => window.setTimeout(r, 300));
+        await invoke<string>("system_screenshot");
+        say(replies.screenshot());
+        return;
+      }
+      case "weather": {
+        const city = intent.city ?? localStorage.getItem(CITY_KEY);
+        if (!city) {
+          say(replies.askCity(), "error");
+          return;
+        }
+        const data = await invoke<{
+          city: string;
+          current: { temperature_2m: number; weather_code: number };
+          daily: { weather_code: number[]; temperature_2m_max: number[]; temperature_2m_min: number[] };
+        }>("weather", { city });
+        localStorage.setItem(CITY_KEY, city);
+        let text: string;
+        if (intent.tomorrow) {
+          const label = weatherLabel(data.daily.weather_code[1]);
+          const min = Math.round(data.daily.temperature_2m_min[1]);
+          const max = Math.round(data.daily.temperature_2m_max[1]);
+          text = `Demain à ${data.city} : ${label}, entre ${min} et ${max} degrés.`;
+        } else {
+          const label = weatherLabel(data.current.weather_code);
+          text = `${Math.round(data.current.temperature_2m)} degrés à ${data.city}, ${label}.`;
+        }
+        const grumble = /pluie|averses|orage|bruine/.test(text)
+          ? " Reste dans ton trou, mortel."
+          : " Profite. Moi, je ne vois rien d'ici.";
+        say(text + grumble);
+        return;
+      }
+      case "noteAdd": {
+        await invoke("note_add", {
+          text: intent.text,
+          date: new Date().toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }),
+        });
+        say(replies.noteAdded());
+        return;
+      }
+      case "noteList": {
+        const notes = await invoke<string[]>("note_list");
+        if (notes.length === 0) {
+          say(replies.notesEmpty(), "error");
+          return;
+        }
+        const last = notes.slice(-6);
+        window.clearTimeout(bubbleTimer);
+        bubble.textContent = last.join("\n");
+        bubble.classList.remove("hidden");
+        speak(
+          `Tu as ${notes.length} note${notes.length > 1 ? "s" : ""}. Les voilà.`,
+          () => sword.set("success"),
+          () => {
+            sword.set("idle");
+            bubbleTimer = window.setTimeout(() => bubble.classList.add("hidden"), 8000);
+          },
+        );
+        return;
+      }
+      case "noteClear": {
+        await invoke("note_clear");
+        say(replies.notesCleared());
+        return;
+      }
+      case "timerList": {
+        if (storedTimers.length === 0) {
+          say(replies.timerListEmpty(), "error");
+          return;
+        }
+        const now = Date.now();
+        const lines = storedTimers
+          .sort((a, b) => a.fireAt - b.fireAt)
+          .map((t) => `${t.label || "sans nom"} — dans ${formatDuration(t.fireAt - now)}`);
+        window.clearTimeout(bubbleTimer);
+        bubble.textContent = lines.join("\n");
+        bubble.classList.remove("hidden");
+        speak(
+          `${storedTimers.length} compte${storedTimers.length > 1 ? "s" : ""} en cours.`,
+          () => sword.set("success"),
+          () => {
+            sword.set("idle");
+            bubbleTimer = window.setTimeout(() => bubble.classList.add("hidden"), 8000);
+          },
+        );
+        return;
+      }
+    }
+  } catch (e) {
+    console.error(e);
+    say(`Ça a raté : ${String(e)}`, "error");
+  }
+}
+
+/** Découpe « fais A et B puis C » et exécute chaque commande, en héritant du verbe. */
+async function handleInput(text: string): Promise<void> {
+  const parts = text
+    .split(/\s+(?:et puis|ensuite|puis|et)\s+/i)
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0);
+  if (parts.length <= 1) {
+    await handleCommand(text);
+    return;
+  }
+  let lastVerb: string | null = null;
+  for (let part of parts) {
+    const verb = extractActionVerb(part);
+    if (verb) lastVerb = verb;
+    else if (lastVerb) part = `${lastVerb} ${part}`;
+    await handleCommand(part);
+  }
+}
+
 async function handleCommand(text: string): Promise<void> {
   sword.set("think");
 
   // minuteurs et rappels
   const timer = parseTimer(text);
   if (timer === "cancel") {
-    const count = timers.length;
-    for (const id of timers.splice(0)) window.clearTimeout(id);
+    const count = cancelAllTimers();
     say(replies.timerCancelled(count), count > 0 ? "success" : "error");
     return;
   }
   if (timer) {
     scheduleTimer(timer.ms, timer.label);
+    return;
+  }
+
+  // contrôle machine, musique, météo, notes
+  const system = parseSystem(text);
+  if (system) {
+    await handleSystem(system);
     return;
   }
 
@@ -205,7 +422,7 @@ input.addEventListener("keydown", (e) => {
     const text = input.value.trim();
     input.value = "";
     micBtn.classList.remove("listening");
-    void handleCommand(text);
+    void handleInput(text);
   }
 });
 
@@ -250,7 +467,7 @@ async function listenAndHandle(fromWake = false): Promise<void> {
     const text = (await invoke<string>("stt_listen")).trim();
     if (text) {
       input.value = text; // montre ce qui a été compris
-      await handleCommand(text);
+      await handleInput(text);
     } else {
       say(replies.heardNothing(), "error");
     }
@@ -448,9 +665,71 @@ void getCurrentWindow().onMoved(() => {
   }
 });
 
+// ---- onboarding (première ouverture) ----
+
+const ONBOARD_KEY = "rubilax.onboarded";
+
+function sayAwait(text: string, state: SwordState): Promise<void> {
+  return new Promise((resolve) => {
+    window.clearTimeout(bubbleTimer);
+    bubble.textContent = text;
+    bubble.classList.remove("hidden");
+    speak(
+      text,
+      () => sword.set(state),
+      () => {
+        sword.set("idle");
+        resolve();
+      },
+    );
+  });
+}
+
+async function runOnboarding(): Promise<void> {
+  localStorage.setItem(ONBOARD_KEY, "1");
+  const steps: Array<{ text: string; el?: HTMLElement; state?: SwordState }> = [
+    {
+      text: "Bon. Puisqu'on est coincés ensemble, mortel, deux mots sur le fonctionnement.",
+      state: "angry",
+    },
+    { text: "Le micro : tu cliques, tu parles, j'obéis. En râlant, mais j'obéis.", el: micBtn },
+    {
+      text: "La braise : allume-la et je me réveillerai quand tu diras « Hé Rubilax ».",
+      el: wakeBtn,
+    },
+    {
+      text: "L'engrenage : branche ta maison Home Assistant, que je serve à quelque chose.",
+      el: $("btn-settings"),
+    },
+    {
+      text: "Tu peux aussi écrire, si ma voix t'effraie. Minuteurs, météo, musique, applications… Allez. Au boulot.",
+      el: input,
+    },
+  ];
+  for (const step of steps) {
+    step.el?.classList.add("spotlight");
+    await sayAwait(step.text, step.state ?? "success");
+    step.el?.classList.remove("spotlight");
+  }
+  bubbleTimer = window.setTimeout(() => bubble.classList.add("hidden"), 2500);
+}
+
 // ---- démarrage ----
 
 if (localStorage.getItem(MINI_PREF) === "1") void setMini(true);
+restoreTimers();
 
 sword.set("wake");
-window.setTimeout(() => say(replies.greeting(), "angry"), 900);
+if (localStorage.getItem(ONBOARD_KEY) !== "1") {
+  window.setTimeout(() => void runOnboarding(), 1100);
+} else {
+  window.setTimeout(() => say(replies.greeting(), "angry"), 900);
+}
+
+// mise à jour automatique (silencieuse s'il n'y a rien)
+window.setTimeout(() => {
+  void checkForUpdates(
+    (version) => say(replies.updateFound(version)),
+    () => say(replies.updateRestart(), "angry"),
+  );
+}, 10_000);

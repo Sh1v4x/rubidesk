@@ -98,6 +98,83 @@ export function formatDuration(ms: number): string {
   return parts.join(" ") || "0 seconde";
 }
 
+export type SystemIntent =
+  | { kind: "volume"; action: string }
+  | { kind: "media"; action: "playpause" | "next" | "previous" }
+  | { kind: "power"; action: "lock" | "sleep" }
+  | { kind: "screenshot" }
+  | { kind: "weather"; city: string | null; tomorrow: boolean }
+  | { kind: "noteAdd"; text: string }
+  | { kind: "noteList" }
+  | { kind: "noteClear" }
+  | { kind: "timerList" };
+
+const MUSIC_WORDS = "(?:musique|chanson|morceau|titre|piste)";
+
+/** Contrôle machine, musique, météo, notes, liste des minuteurs. */
+export function parseSystem(text: string): SystemIntent | null {
+  const norm = normalize(text).replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+
+  // volume
+  const setVol = norm.match(/\b(?:mets?|regle[rz]?)\b[^0-9]*\b(?:son|volume)\b[^0-9]*?(\d{1,3})\b/);
+  if (setVol) return { kind: "volume", action: `set:${setVol[1]}` };
+  if (/\b(?:monte[rz]?|augmente[rz]?|remonte[rz]?)\b.*\b(?:son|volume)\b|\bplus fort\b/.test(norm))
+    return { kind: "volume", action: "up" };
+  if (/\b(?:baisse[rz]?|diminue[rz]?|reduis)\b.*\b(?:son|volume)\b|\bmoins fort\b/.test(norm))
+    return { kind: "volume", action: "down" };
+  if (/\b(?:remets?|retablis?)\b.*\bson\b/.test(norm)) return { kind: "volume", action: "unmute" };
+  if (/\bcoupe[rz]?\b.*\bson\b|\bmuet\b|\bmute\b/.test(norm)) return { kind: "volume", action: "mute" };
+
+  // musique
+  if (new RegExp(`\\bmets? (?:en )?pause\\b|\\bpause\\b.*\\b${MUSIC_WORDS}\\b|\\b(?:reprends?|relance)\\b.*\\b${MUSIC_WORDS}\\b|^play$`).test(norm))
+    return { kind: "media", action: "playpause" };
+  if (new RegExp(`\\b${MUSIC_WORDS}\\b.*\\bsuivante?\\b|\\bsuivante?\\b.*\\b${MUSIC_WORDS}\\b|\\bskip\\b|\\bpasse\\b.*\\b${MUSIC_WORDS}\\b`).test(norm))
+    return { kind: "media", action: "next" };
+  if (new RegExp(`\\b${MUSIC_WORDS}\\b.*\\bprecedente?\\b|\\bprecedente?\\b.*\\b${MUSIC_WORDS}\\b`).test(norm))
+    return { kind: "media", action: "previous" };
+
+  // machine
+  if (/\bverrouille[rz]?\b/.test(norm)) return { kind: "power", action: "lock" };
+  if (/\bmets?\b.*\ben veille\b/.test(norm) && /\b(pc|ordi|ordinateur|mac|machine|ecran)\b/.test(norm))
+    return { kind: "power", action: "sleep" };
+  if (/\b(?:capture[s]? d ?ecran|screenshot|fais une capture)\b/.test(norm)) return { kind: "screenshot" };
+
+  // météo
+  if (/\b(?:meteo|quel temps|temperature dehors|il fait (?:beau|combien|froid|chaud) dehors)\b/.test(norm)) {
+    const tomorrow = /\bdemain\b/.test(norm);
+    const cityMatch = norm.match(/\bmeteo\b(?:\s+(?:a|de|pour|du|sur))?\s+(.+)$/);
+    let city: string | null = null;
+    if (cityMatch) {
+      const words = cityMatch[1]
+        .split(/\s+/)
+        .filter((w) => !STOP_WORDS.has(w) && !["demain", "aujourd", "hui", "a", "de", "pour"].includes(w));
+      if (words.length > 0) city = words.join(" ");
+    }
+    return { kind: "weather", city, tomorrow };
+  }
+
+  // notes
+  const note = text.match(/\bnote[sz]?\s+(?:que\s+|de\s+)?(.+)$/i);
+  if (note && !/\b(lis|liste|montre|efface|supprime|vide|mes)\b/i.test(text)) {
+    return { kind: "noteAdd", text: note[1].trim() };
+  }
+  if (/\b(?:efface[rz]?|supprime[rz]?|vide[rz]?)\b.*\bnotes?\b/.test(norm)) return { kind: "noteClear" };
+  if (/\b(?:lis|liste[rz]?|montre[rz]?)\b.*\bnotes?\b|\bmes notes\b/.test(norm)) return { kind: "noteList" };
+
+  // minuteurs en cours
+  if (/\b(?:mes|les|liste[rz]? (?:mes|les)?)\b.*\b(?:minuteurs?|rappels?|timers?)\b/.test(norm))
+    return { kind: "timerList" };
+
+  return null;
+}
+
+/** Premier verbe d'action trouvé (pour hériter dans les commandes chaînées). */
+export function extractActionVerb(text: string): string | null {
+  const norm = normalize(text);
+  const m = norm.match(ON_WORDS) ?? norm.match(OFF_WORDS) ?? norm.match(TOGGLE_WORDS);
+  return m ? m[0] : null;
+}
+
 export interface OpenIntent {
   kind: "url" | "app" | "search";
   target: string;

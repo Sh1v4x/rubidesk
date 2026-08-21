@@ -94,6 +94,38 @@ export const replies = {
       "Mouais. Et tu veux que j'en fasse quoi, de ça ?",
       "Allumer, éteindre. C'est tout ce que je daigne faire pour l'instant.",
     ]),
+  volume: (result: string): string =>
+    pick([
+      `Voilà, ${result}. DJ Rubilax, à ton service. Malheureusement.`,
+      `${result}. Autre chose, ou je peux retourner ruminer ?`,
+    ]),
+  media: (): string =>
+    pick(["Fait.", "Voilà voilà.", "C'est géré. La musique adoucit même les shushus."]),
+  mediaFailed: (): string =>
+    "Aucun lecteur ne tourne, mortel. Je contrôle la musique, je ne l'invente pas.",
+  locking: (): string =>
+    pick(["Je verrouille. Personne ne touche à NOTRE machine.", "Verrouillé. File."]),
+  sleeping: (): string => "Bonne nuit, la machine. Moi je ne dors jamais. Jamais.",
+  screenshot: (): string =>
+    pick([
+      "Capturé. C'est sur le Bureau.",
+      "Clic. L'écran est immortalisé, sur le Bureau.",
+    ]),
+  noteAdded: (): string =>
+    pick([
+      "Noté. Je sers de post-it, maintenant.",
+      "C'est gravé. Dans un fichier, pas dans le marbre.",
+    ]),
+  notesEmpty: (): string => "Aucune note. Ta mémoire est vide, comme la mienne de bons souvenirs.",
+  notesCleared: (): string => "Effacé. Tous tes secrets sont partis en fumée.",
+  timerListEmpty: (): string => "Aucun compte en cours. Je me repose, pour une fois.",
+  missedTimers: (labels: string): string =>
+    `Pendant ton absence, ça a sonné dans le vide : ${labels}. J'ai crié pour rien.`,
+  updateFound: (version: string): string =>
+    `Une version ${version} de moi existe. Je me perfectionne, ne touche à rien.`,
+  updateRestart: (): string => "Mise à jour installée. Je reviens — ne t'enfuis pas.",
+  askCity: (): string =>
+    "Dis-moi ta ville une fois — « météo à Lyon » par exemple — et je m'en souviendrai.",
   opened: (name: string): string =>
     pick([
       `J'ouvre ${name}. Portier, maintenant. Formidable.`,
