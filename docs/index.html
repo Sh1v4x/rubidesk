@@ -52,6 +52,9 @@
     a { color: var(--braise2); text-decoration: none; }
     a:hover { color: #ffc37e; }
     .wrap { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+    /* .wrap écrase le padding vertical de section/header : on le rétablit ici */
+    header.wrap { padding-top: 110px; padding-bottom: 76px; }
+    section.wrap { padding-top: 76px; padding-bottom: 76px; }
 
     /* ---- héros ---- */
     header { padding: 110px 0 76px; }
