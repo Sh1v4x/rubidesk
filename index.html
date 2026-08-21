@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rubilax</title>
+  </head>
+  <body>
+    <div id="app">
+      <button id="btn-close" title="Fermer">×</button>
+
+      <div id="bubble" class="hidden"></div>
+
+      <!-- Le Fendoir — design importé du canvas « Rubilax pour application Tauri » -->
+      <div id="avatar" data-tauri-drag-region>
+        <svg id="sword-svg" viewBox="0 0 220 620" role="img" aria-label="Le Fendoir">
+          <defs>
+            <linearGradient id="fBlade" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#6e6249" />
+              <stop offset="0.14" stop-color="#b5a985" />
+              <stop offset="0.42" stop-color="#dfd4b6" />
+              <stop offset="0.6" stop-color="#c7bb9a" />
+              <stop offset="0.9" stop-color="#8b7f61" />
+              <stop offset="1" stop-color="#5d5340" />
+            </linearGradient>
+            <linearGradient id="fCore" x1="0" y1="0" x2="1" y2="0.4">
+              <stop offset="0" stop-color="#1d1913" />
+              <stop offset="0.5" stop-color="#33291f" />
+              <stop offset="1" stop-color="#151109" />
+            </linearGradient>
+            <linearGradient id="fGrip" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#0c0a08" />
+              <stop offset="0.3" stop-color="#2f2820" />
+              <stop offset="0.55" stop-color="#3b332a" />
+              <stop offset="0.8" stop-color="#191510" />
+              <stop offset="1" stop-color="#080706" />
+            </linearGradient>
+            <linearGradient id="fMane" x1="0.2" y1="0" x2="0.8" y2="1">
+              <stop offset="0" stop-color="#2e2620" />
+              <stop offset="0.55" stop-color="#1b1712" />
+              <stop offset="1" stop-color="#0c0a08" />
+            </linearGradient>
+            <linearGradient id="fBone" x1="0" y1="0" x2="1" y2="0.3">
+              <stop offset="0" stop-color="#f1e8cf" />
+              <stop offset="0.5" stop-color="#d3c7a6" />
+              <stop offset="1" stop-color="#9e9276" />
+            </linearGradient>
+            <linearGradient id="fRing" x1="0.1" y1="0" x2="0.8" y2="1">
+              <stop offset="0" stop-color="#d3612f" />
+              <stop offset="0.34" stop-color="#a93a17" />
+              <stop offset="0.72" stop-color="#7a260d" />
+              <stop offset="1" stop-color="#4c1608" />
+            </linearGradient>
+            <radialGradient id="fSclera" cx="0.34" cy="0.28" r="0.88">
+              <stop offset="0" stop-color="#faf5e4" />
+              <stop offset="0.6" stop-color="#e3d8ba" />
+              <stop offset="0.88" stop-color="#c0b391" />
+              <stop offset="1" stop-color="#8e8265" />
+            </radialGradient>
+            <radialGradient id="fIris" cx="0.42" cy="0.34" r="0.74">
+              <stop offset="0" stop-color="#ffe0a2" />
+              <stop offset="0.3" stop-color="#f59a2c" />
+              <stop offset="0.66" stop-color="#c9490f" />
+              <stop offset="0.92" stop-color="#7d2606" />
+              <stop offset="1" stop-color="#3d1103" />
+            </radialGradient>
+            <radialGradient id="fGlow" cx="0.5" cy="0.5" r="0.5">
+              <stop offset="0" stop-color="#ff7c26" stop-opacity="0.6" />
+              <stop offset="0.55" stop-color="#ff5f18" stop-opacity="0.18" />
+              <stop offset="1" stop-color="#ff5f18" stop-opacity="0" />
+            </radialGradient>
+            <linearGradient id="fSheen" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#fff" stop-opacity="0" />
+              <stop offset="0.5" stop-color="#fff" stop-opacity="0.4" />
+              <stop offset="1" stop-color="#fff" stop-opacity="0" />
+            </linearGradient>
+            <filter id="fGrain" x="0" y="0" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" result="n" />
+              <feColorMatrix type="saturate" values="0" in="n" result="d" />
+            </filter>
+            <filter id="fSoft" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="5" />
+            </filter>
+            <clipPath id="fEyeClip"><circle cx="110" cy="322" r="45" /></clipPath>
+            <clipPath id="fBladeClip">
+              <path d="M62,300 L158,300 L158,418 C158,470 138,540 110,600 C82,540 62,470 62,418 Z" />
+            </clipPath>
+            <clipPath id="fGripClip"><path d="M74,118 L146,118 L150,304 L70,304 Z" /></clipPath>
+          </defs>
+
+          <ellipse cx="110" cy="604" rx="52" ry="8" fill="#000" opacity="0.55" filter="url(#fSoft)" />
+
+          <g id="mane">
+            <path d="M78,116 C56,92 26,54 16,18 C40,10 66,48 84,88 L86,116 Z" fill="url(#fMane)" />
+            <path d="M16,18 C10,32 12,46 20,56 C28,48 26,32 22,20 Z" fill="#151210" />
+            <path d="M78,116 C62,94 42,62 36,32 C48,34 66,64 80,94 Z" fill="#332b23" opacity="0.7" />
+            <path d="M142,116 C164,92 194,54 204,18 C180,10 154,48 136,88 L134,116 Z" fill="url(#fMane)" />
+            <path d="M204,18 C210,32 208,46 200,56 C192,48 194,32 198,20 Z" fill="#151210" />
+            <path d="M142,116 C158,94 178,62 184,32 C172,34 154,64 140,94 Z" fill="#332b23" opacity="0.7" />
+            <path d="M92,112 C82,72 78,28 96,4 C114,26 116,72 108,112 Z" fill="#221c16" />
+            <path d="M99,106 C92,70 92,34 101,14 C108,36 108,72 105,106 Z" fill="#3a3128" opacity="0.72" />
+            <path d="M118,114 C122,80 130,44 148,26 C152,50 140,90 126,114 Z" fill="#1a1611" />
+            <path d="M102,114 C96,84 86,50 68,30 C62,54 78,92 92,114 Z" fill="#1a1611" />
+            <path d="M96,6 C92,14 92,22 96,28 C100,22 100,14 99,6 Z" fill="#0d0b09" />
+          </g>
+
+          <path d="M68,112 L152,112 L154,142 L66,142 Z" fill="url(#fBone)" />
+          <path d="M68,112 L152,112 L152,120 L67,120 Z" fill="#f6efd8" opacity="0.85" />
+          <path d="M110,112 L152,112 L154,142 L110,142 Z" fill="#000" opacity="0.13" />
+          <path d="M66,142 L154,142 L153,148 L67,148 Z" fill="#3c3428" />
+
+          <path d="M74,140 L146,140 L150,304 L70,304 Z" fill="url(#fGrip)" />
+          <g clip-path="url(#fGripClip)">
+            <rect x="60" y="110" width="100" height="200" filter="url(#fGrain)" opacity="0.16" />
+            <path d="M88,140 C84,190 84,250 86,304" fill="none" stroke="#4e4437" stroke-width="3" opacity="0.55" />
+            <path d="M132,140 C136,190 136,250 134,304" fill="none" stroke="#000" stroke-width="4" opacity="0.35" />
+            <path d="M74,140 L80,140 L76,304 L70,304 Z" fill="#5c5142" opacity="0.5" />
+          </g>
+          <path d="M70,196 L150,196 L150,214 L70,214 Z" fill="#b9ac8c" opacity="0.5" />
+
+          <path d="M62,300 L158,300 L158,418 C158,470 138,540 110,600 C82,540 62,470 62,418 Z" fill="url(#fBlade)" />
+          <g clip-path="url(#fBladeClip)">
+            <path d="M110,318 L142,430 L110,562 L78,430 Z" fill="url(#fCore)" />
+            <path d="M110,336 L130,430 L110,528 L90,430 Z" fill="#0f0c08" opacity="0.45" />
+            <path d="M62,300 L72,300 L70,420 C70,468 88,536 110,588 L110,600 C82,540 62,470 62,418 Z" fill="#f6eed8" opacity="0.42" />
+            <path d="M158,300 L158,418 C158,470 138,540 110,600 L110,588 C132,536 150,468 150,420 L148,300 Z" fill="#000" opacity="0.26" />
+            <path d="M62,300 L158,300 L158,316 L62,316 Z" fill="#000" opacity="0.2" />
+            <rect x="55" y="290" width="112" height="320" filter="url(#fGrain)" opacity="0.1" />
+            <path d="M74,306 C68,352 72,402 84,444" fill="none" stroke="#6b6047" stroke-width="1.6" opacity="0.45" />
+            <path d="M146,306 C152,352 148,402 136,444" fill="none" stroke="#6b6047" stroke-width="1.6" opacity="0.4" />
+            <rect id="sheen" x="55" y="0" width="112" height="70" fill="url(#fSheen)" />
+          </g>
+
+          <path d="M64,286 C34,278 10,296 2,332 C10,352 30,362 50,358 C56,340 58,314 64,300 Z" fill="#1b1712" />
+          <path d="M62,294 C40,290 20,304 12,328 C22,342 38,348 52,344 C54,326 56,306 62,296 Z" fill="#302820" opacity="0.85" />
+          <path d="M2,332 C6,344 12,354 20,360" fill="none" stroke="#000" stroke-width="2" opacity="0.4" />
+          <path d="M10,338 C4,362 10,388 26,402 C36,382 32,356 22,340 Z" fill="url(#fBone)" />
+          <path d="M11,340 C7,360 11,380 21,392 C26,376 22,354 16,342 Z" fill="#f2e9d1" opacity="0.7" />
+          <path d="M156,286 C186,278 210,296 218,332 C210,352 190,362 170,358 C164,340 162,314 156,300 Z" fill="#1b1712" />
+          <path d="M158,294 C180,290 200,304 208,328 C198,342 182,348 168,344 C166,326 164,306 158,296 Z" fill="#302820" opacity="0.85" />
+          <path d="M210,338 C216,362 210,388 194,402 C184,382 188,356 198,340 Z" fill="url(#fBone)" />
+          <path d="M209,340 C213,360 209,380 199,392 C194,376 198,354 204,342 Z" fill="#f2e9d1" opacity="0.7" />
+
+          <g id="embers">
+            <circle cx="82" cy="352" r="2.6" fill="#ffab4a" style="animation: ember 2.6s ease-out infinite" />
+            <circle cx="140" cy="366" r="2" fill="#ff8a2c" style="animation: ember 3.1s ease-out 0.7s infinite" />
+            <circle cx="66" cy="336" r="1.6" fill="#ffd27a" style="animation: ember 2.2s ease-out 1.3s infinite" />
+            <circle cx="154" cy="340" r="2.2" fill="#ff9b3a" style="animation: ember 3.4s ease-out 1.9s infinite" />
+            <circle cx="110" cy="378" r="1.8" fill="#ffc266" style="animation: ember 2.9s ease-out 2.4s infinite" />
+          </g>
+
+          <circle id="glow" cx="110" cy="322" r="80" fill="url(#fGlow)" />
+          <circle id="pulse-ring" cx="110" cy="322" r="62" fill="none" stroke="#e2703a" stroke-width="2.4" />
+
+          <circle cx="110" cy="322" r="57" fill="#140d08" />
+          <circle cx="110" cy="322" r="55" fill="url(#fRing)" />
+          <path d="M110,267 A55,55 0 0 1 158,296 L149,301 A45,45 0 0 0 110,277 Z" fill="#ef9552" opacity="0.72" />
+          <path d="M110,377 A55,55 0 0 1 62,348 L71,343 A45,45 0 0 0 110,367 Z" fill="#340e04" opacity="0.66" />
+          <path d="M158,300 L166,296 L165,318 L157,316 Z" fill="#f0a24f" />
+          <path d="M160,320 L166,320 L164,338 L157,334 Z" fill="#8f3113" />
+          <path d="M55,304 C52,316 52,330 54,342 L62,340 C60,328 60,316 62,306 Z" fill="#f2a55c" opacity="0.35" />
+          <path d="M76,283 C68,290 62,298 58,308" fill="none" stroke="#2a0b03" stroke-width="3" opacity="0.5" />
+
+          <circle cx="110" cy="322" r="45" fill="url(#fSclera)" />
+          <path d="M78,300 C88,312 90,332 84,350" fill="none" stroke="#ab452a" stroke-width="1.9" opacity="0.48" />
+          <path d="M136,344 C129,334 127,318 132,304" fill="none" stroke="#ab452a" stroke-width="1.6" opacity="0.4" />
+          <path d="M92,357 C102,362 118,362 128,356" fill="none" stroke="#ab452a" stroke-width="1.3" opacity="0.32" />
+
+          <g clip-path="url(#fEyeClip)">
+            <g id="iris-g">
+              <circle cx="110" cy="322" r="29" fill="url(#fIris)" />
+              <path d="M110,293 L114,313 L110,322 L106,313 Z" fill="#ffd28a" opacity="0.35" />
+              <path d="M139,322 L119,326 L110,322 L119,318 Z" fill="#ffd28a" opacity="0.28" />
+              <path d="M110,351 L106,331 L110,322 L114,331 Z" fill="#7d2606" opacity="0.4" />
+              <circle cx="110" cy="322" r="29" fill="none" stroke="#3d1103" stroke-width="2.4" opacity="0.65" />
+              <ellipse id="pupil" cx="110" cy="322" rx="12" ry="12.5" fill="#0a0604" />
+              <ellipse cx="99" cy="310" rx="8" ry="6.6" fill="#fff" opacity="0.92" />
+              <ellipse cx="120" cy="336" rx="4" ry="3.2" fill="#fff" opacity="0.26" />
+            </g>
+            <path class="lid-top" d="M63,190 H157 V312 Q110,340 63,312 Z" fill="#231c15" />
+            <path class="lid-bot" d="M63,470 H157 V332 Q110,304 63,332 Z" fill="#231c15" />
+            <path class="lid-top" d="M63,190 H157 V306 Q110,334 63,306 Z" fill="#3a2f24" opacity="0.5" />
+          </g>
+          <circle cx="110" cy="322" r="45" fill="none" stroke="#2c0d03" stroke-width="3" opacity="0.5" />
+          <circle cx="110" cy="322" r="55" fill="none" stroke="#1b0803" stroke-width="2.5" opacity="0.55" />
+        </svg>
+        <div id="poke-zone" title="Toucher l'œil. À tes risques et périls."></div>
+      </div>
+
+      <div id="composer">
+        <button id="btn-mic" title="Parler à Rubilax">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
+        </button>
+        <input id="input" type="text" placeholder="Ex : allume la lumière du salon" autocomplete="off" />
+        <button id="btn-wake" title="Veille vocale : il se réveille quand tu dis « Rubilax »">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2c1.2 4.2-3.4 5.6-3.4 9.6a3.4 3.4 0 0 0 6.8 0c0-1.5-.7-2.7-1.4-3.8 2.2 1.2 4.5 3.4 4.5 6.7A6.5 6.5 0 0 1 12 21a6.5 6.5 0 0 1-6.5-6.5C5.5 8.6 10.8 6.6 12 2z"/></svg>
+        </button>
+        <button id="btn-settings" title="Configuration Home Assistant">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19.4 13a7.5 7.5 0 0 0 .06-1 7.5 7.5 0 0 0-.06-1l2.1-1.64a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.6-.22l-2.48 1a7.6 7.6 0 0 0-1.72-1l-.38-2.64A.5.5 0 0 0 14 2h-4a.5.5 0 0 0-.5.42L9.13 5.06a7.6 7.6 0 0 0-1.72 1l-2.48-1a.5.5 0 0 0-.6.22l-2 3.46a.5.5 0 0 0 .12.64L4.54 11a7.5 7.5 0 0 0 0 2l-2.1 1.64a.5.5 0 0 0-.11.64l2 3.46a.5.5 0 0 0 .6.22l2.48-1a7.6 7.6 0 0 0 1.72 1l.38 2.64A.5.5 0 0 0 10 22h4a.5.5 0 0 0 .5-.42l.37-2.64a7.6 7.6 0 0 0 1.72-1l2.48 1a.5.5 0 0 0 .6-.22l2-3.46a.5.5 0 0 0-.11-.64zM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5z"/></svg>
+        </button>
+      </div>
+
+      <div id="ctx-menu" class="hidden">
+        <button data-action="mini">Mode mini</button>
+        <button data-action="mute">Couper la voix</button>
+        <button data-action="settings">Configuration…</button>
+        <button data-action="quit">Quitter</button>
+      </div>
+
+      <div id="settings" class="hidden">
+        <h3>Home Assistant</h3>
+        <label>URL
+          <input id="ha-url" type="text" placeholder="http://homeassistant.local:8123" autocomplete="off" />
+        </label>
+        <label>Token (long-lived)
+          <input id="ha-token" type="password" placeholder="eyJhbGciOi…" autocomplete="off" />
+        </label>
+        <div class="row">
+          <button id="btn-save">Enregistrer</button>
+          <button id="btn-test">Tester</button>
+        </div>
+        <p id="settings-status"></p>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

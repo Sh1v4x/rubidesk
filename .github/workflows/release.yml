@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+          - platform: windows-latest
+
+    runs-on: ${{ matrix.platform }}
+
+    env:
+      # whisper.cpp utilise std::filesystem, indisponible sous la cible 10.13 par défaut
+      MACOSX_DEPLOYMENT_TARGET: "12.0"
+      # bindgen (whisper-rs-sys) a besoin de libclang sur les runners Windows
+      LIBCLANG_PATH: ${{ matrix.platform == 'windows-latest' && 'C:\Program Files\LLVM\bin' || '' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - run: npm ci
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Rubilax ${{ github.ref_name }}"
+          releaseBody: |
+            Packages compilés automatiquement par la CI.
+
+            - **Windows** : `Rubilax_x.y.z_x64-setup.exe`
+            - **macOS** (Apple Silicon) : `Rubilax_x.y.z_aarch64.dmg`
+
+            Binaires non signés : voir le README pour la première ouverture.
+          releaseDraft: false
+          prerelease: false
