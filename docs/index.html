@@ -55,6 +55,7 @@
     /* .wrap écrase le padding vertical de section/header : on le rétablit ici */
     header.wrap { padding-top: 110px; padding-bottom: 76px; }
     section.wrap { padding-top: 76px; padding-bottom: 76px; }
+    #bug.wrap { padding-top: 44px; }
 
     /* ---- héros ---- */
     header { padding: 110px 0 76px; }
@@ -105,7 +106,11 @@
       background: var(--panel); border: 1px solid var(--ligne); border-radius: 14px; padding: 30px 32px;
     }
     .card h3 { font-size: 16.5px; font-weight: 600; margin-bottom: 10px; }
-    .card h3 .ic { margin-right: 8px; }
+    .card h3 .ic, .card h3 svg.ic { width: 18px; height: 18px; margin-right: 9px; vertical-align: -3px; color: var(--braise2); display: inline-block; }
+    .band-ic { width: 38px; height: 38px; color: var(--vert); }
+    .eliadex .band-ic { color: #7ae8e0; }
+    .btn-ic { width: 18px; height: 18px; }
+    .bug-types svg { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; }
     .card p { font-size: 14.5px; color: var(--mut); }
     .card b, .card code { color: #d9c9ae; font-weight: 500; }
     .card code { font-family: "JetBrains Mono", monospace; font-size: 13px; }
@@ -132,19 +137,19 @@
 
 
     /* ---- formulaire de bug ---- */
-    .bug-wrap { display: grid; grid-template-columns: 1fr 1.1fr; gap: 44px; align-items: start;
+    .bug-wrap { display: grid; grid-template-columns: 1fr 1.1fr; gap: 36px; align-items: start;
       background: linear-gradient(150deg, rgba(46, 30, 14, 0.55), rgba(14, 12, 8, 0.9));
-      border: 1px solid rgba(240, 162, 79, 0.25); border-radius: 20px; padding: 44px; }
+      border: 1px solid rgba(240, 162, 79, 0.25); border-radius: 20px; padding: 32px 36px; }
     @media (max-width: 800px) { .bug-wrap { grid-template-columns: 1fr; } }
     .bug-pitch .pill { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 12.5px;
       padding: 6px 14px; border-radius: 999px; background: rgba(226, 112, 58, 0.14);
       border: 1px solid rgba(226, 112, 58, 0.4); color: var(--braise2); margin-bottom: 18px; }
     .bug-pitch h3 { font-size: 30px; font-weight: 600; line-height: 1.15; margin-bottom: 14px; }
     .bug-pitch p { color: var(--mut); font-size: 15.5px; }
-    .bug-form { background: rgba(10, 8, 6, 0.6); border: 1px solid var(--ligne); border-radius: 16px; padding: 26px; }
+    .bug-form { background: rgba(10, 8, 6, 0.6); border: 1px solid var(--ligne); border-radius: 16px; padding: 20px 22px; }
     .bug-form .lbl { font-family: "JetBrains Mono", monospace; font-size: 11.5px; letter-spacing: 0.08em;
       text-transform: uppercase; color: var(--mut); margin: 0 0 8px; }
-    .bug-form .lbl + .lbl, .bug-types + .lbl, .bug-form input + .lbl, .bug-form textarea + .lbl { margin-top: 22px; }
+    .bug-form .lbl + .lbl, .bug-types + .lbl, .bug-form input + .lbl, .bug-form textarea + .lbl { margin-top: 14px; }
     .bug-types { display: flex; gap: 12px; }
     .bug-types button { font-family: "JetBrains Mono", monospace; font-size: 12.5px; padding: 8px 14px;
       border-radius: 10px; border: 1px solid var(--ligne); background: transparent; color: var(--mut); cursor: pointer; }
@@ -153,8 +158,8 @@
       border: 1px solid rgba(226, 112, 58, 0.2); border-radius: 11px; padding: 11px 12px; color: var(--creme);
       font-family: "Spectral", serif; font-size: 14.5px; outline: none; }
     .bug-form input:focus, .bug-form textarea:focus { border-color: rgba(226, 112, 58, 0.55); }
-    .bug-form textarea { height: 110px; resize: none; }
-    #bugsend { margin-top: 18px; width: 100%; padding: 14px; border-radius: 12px; border: none;
+    .bug-form textarea { height: 88px; resize: none; }
+    #bugsend { margin-top: 14px; width: 100%; padding: 12px; border-radius: 12px; border: none;
       background: linear-gradient(135deg, var(--braise), #b4451c); color: #fff4e8;
       font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: 14.5px; cursor: pointer; }
     #bugsend:disabled { opacity: 0.6; cursor: wait; }
@@ -167,6 +172,7 @@
     footer .heart { text-align: center; margin-top: 22px; color: var(--mut); }
   </style>
   <script src="config.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
@@ -182,8 +188,8 @@
         <span class="badge"><b>0</b> compte · <b>0</b> pub</span>
       </div>
       <div class="dl">
-        <a id="dl-win" class="btn btn-win" href="https://github.com/Sh1v4x/rubidesk/releases/latest">⊞&nbsp; Télécharger pour Windows</a>
-        <a id="dl-mac" class="btn btn-mac" href="https://github.com/Sh1v4x/rubidesk/releases/latest">&nbsp; Télécharger pour macOS</a>
+        <a id="dl-win" class="btn btn-win" href="https://github.com/Sh1v4x/rubidesk/releases/latest"><i data-lucide="monitor" class="btn-ic"></i> Télécharger pour Windows</a>
+        <a id="dl-mac" class="btn btn-mac" href="https://github.com/Sh1v4x/rubidesk/releases/latest"><i data-lucide="apple" class="btn-ic"></i> Télécharger pour macOS</a>
         <span class="dl-note">Binaires non signés (outil indépendant) : Windows → <i>Informations complémentaires</i> → <i>Exécuter quand même</i> · macOS → clic droit → <i>Ouvrir</i>. <a href="https://github.com/Sh1v4x/rubidesk/releases">Toutes les versions</a>.</span>
       </div>
     </div>
@@ -287,20 +293,20 @@
 <section class="wrap">
   <h2>✦ Ce qu'il sait faire</h2>
   <div class="grid">
-    <div class="card"><h3><span class="ic">👁️</span>Le Fendoir, vivant</h3><p>Épée-shushu animée en fenêtre transparente au-dessus de tout : <b>trois formes</b> (normale, air, feu) qu'il change tout seul, 8 humeurs, clignements, braises — et son œil te suit partout sur l'écran.</p></div>
-    <div class="card"><h3><span class="ic">🎙️</span>Voix 100 % locale</h3><p>Reconnaissance vocale <b>whisper.cpp embarquée</b> (GPU sur Mac) : ta voix ne quitte jamais ta machine. Dis <code>« Hé Rubilax »</code> et il se réveille — de mauvaise humeur, évidemment.</p></div>
-    <div class="card"><h3><span class="ic">🏠</span>Domotique Home Assistant</h3><p><code>« Allume la lumière du salon »</code>, <code>« éteins le ventilo »</code> — reconnaissance floue de tes appareils, à la voix ou au clavier. Module optionnel, désactivable.</p></div>
-    <div class="card"><h3><span class="ic">⏲️</span>Minuteurs &amp; rappels</h3><p><code>« Rappelle-moi dans 20 minutes de sortir le four »</code> — il compte, même après un redémarrage, puis il te hurle dessus. C'est sa façon d'aider.</p></div>
-    <div class="card"><h3><span class="ic">🚀</span>Lanceur d'apps &amp; web</h3><p><code>« Ouvre Spotify »</code>, <code>« va sur youtube.com »</code>, <code>« recherche recette tartiflette »</code> — matching flou des applications installées.</p></div>
-    <div class="card"><h3><span class="ic">🎛️</span>Contrôle de la machine</h3><p><code>« Baisse le son »</code>, <code>« mets pause »</code>, <code>« musique suivante »</code>, <code>« verrouille l'écran »</code>, <code>« capture d'écran »</code>, météo, notes rapides…</p></div>
-    <div class="card"><h3><span class="ic">⚔️</span>Trois formes élémentaires</h3><p>Lance Wakfu et il <b>s'embrase</b>. Coupe sa voix et il passe en forme air. Et parfois il se transforme juste parce que ça lui chante — ou sur ordre : <code>« passe en forme feu »</code>.</p></div>
-    <div class="card"><h3><span class="ic">💢</span>Un vrai caractère</h3><p>Répliques de shushu grognon, réaction quand tu le déplaces ou touches son œil, mise à jour automatique, raccourci global, easter eggs Wakfu — parle-lui de Pinpin.</p></div>
+    <div class="card"><h3><i data-lucide="eye" class="ic"></i>Le Fendoir, vivant</h3><p>Épée-shushu animée en fenêtre transparente au-dessus de tout : <b>trois formes</b> (normale, air, feu) qu'il change tout seul, 8 humeurs, clignements, braises — et son œil te suit partout sur l'écran.</p></div>
+    <div class="card"><h3><i data-lucide="mic" class="ic"></i>Voix 100 % locale</h3><p>Reconnaissance vocale <b>whisper.cpp embarquée</b> (GPU sur Mac) : ta voix ne quitte jamais ta machine. Dis <code>« Hé Rubilax »</code> et il se réveille — de mauvaise humeur, évidemment.</p></div>
+    <div class="card"><h3><i data-lucide="house" class="ic"></i>Domotique Home Assistant</h3><p><code>« Allume la lumière du salon »</code>, <code>« éteins le ventilo »</code> — reconnaissance floue de tes appareils, à la voix ou au clavier. Module optionnel, désactivable.</p></div>
+    <div class="card"><h3><i data-lucide="alarm-clock" class="ic"></i>Minuteurs &amp; rappels</h3><p><code>« Rappelle-moi dans 20 minutes de sortir le four »</code> — il compte, même après un redémarrage, puis il te hurle dessus. C'est sa façon d'aider.</p></div>
+    <div class="card"><h3><i data-lucide="rocket" class="ic"></i>Lanceur d'apps &amp; web</h3><p><code>« Ouvre Spotify »</code>, <code>« va sur youtube.com »</code>, <code>« recherche recette tartiflette »</code> — matching flou des applications installées.</p></div>
+    <div class="card"><h3><i data-lucide="sliders-horizontal" class="ic"></i>Contrôle de la machine</h3><p><code>« Baisse le son »</code>, <code>« mets pause »</code>, <code>« musique suivante »</code>, <code>« verrouille l'écran »</code>, <code>« capture d'écran »</code>, météo, notes rapides…</p></div>
+    <div class="card"><h3><i data-lucide="flame" class="ic"></i>Trois formes élémentaires</h3><p>Lance Wakfu et il <b>s'embrase</b>. Coupe sa voix et il passe en forme air. Et parfois il se transforme juste parce que ça lui chante — ou sur ordre : <code>« passe en forme feu »</code>.</p></div>
+    <div class="card"><h3><i data-lucide="message-circle" class="ic"></i>Un vrai caractère</h3><p>Répliques de shushu grognon, réaction quand tu le déplaces ou touches son œil, mise à jour automatique, raccourci global, easter eggs Wakfu — parle-lui de Pinpin.</p></div>
   </div>
 </section>
 
 <section class="wrap">
   <div class="band">
-    <div class="band-icon">🔒</div>
+    <div class="band-icon"><i data-lucide="shield-check" class="band-ic"></i></div>
     <div>
       <h3>Ta voix reste chez toi</h3>
       <p>La reconnaissance vocale tourne <b>entièrement en local</b> (modèles whisper téléchargés une fois, ~580 Mo). Aucun compte, aucune pub, aucune collecte. Les seules requêtes réseau : ta domotique locale, la météo si tu la demandes, et les mises à jour de l'app.</p>
@@ -310,7 +316,7 @@
 
 <section class="wrap">
   <div class="band eliadex">
-    <div class="band-icon">🗡️</div>
+    <div class="band-icon"><i data-lucide="swords" class="band-ic"></i></div>
     <div style="flex:1">
       <h3>Tu joues à Wakfu ?</h3>
       <p>Rubidesk est le compagnon d'<b>Eliadex</b>, l'app de recherche d'items, crafts et builds. Ensemble : demande <code>« où je trouve la gelée royale ? »</code> et Eliadex s'ouvre sur la réponse.</p>
@@ -378,9 +384,9 @@
     var repo = "https://github.com/" + (c.owner || "Sh1v4x") + "/" + (c.repo || "rubidesk");
     var params = new URLSearchParams(location.search);
     var types = [
-      { key: "bug", label: "🐞 Bug", prefix: "[Bug] ", tag: "bug" },
-      { key: "idee", label: "✨ Idée", prefix: "[Idée] ", tag: "enhancement" },
-      { key: "autre", label: "💬 Autre", prefix: "[Autre] ", tag: "question" },
+      { key: "bug", label: '<i data-lucide="bug"></i> Bug', prefix: "[Bug] ", tag: "bug" },
+      { key: "idee", label: '<i data-lucide="sparkles"></i> Idée', prefix: "[Idée] ", tag: "enhancement" },
+      { key: "autre", label: '<i data-lucide="message-circle"></i> Autre', prefix: "[Autre] ", tag: "question" },
     ];
     var picked = 0;
     var typesEl = document.getElementById("bugtypes");
@@ -388,11 +394,12 @@
       typesEl.innerHTML = "";
       types.forEach(function (t, i) {
         var b = document.createElement("button");
-        b.type = "button"; b.textContent = t.label;
+        b.type = "button"; b.innerHTML = t.label;
         b.className = i === picked ? "on" : "";
         b.onclick = function () { picked = i; renderTypes(); };
         typesEl.appendChild(b);
       });
+      if (window.lucide) window.lucide.createIcons();
     }
     renderTypes();
 
@@ -438,5 +445,6 @@
     };
   })();
 </script>
+<script>if (window.lucide) window.lucide.createIcons();</script>
 </body>
 </html>
