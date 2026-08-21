@@ -168,6 +168,8 @@ pub fn run() {
             stt::wake_start,
             stt::wake_stop,
             stt::wake_pause,
+            stt::audio_inputs,
+            stt::set_input_device,
             open::open_app,
             open::open_web,
             open::app_installed,

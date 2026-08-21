@@ -281,6 +281,23 @@ body.el-fire {
   display: none;
 }
 
+#mic-select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  border-radius: 8px;
+  padding: 6px 8px;
+  color: var(--ink);
+  font-size: 12px;
+  outline: none;
+  appearance: none;
+}
+
+#mic-select option {
+  background: #1a140f;
+  color: var(--ink);
+}
+
 #modules button.active,
 #element-pref button.active {
   background: rgba(var(--accent-rgb), 0.35);

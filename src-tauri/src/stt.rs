@@ -32,6 +32,9 @@ Où je trouve la gelée royale ? Où se trouve le boss ? Recette du pain d'Incar
 static STOP_FLAG: AtomicBool = AtomicBool::new(false);
 static WHISPER_CTX: Mutex<Option<Arc<WhisperContext>>> = Mutex::new(None);
 
+/// Micro choisi par l'utilisateur (None = défaut système).
+static PREFERRED_INPUT: Mutex<Option<String>> = Mutex::new(None);
+
 static WAKE_ACTIVE: AtomicBool = AtomicBool::new(false);
 static WAKE_PAUSED: AtomicBool = AtomicBool::new(false);
 static WAKE_RUNNING: AtomicBool = AtomicBool::new(false);
@@ -160,12 +163,50 @@ pub fn stt_stop() {
     STOP_FLAG.store(true, Ordering::SeqCst);
 }
 
-/// Ouvre le micro par défaut et pousse les échantillons (mono f32) dans `samples`.
+/// Liste les périphériques d'entrée disponibles.
+#[tauri::command]
+pub fn audio_inputs() -> Vec<String> {
+    let host = cpal::default_host();
+    let mut names = Vec::new();
+    if let Ok(devices) = host.input_devices() {
+        for device in devices {
+            if let Ok(desc) = device.description() {
+                names.push(desc.name().to_string());
+            }
+        }
+    }
+    names
+}
+
+/// Choisit le micro à utiliser (None ou nom vide = défaut système).
+#[tauri::command]
+pub fn set_input_device(name: Option<String>) {
+    *PREFERRED_INPUT.lock().unwrap() = name.filter(|n| !n.is_empty());
+}
+
+/// Le micro préféré s'il existe encore, sinon le défaut système.
+fn pick_input_device(host: &cpal::Host) -> Option<cpal::Device> {
+    let preferred = PREFERRED_INPUT.lock().unwrap().clone();
+    if let Some(wanted) = preferred {
+        if let Ok(devices) = host.input_devices() {
+            for device in devices {
+                if device
+                    .description()
+                    .map(|d| d.name() == wanted)
+                    .unwrap_or(false)
+                {
+                    return Some(device);
+                }
+            }
+        }
+    }
+    host.default_input_device()
+}
+
+/// Ouvre le micro choisi et pousse les échantillons (mono f32) dans `samples`.
 fn open_input_stream(samples: Arc<Mutex<Vec<f32>>>) -> Result<(cpal::Stream, usize), String> {
     let host = cpal::default_host();
-    let device = host
-        .default_input_device()
-        .ok_or("aucun micro détecté")?;
+    let device = pick_input_device(&host).ok_or("aucun micro détecté")?;
     let supported = device.default_input_config().map_err(|e| e.to_string())?;
     let sample_rate = supported.sample_rate() as usize;
     let channels = supported.channels() as usize;
@@ -574,7 +615,13 @@ fn matches_wake_word(text: &str) -> bool {
 
 #[cfg(test)]
 mod wake_tests {
-    use super::matches_wake_word;
+    use super::{audio_inputs, matches_wake_word};
+
+    #[test]
+    fn liste_les_micros_sans_paniquer() {
+        let inputs = audio_inputs();
+        println!("micros détectés : {inputs:?}");
+    }
 
     #[test]
     fn variantes_acceptees() {

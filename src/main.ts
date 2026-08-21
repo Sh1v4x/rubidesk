@@ -598,6 +598,7 @@ micBtn.addEventListener("click", async () => {
 // ---- mot d'éveil « Rubilax » ----
 
 const WAKE_PREF = "rubilax.wake";
+const MIC_KEY = "rubilax.mic";
 const wakeBtn = $("btn-wake");
 
 async function setWakeMode(on: boolean): Promise<void> {
@@ -626,9 +627,16 @@ void listen<string>("wake-detected", () => {
   if (!listeningNow) void listenAndHandle(true);
 });
 
-if (localStorage.getItem(WAKE_PREF) === "1") {
-  void setWakeMode(true).catch(console.error);
-}
+// appliquer le micro choisi avant de démarrer la veille vocale
+void (async () => {
+  const savedMic = localStorage.getItem(MIC_KEY);
+  if (savedMic) {
+    await invoke("set_input_device", { name: savedMic }).catch(() => {});
+  }
+  if (localStorage.getItem(WAKE_PREF) === "1") {
+    await setWakeMode(true).catch(console.error);
+  }
+})();
 
 // ---- settings ----
 
@@ -641,7 +649,40 @@ $("btn-settings").addEventListener("click", () => {
   settingsStatus.textContent = "";
   refreshElementButtons();
   refreshModuleButtons();
+  void refreshMicList();
   settingsPanel.classList.toggle("hidden");
+});
+
+// ---- choix du microphone ----
+
+const micSelect = $<HTMLSelectElement>("mic-select");
+
+async function refreshMicList(): Promise<void> {
+  const saved = localStorage.getItem(MIC_KEY) ?? "";
+  const devices = await invoke<string[]>("audio_inputs").catch(() => [] as string[]);
+  micSelect.innerHTML = "";
+  const def = document.createElement("option");
+  def.value = "";
+  def.textContent = "Micro par défaut du système";
+  micSelect.appendChild(def);
+  for (const name of devices) {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    micSelect.appendChild(opt);
+  }
+  micSelect.value = devices.includes(saved) ? saved : "";
+}
+
+micSelect.addEventListener("change", async () => {
+  const name = micSelect.value;
+  localStorage.setItem(MIC_KEY, name);
+  await invoke("set_input_device", { name: name || null }).catch(console.error);
+  // la veille vocale tient son flux micro ouvert : on la relance sur le nouveau
+  if (wakeBtn.classList.contains("active")) {
+    await invoke("wake_stop").catch(() => {});
+    window.setTimeout(() => void invoke("wake_start").catch(console.error), 600);
+  }
 });
 
 // ouvre le formulaire du site vitrine, version et OS pré-remplis
