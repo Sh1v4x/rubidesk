@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Capability for the main window",
+  "description": "Capability for the main window (toutes plateformes)",
   "windows": ["main"],
   "permissions": [
     "core:default",
@@ -12,8 +12,6 @@
     "core:window:allow-scale-factor",
     "core:window:allow-set-size",
     "opener:default",
-    "dialog:default",
-    "updater:default",
-    "process:default"
+    "dialog:default"
   ]
 }

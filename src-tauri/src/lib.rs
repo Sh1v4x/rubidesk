@@ -1,6 +1,75 @@
+#[cfg(desktop)]
 mod open;
+#[cfg(desktop)]
 mod stt;
 mod system;
+
+/// Sur mobile : mêmes commandes, réponses gracieuses — la voix embarquée et
+/// le lanceur d'applications viendront dans un second temps.
+#[cfg(mobile)]
+mod stt {
+    use tauri::AppHandle;
+
+    #[tauri::command]
+    pub fn stt_model_ready(_app: AppHandle) -> Result<bool, String> {
+        Ok(false)
+    }
+    #[tauri::command]
+    pub async fn stt_download_model(_app: AppHandle) -> Result<(), String> {
+        Err("la voix embarquée n'est pas encore disponible sur mobile".into())
+    }
+    #[tauri::command]
+    pub async fn stt_listen(_app: AppHandle) -> Result<String, String> {
+        Err("la voix embarquée n'est pas encore disponible sur mobile".into())
+    }
+    #[tauri::command]
+    pub fn stt_stop() {}
+    #[tauri::command]
+    pub fn wake_model_ready(_app: AppHandle) -> Result<bool, String> {
+        Ok(false)
+    }
+    #[tauri::command]
+    pub async fn wake_download_model(_app: AppHandle) -> Result<(), String> {
+        Err("le mot d'éveil n'est pas encore disponible sur mobile".into())
+    }
+    #[tauri::command]
+    pub fn wake_start(_app: AppHandle) -> Result<(), String> {
+        Err("le mot d'éveil n'est pas encore disponible sur mobile".into())
+    }
+    #[tauri::command]
+    pub fn wake_stop() {}
+    #[tauri::command]
+    pub fn wake_pause(_paused: bool) {}
+    #[tauri::command]
+    pub fn audio_inputs() -> Vec<String> {
+        Vec::new()
+    }
+    #[tauri::command]
+    pub fn set_input_device(_name: Option<String>) {}
+
+    pub fn warm_up(_app: &AppHandle) {}
+    pub fn shutdown() {}
+}
+
+#[cfg(mobile)]
+mod open {
+    #[tauri::command]
+    pub fn open_app(name: String) -> Result<String, String> {
+        Err(format!("l'ouverture d'applications n'est pas encore disponible sur mobile ({name})"))
+    }
+    #[tauri::command]
+    pub fn open_web(url: String) -> Result<(), String> {
+        tauri_plugin_opener::open_url(url, None::<String>).map_err(|e| e.to_string())
+    }
+    #[tauri::command]
+    pub fn app_installed(_name: String) -> bool {
+        false
+    }
+    #[tauri::command]
+    pub fn open_path(_path: String) -> Result<(), String> {
+        Err("indisponible sur mobile".into())
+    }
+}
 
 use serde_json::{json, Value};
 use std::time::Duration;
@@ -69,6 +138,7 @@ async fn ha_call_service(
 }
 
 /// Icône de la barre des menus : afficher/masquer, écouter, démarrage auto, quitter.
+#[cfg(desktop)]
 fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
     use tauri::menu::{CheckMenuItemBuilder, MenuBuilder, MenuItemBuilder};
     use tauri::tray::TrayIconBuilder;
@@ -122,37 +192,46 @@ fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    use tauri::Emitter;
-    use tauri_plugin_global_shortcut::ShortcutState;
-
-    tauri::Builder::default()
+    #[allow(unused_mut)]
+    let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_process::init())
-        // ne restaure que la position : la taille dépend du mode mini, géré côté front
-        .plugin(
-            tauri_plugin_window_state::Builder::new()
-                .with_state_flags(tauri_plugin_window_state::StateFlags::POSITION)
-                .build(),
-        )
-        .plugin(tauri_plugin_autostart::init(
-            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
-            None,
-        ))
-        .plugin(
-            tauri_plugin_global_shortcut::Builder::new()
-                .with_shortcuts(["CmdOrCtrl+Shift+R"])
-                .expect("raccourci global invalide")
-                .with_handler(|app, _shortcut, event| {
-                    if event.state == ShortcutState::Pressed {
-                        let _ = app.emit("shortcut-listen", ());
-                    }
-                })
-                .build(),
-        )
+        .plugin(tauri_plugin_dialog::init());
+
+    #[cfg(desktop)]
+    {
+        use tauri::Emitter;
+        use tauri_plugin_global_shortcut::ShortcutState;
+
+        builder = builder
+            .plugin(tauri_plugin_updater::Builder::new().build())
+            .plugin(tauri_plugin_process::init())
+            // ne restaure que la position : la taille dépend du mode mini, géré côté front
+            .plugin(
+                tauri_plugin_window_state::Builder::new()
+                    .with_state_flags(tauri_plugin_window_state::StateFlags::POSITION)
+                    .build(),
+            )
+            .plugin(tauri_plugin_autostart::init(
+                tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+                None,
+            ))
+            .plugin(
+                tauri_plugin_global_shortcut::Builder::new()
+                    .with_shortcuts(["CmdOrCtrl+Shift+R"])
+                    .expect("raccourci global invalide")
+                    .with_handler(|app, _shortcut, event| {
+                        if event.state == ShortcutState::Pressed {
+                            let _ = app.emit("shortcut-listen", ());
+                        }
+                    })
+                    .build(),
+            );
+    }
+
+    builder
         .setup(|app| {
             stt::warm_up(app.handle());
+            #[cfg(desktop)]
             setup_tray(app)?;
             Ok(())
         })

@@ -5,6 +5,7 @@
 
 use serde_json::{json, Value};
 use std::path::PathBuf;
+#[cfg(any(target_os = "macos", target_os = "windows"))]
 use std::process::Command;
 use tauri::{AppHandle, Manager};
 
@@ -43,6 +44,12 @@ fn sendkeys(char_code: u16, times: u32) -> Result<(), String> {
 /// action : "up" | "down" | "mute" | "unmute" | "set:<0-100>" (set : macOS seulement)
 #[tauri::command]
 pub fn system_volume(action: String) -> Result<String, String> {
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    {
+        let _ = action;
+        return Err("indisponible sur mobile".into());
+    }
+
     #[cfg(target_os = "macos")]
     {
         match action.as_str() {
@@ -91,6 +98,12 @@ pub fn system_volume(action: String) -> Result<String, String> {
 /// action : "playpause" | "next" | "previous"
 #[tauri::command]
 pub fn system_media(action: String) -> Result<(), String> {
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    {
+        let _ = action;
+        return Err("indisponible sur mobile".into());
+    }
+
     #[cfg(target_os = "macos")]
     {
         let verb = match action.as_str() {
@@ -121,6 +134,14 @@ pub fn system_media(action: String) -> Result<(), String> {
 /// action : "lock" | "sleep"
 #[tauri::command]
 pub fn system_power(action: String) -> Result<(), String> {
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    {
+        let _ = action;
+        return Err("indisponible sur mobile".into());
+    }
+
+    #[cfg(any(target_os = "macos", target_os = "windows"))]
+    {
     let mut cmd = match action.as_str() {
         #[cfg(target_os = "macos")]
         "lock" => {
@@ -151,12 +172,19 @@ pub fn system_power(action: String) -> Result<(), String> {
         _ => return Err("action inconnue".into()),
     };
     cmd.spawn().map(|_| ()).map_err(|e| e.to_string())
+    }
 }
 
 /// Capture l'écran entier sur le Bureau ; renvoie le chemin du fichier.
 #[tauri::command]
 pub fn system_screenshot() -> Result<String, String> {
-    let stamp = std::time::SystemTime::now()
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    {
+        return Err("indisponible sur mobile".into());
+    }
+
+    #[cfg(any(target_os = "macos", target_os = "windows"))]
+    let stamp: u64 = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.as_secs())
         .unwrap_or(0);
@@ -199,6 +227,12 @@ pub fn system_screenshot() -> Result<String, String> {
 /// Un processus dont le nom contient `name` tourne-t-il ? (insensible à la casse)
 #[tauri::command]
 pub fn process_running(name: String) -> bool {
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    {
+        let _ = name;
+        false
+    }
+
     #[cfg(target_os = "macos")]
     {
         Command::new("pgrep")
