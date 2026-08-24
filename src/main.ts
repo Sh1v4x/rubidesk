@@ -1,6 +1,7 @@
 import "./styles.css";
 import { getVersion } from "@tauri-apps/api/app";
 import { invoke } from "@tauri-apps/api/core";
+import { open as openFileDialog } from "@tauri-apps/plugin-dialog";
 import { LogicalSize } from "@tauri-apps/api/dpi";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -693,6 +694,21 @@ for (const btn of document.querySelectorAll<HTMLButtonElement>(".panel-close")) 
 const eliadexPathInput = $<HTMLInputElement>("eliadex-path");
 eliadexPathInput.addEventListener("change", () => {
   localStorage.setItem(ELIADEX_PATH_KEY, eliadexPathInput.value.trim());
+});
+
+$("btn-eliadex-browse").addEventListener("click", async () => {
+  const isMac = navigator.userAgent.includes("Mac");
+  const selected = await openFileDialog({
+    title: "Sélectionner Eliadex",
+    multiple: false,
+    filters: isMac
+      ? [{ name: "Application", extensions: ["app"] }]
+      : [{ name: "Application", extensions: ["exe", "lnk"] }],
+  }).catch(() => null);
+  if (typeof selected === "string" && selected) {
+    eliadexPathInput.value = selected;
+    localStorage.setItem(ELIADEX_PATH_KEY, selected);
+  }
 });
 
 // ---- choix du microphone ----

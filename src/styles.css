@@ -368,6 +368,16 @@ body.mini #btn-close {
   gap: 8px;
 }
 
+.path-row input {
+  flex: 1;
+  margin-top: 0;
+}
+
+.path-row .action {
+  flex: none;
+  white-space: nowrap;
+}
+
 button.action {
   border: none;
   border-radius: 8px;
