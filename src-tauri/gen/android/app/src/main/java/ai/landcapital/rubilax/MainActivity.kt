@@ -24,6 +24,7 @@ class MainActivity : TauriActivity() {
     enableEdgeToEdge()
     initNdk()
     super.onCreate(savedInstanceState)
+    QuipReceiver.schedule(this) // les humeurs de Rubilax reprennent
     maybeStartVoice(intent)
   }
 

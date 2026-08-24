@@ -34,6 +34,20 @@ class FendoirOverlayService : Service() {
         addEyeOverlay()
     }
 
+    // si le système nous tue (mémoire, économiseur…), qu'il nous relance
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_STICKY
+
+    // l'app retirée des récents ne doit pas emporter l'œil avec elle
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        val restart = Intent(applicationContext, FendoirOverlayService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(restart)
+        } else {
+            startService(restart)
+        }
+        super.onTaskRemoved(rootIntent)
+    }
+
     private fun startInForeground() {
         val channelId = "fendoir_overlay"
         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -80,8 +94,10 @@ class FendoirOverlayService : Service() {
         params.x = resources.displayMetrics.widthPixels - size - (12 * density).toInt()
         params.y = (140 * density).toInt()
 
+        // le PNG de premier plan : l'œil seul, sur transparence (l'icône
+        // adaptive, elle, a un fond sombre — pas question de carré noir)
         val view = ImageView(this)
-        view.setImageResource(R.mipmap.ic_launcher_round)
+        view.setImageResource(R.mipmap.ic_launcher_foreground)
         view.elevation = 8f
 
         var downX = 0f
