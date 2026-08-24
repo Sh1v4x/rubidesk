@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- l'œil du Fendoir replié dans la zone sûre des icônes adaptives
+     (Android masque et zoome ~66 % au centre) -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@mipmap/ic_launcher_foreground"
+    android:inset="20%" />

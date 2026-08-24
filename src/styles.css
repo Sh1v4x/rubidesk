@@ -2,6 +2,14 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* pas de rectangle de sélection au toucher (œil, cartes, boutons) */
+#poke-zone,
+#avatar,
+button {
+  outline: none;
 }
 
 html,
