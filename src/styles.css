@@ -518,6 +518,99 @@ button.action.wide {
   opacity: 0.85;
 }
 
+/* carnet : notes & minuteurs éditables */
+.book-list {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 4px;
+}
+
+.book-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.book-row + .book-row {
+  border-top: 1px solid rgba(var(--accent-rgb), 0.08);
+}
+
+.book-row .book-edit {
+  flex: 1;
+  width: auto;
+  margin-top: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 4px 6px;
+  color: var(--ink);
+  font-size: 12px;
+  outline: none;
+}
+
+.book-row .book-edit:focus {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(var(--accent-rgb), 0.35);
+}
+
+.book-text {
+  flex: 1;
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+.book-meta {
+  flex: none;
+  font-size: 9.5px;
+  opacity: 0.45;
+  white-space: nowrap;
+}
+
+.book-del {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(var(--accent-rgb), 0.12);
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.book-del:hover {
+  background: rgba(255, 90, 60, 0.3);
+  color: #ff9d8a;
+}
+
+.book-empty {
+  font-size: 11.5px;
+  opacity: 0.5;
+  padding: 2px 0 6px;
+}
+
+.add-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 7px;
+}
+
+.add-row input {
+  flex: 1;
+  margin-top: 0;
+}
+
+.add-row .mini-num {
+  flex: none;
+  width: 62px;
+}
+
+.add-row .action {
+  flex: none;
+}
+
 /* liste d'exemples du panneau d'aide */
 .cmds {
   list-style: none;

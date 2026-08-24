@@ -183,6 +183,8 @@ pub fn run() {
             system::weather,
             system::note_add,
             system::note_list,
+            system::note_update,
+            system::note_delete,
             system::note_clear
         ])
         .build(tauri::generate_context!())

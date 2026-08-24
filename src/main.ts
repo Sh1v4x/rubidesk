@@ -104,12 +104,20 @@ function armTimer(timer: StoredTimer): void {
   timerHandles.set(timer.id, handle);
 }
 
-function scheduleTimer(ms: number, label: string): void {
+function scheduleTimer(ms: number, label: string, quiet = false): void {
   const timer: StoredTimer = { id: ++timerSeq, fireAt: Date.now() + ms, label };
   storedTimers.push(timer);
   saveTimers();
   armTimer(timer);
-  say(replies.timerSet(formatDuration(ms)), "success");
+  if (!quiet) say(replies.timerSet(formatDuration(ms)), "success");
+}
+
+function cancelTimer(id: number): void {
+  const handle = timerHandles.get(id);
+  if (handle !== undefined) window.clearTimeout(handle);
+  timerHandles.delete(id);
+  storedTimers = storedTimers.filter((t) => t.id !== id);
+  saveTimers();
 }
 
 function cancelAllTimers(): number {
@@ -306,23 +314,10 @@ async function handleSystem(intent: SystemIntent): Promise<void> {
         return;
       }
       case "noteList": {
-        const notes = await invoke<string[]>("note_list");
-        if (notes.length === 0) {
-          say(replies.notesEmpty(), "error");
-          return;
-        }
-        const last = notes.slice(-6);
-        window.clearTimeout(bubbleTimer);
-        bubble.textContent = last.join("\n");
-        bubble.classList.remove("hidden");
-        speak(
-          `Tu as ${notes.length} note${notes.length > 1 ? "s" : ""}. Les voilà.`,
-          () => sword.set("success"),
-          () => {
-            sword.set("idle");
-            bubbleTimer = window.setTimeout(() => bubble.classList.add("hidden"), 8000);
-          },
-        );
+        const notes = await invoke<string[]>("note_list").catch(() => [] as string[]);
+        await openBook();
+        if (notes.length === 0) say(replies.notesEmpty(), "error");
+        else say(`Tu as ${notes.length} note${notes.length > 1 ? "s" : ""}. Le carnet est ouvert, débrouille-toi.`);
         return;
       }
       case "noteClear": {
@@ -331,25 +326,9 @@ async function handleSystem(intent: SystemIntent): Promise<void> {
         return;
       }
       case "timerList": {
-        if (storedTimers.length === 0) {
-          say(replies.timerListEmpty(), "error");
-          return;
-        }
-        const now = Date.now();
-        const lines = storedTimers
-          .sort((a, b) => a.fireAt - b.fireAt)
-          .map((t) => `${t.label || "sans nom"} — dans ${formatDuration(t.fireAt - now)}`);
-        window.clearTimeout(bubbleTimer);
-        bubble.textContent = lines.join("\n");
-        bubble.classList.remove("hidden");
-        speak(
-          `${storedTimers.length} compte${storedTimers.length > 1 ? "s" : ""} en cours.`,
-          () => sword.set("success"),
-          () => {
-            sword.set("idle");
-            bubbleTimer = window.setTimeout(() => bubble.classList.add("hidden"), 8000);
-          },
-        );
+        await openBook();
+        if (storedTimers.length === 0) say(replies.timerListEmpty(), "error");
+        else say(`${storedTimers.length} compte${storedTimers.length > 1 ? "s" : ""} en cours — c'est dans le carnet.`);
         return;
       }
     }
@@ -675,6 +654,7 @@ $("btn-settings").addEventListener("click", () => {
   refreshModuleButtons();
   void refreshMicList();
   $("help").classList.add("hidden");
+  bookPanel.classList.add("hidden");
   settingsPanel.classList.toggle("hidden");
 });
 
@@ -682,12 +662,122 @@ $("btn-settings").addEventListener("click", () => {
 
 $("btn-help").addEventListener("click", () => {
   settingsPanel.classList.add("hidden");
+  bookPanel.classList.add("hidden");
   $("help").classList.toggle("hidden");
 });
 
 for (const btn of document.querySelectorAll<HTMLButtonElement>(".panel-close")) {
   btn.addEventListener("click", () => btn.closest(".panel")?.classList.add("hidden"));
 }
+
+// ---- carnet : notes & minuteurs éditables ----
+
+const bookPanel = $("book");
+
+async function renderNotes(): Promise<void> {
+  const list = $("notes-list");
+  const notes = await invoke<string[]>("note_list").catch(() => [] as string[]);
+  list.innerHTML = "";
+  if (notes.length === 0) {
+    list.innerHTML = '<p class="book-empty">Aucune note. Le vide. Comme sa patience.</p>';
+    return;
+  }
+  notes.forEach((line, index) => {
+    const m = line.match(/^- \[(.*?)\] (.*)$/);
+    const date = m ? m[1] : "";
+    const text = m ? m[2] : line.replace(/^- /, "");
+    const row = document.createElement("div");
+    row.className = "book-row";
+    const input = document.createElement("input");
+    input.className = "book-edit";
+    input.value = text;
+    input.addEventListener("change", () => {
+      const value = input.value.trim();
+      if (value) void invoke("note_update", { index, text: value }).catch(console.error);
+      else void invoke("note_delete", { index }).then(() => renderNotes());
+    });
+    const meta = document.createElement("span");
+    meta.className = "book-meta";
+    meta.textContent = date;
+    const del = document.createElement("button");
+    del.className = "book-del";
+    del.title = "Supprimer";
+    del.textContent = "×";
+    del.addEventListener("click", () => {
+      void invoke("note_delete", { index }).then(() => renderNotes());
+    });
+    row.append(input, meta, del);
+    list.appendChild(row);
+  });
+}
+
+function renderTimers(): void {
+  const list = $("timers-list");
+  list.innerHTML = "";
+  if (storedTimers.length === 0) {
+    list.innerHTML = '<p class="book-empty">Aucun compte en cours.</p>';
+    return;
+  }
+  const now = Date.now();
+  for (const timer of [...storedTimers].sort((a, b) => a.fireAt - b.fireAt)) {
+    const row = document.createElement("div");
+    row.className = "book-row";
+    const span = document.createElement("span");
+    span.className = "book-text";
+    const at = new Date(timer.fireAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    span.textContent = `${timer.label || "Minuteur"} — dans ${formatDuration(timer.fireAt - now)} (à ${at})`;
+    const del = document.createElement("button");
+    del.className = "book-del";
+    del.title = "Annuler";
+    del.textContent = "×";
+    del.addEventListener("click", () => {
+      cancelTimer(timer.id);
+      renderTimers();
+    });
+    row.append(span, del);
+    list.appendChild(row);
+  }
+}
+
+async function openBook(): Promise<void> {
+  settingsPanel.classList.add("hidden");
+  $("help").classList.add("hidden");
+  await renderNotes();
+  renderTimers();
+  bookPanel.classList.remove("hidden");
+}
+
+$("btn-note-add").addEventListener("click", async () => {
+  const input = $<HTMLInputElement>("note-new");
+  const text = input.value.trim();
+  if (!text) return;
+  await invoke("note_add", {
+    text,
+    date: new Date().toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }),
+  }).catch(console.error);
+  input.value = "";
+  void renderNotes();
+});
+
+$<HTMLInputElement>("note-new").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") $("btn-note-add").click();
+});
+
+$("btn-timer-add").addEventListener("click", () => {
+  const minsInput = $<HTMLInputElement>("timer-mins");
+  const labelInput = $<HTMLInputElement>("timer-label");
+  const mins = parseInt(minsInput.value, 10);
+  if (!Number.isFinite(mins) || mins <= 0) return;
+  scheduleTimer(mins * 60_000, labelInput.value.trim(), true);
+  minsInput.value = "";
+  labelInput.value = "";
+  renderTimers();
+});
+
+// compte à rebours rafraîchi tant que le carnet est ouvert
+window.setInterval(() => {
+  if (!bookPanel.classList.contains("hidden")) renderTimers();
+}, 30_000);
 
 // ---- chemin d'Eliadex ----
 
@@ -862,6 +952,9 @@ ctxMenu.addEventListener("click", (e) => {
   const action = (e.target as HTMLElement).dataset.action;
   ctxMenu.classList.add("hidden");
   switch (action) {
+    case "book":
+      void openBook();
+      break;
     case "mini":
       void setMini(!document.body.classList.contains("mini"));
       break;

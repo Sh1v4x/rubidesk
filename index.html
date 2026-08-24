@@ -353,10 +353,35 @@
       </div>
 
       <div id="ctx-menu" class="hidden">
+        <button data-action="book">Carnet — notes &amp; rappels</button>
         <button data-action="mini">Mode mini</button>
         <button data-action="mute">Couper la voix</button>
         <button data-action="settings">Configuration…</button>
         <button data-action="quit">Quitter</button>
+      </div>
+
+      <div id="book" class="panel hidden">
+        <div class="panel-head">
+          <h3>Carnet</h3>
+          <button class="panel-close" data-close="book">×</button>
+        </div>
+        <div class="section">
+          <p class="section-title">Notes</p>
+          <div id="notes-list" class="book-list"></div>
+          <div class="add-row">
+            <input id="note-new" placeholder="Nouvelle note…" autocomplete="off" />
+            <button class="action" id="btn-note-add">Ajouter</button>
+          </div>
+        </div>
+        <div class="section">
+          <p class="section-title">Minuteurs &amp; rappels</p>
+          <div id="timers-list" class="book-list"></div>
+          <div class="add-row">
+            <input id="timer-mins" class="mini-num" type="number" min="1" placeholder="min" />
+            <input id="timer-label" placeholder="Rappel (optionnel)" autocomplete="off" />
+            <button class="action" id="btn-timer-add">Ajouter</button>
+          </div>
+        </div>
       </div>
 
       <div id="settings" class="panel hidden">
@@ -472,6 +497,7 @@
             <li>« Rappelle-moi dans 1 h de sortir le four »</li>
             <li>« Note que je dois racheter des piles » · « Lis mes notes »</li>
             <li>« Quel temps demain ? » · « Météo à Lyon »</li>
+            <li>Clic droit sur la lame → <b>Carnet</b> pour tout consulter et éditer</li>
           </ul>
         </div>
         <div class="section last">

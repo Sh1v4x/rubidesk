@@ -304,6 +304,57 @@ pub fn note_list(app: AppHandle) -> Result<Vec<String>, String> {
         .collect())
 }
 
+fn read_note_lines(app: &AppHandle) -> Result<(PathBuf, Vec<String>), String> {
+    let path = notes_path(app)?;
+    let lines = if path.exists() {
+        std::fs::read_to_string(&path)
+            .map_err(|e| e.to_string())?
+            .lines()
+            .filter(|l| !l.trim().is_empty())
+            .map(String::from)
+            .collect()
+    } else {
+        Vec::new()
+    };
+    Ok((path, lines))
+}
+
+fn write_note_lines(path: &PathBuf, lines: &[String]) -> Result<(), String> {
+    if lines.is_empty() {
+        if path.exists() {
+            std::fs::remove_file(path).map_err(|e| e.to_string())?;
+        }
+        return Ok(());
+    }
+    std::fs::write(path, lines.join("\n") + "\n").map_err(|e| e.to_string())
+}
+
+/// Remplace le texte d'une note (l'horodatage « - [date] » est conservé).
+#[tauri::command]
+pub fn note_update(app: AppHandle, index: usize, text: String) -> Result<(), String> {
+    let (path, mut lines) = read_note_lines(&app)?;
+    let line = lines.get_mut(index).ok_or("note introuvable")?;
+    if line.starts_with("- [") {
+        if let Some(pos) = line.find("] ") {
+            *line = format!("{}] {}", &line[..pos], text.trim());
+            return write_note_lines(&path, &lines);
+        }
+    }
+    *line = format!("- {}", text.trim());
+    write_note_lines(&path, &lines)
+}
+
+/// Supprime une note par son index.
+#[tauri::command]
+pub fn note_delete(app: AppHandle, index: usize) -> Result<(), String> {
+    let (path, mut lines) = read_note_lines(&app)?;
+    if index >= lines.len() {
+        return Err("note introuvable".into());
+    }
+    lines.remove(index);
+    write_note_lines(&path, &lines)
+}
+
 #[tauri::command]
 pub fn note_clear(app: AppHandle) -> Result<(), String> {
     let path = notes_path(&app)?;
