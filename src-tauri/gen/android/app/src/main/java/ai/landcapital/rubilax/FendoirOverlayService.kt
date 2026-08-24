@@ -18,7 +18,8 @@ import kotlin.math.abs
 
 /**
  * L'œil de Rubilax flottant par-dessus les autres applications.
- * Glisser pour le déplacer, toucher pour ouvrir l'app, appui long pour le renvoyer.
+ * Glisser pour le déplacer, toucher pour ouvrir l'app, appui long pour lui
+ * parler (reconnaissance vocale). Il se range via l'interrupteur des réglages.
  */
 class FendoirOverlayService : Service() {
 
@@ -54,7 +55,7 @@ class FendoirOverlayService : Service() {
             )
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle("Rubilax veille")
-            .setContentText("L'œil flotte sur ton écran. Touche-le pour lui parler.")
+            .setContentText("Touche l'œil : ouvrir. Appui long : lui parler.")
             .setContentIntent(openIntent)
             .setOngoing(true)
             .build()
@@ -80,7 +81,7 @@ class FendoirOverlayService : Service() {
         params.y = (140 * density).toInt()
 
         val view = ImageView(this)
-        view.setImageResource(R.mipmap.ic_launcher)
+        view.setImageResource(R.mipmap.ic_launcher_round)
         view.elevation = 8f
 
         var downX = 0f
@@ -114,13 +115,15 @@ class FendoirOverlayService : Service() {
                     MotionEvent.ACTION_UP -> {
                         val pressTime = System.currentTimeMillis() - downAt
                         if (!moved) {
+                            val intent = Intent(this@FendoirOverlayService, MainActivity::class.java)
+                            intent.addFlags(
+                                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                            )
                             if (pressTime > 600) {
-                                stopSelf() // appui long : l'œil se retire
-                            } else {
-                                val intent = Intent(this@FendoirOverlayService, MainActivity::class.java)
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                startActivity(intent)
+                                // appui long : ouvrir en écoute vocale
+                                intent.putExtra(MainActivity.EXTRA_VOICE, true)
                             }
+                            startActivity(intent)
                         }
                         return true
                     }

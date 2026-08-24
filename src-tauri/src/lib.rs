@@ -338,7 +338,9 @@ pub fn run() {
             system::overlay_set,
             system::overlay_available,
             system::automations_save,
-            system::automations_load
+            system::automations_load,
+            system::voice_take_pending,
+            system::voice_listen
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

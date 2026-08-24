@@ -474,6 +474,33 @@ pub fn overlay_set(active: bool) -> Result<(), String> {
     }
 }
 
+/// Récupère (et consomme) une commande dictée via la reconnaissance vocale
+/// native Android (œil flottant en appui long, ou bouton micro).
+#[tauri::command]
+pub fn voice_take_pending() -> Result<Option<String>, String> {
+    #[cfg(target_os = "android")]
+    {
+        return crate::android::take_voice_command();
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        Ok(None)
+    }
+}
+
+/// Déclenche l'écoute vocale native (Android uniquement).
+#[tauri::command]
+pub fn voice_listen() -> Result<(), String> {
+    #[cfg(target_os = "android")]
+    {
+        return crate::android::start_voice();
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        Err("l'écoute native, c'est sur le téléphone".into())
+    }
+}
+
 fn automations_path(app: &AppHandle) -> Result<PathBuf, String> {
     let dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;

@@ -642,6 +642,13 @@ async function listenAndHandle(fromWake = false): Promise<void> {
 }
 
 micBtn.addEventListener("click", async () => {
+  if (IS_ANDROID) {
+    // reconnaissance vocale système (le dialogue micro d'Android)
+    void invoke("voice_listen").catch(() =>
+      say("Pas de reconnaissance vocale sur ce téléphone, mortel.", "error"),
+    );
+    return;
+  }
   if (listeningNow) {
     // deuxième clic = fin d'écoute immédiate
     await invoke("stt_stop");
@@ -1149,6 +1156,33 @@ if (IS_ANDROID) {
   if (localStorage.getItem("rubilax.overlay") === "1") {
     void invoke("overlay_set", { active: true }).catch(() => {});
   }
+
+  // commande dictée (appui long sur l'œil ou bouton micro) : relevée quand
+  // l'app revient au premier plan, plus quelques relances au démarrage
+  let voiceBusy = false;
+  const pollVoice = async (): Promise<void> => {
+    if (voiceBusy) return;
+    voiceBusy = true;
+    try {
+      const text = await invoke<string | null>("voice_take_pending");
+      if (text) {
+        input.value = text; // montre ce qui a été compris
+        sword.set("listen");
+        await handleInput(text);
+      }
+    } catch {
+      // pont natif indisponible : tant pis pour cette fois
+    } finally {
+      voiceBusy = false;
+    }
+  };
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) void pollVoice();
+  });
+  window.addEventListener("focus", () => void pollVoice());
+  for (const delay of [800, 2000, 4000, 7000, 11000]) {
+    window.setTimeout(() => void pollVoice(), delay);
+  }
 }
 
 const overlaySwitch = $("overlay-switch");
@@ -1163,7 +1197,7 @@ overlaySwitch.addEventListener("click", async () => {
     await invoke("overlay_set", { active: want });
     localStorage.setItem("rubilax.overlay", want ? "1" : "0");
     settingsStatus.textContent = want
-      ? "L'œil flotte. Appui long dessus pour le retirer."
+      ? "L'œil flotte. Touche : ouvrir. Appui long : lui parler. Il se range ici."
       : "Œil rangé.";
   } catch (e) {
     settingsStatus.textContent =

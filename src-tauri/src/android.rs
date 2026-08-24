@@ -320,6 +320,66 @@ pub fn can_draw_overlays() -> Result<bool, String> {
     })
 }
 
+/// Récupère et consomme la commande dictée via la reconnaissance vocale
+/// système (déposée par MainActivity dans voice_command.txt).
+pub fn take_voice_command() -> Result<Option<String>, String> {
+    with_context(|env, context| {
+        let dir = env
+            .call_method(context, "getFilesDir", "()Ljava/io/File;", &[])?
+            .l()?;
+        let path = env
+            .call_method(&dir, "getAbsolutePath", "()Ljava/lang/String;", &[])?
+            .l()?;
+        let path: String = env.get_string(&JString::from(path))?.into();
+        let file = std::path::Path::new(&path).join("voice_command.txt");
+        if !file.exists() {
+            return Ok(None);
+        }
+        let text = std::fs::read_to_string(&file)?;
+        let _ = std::fs::remove_file(&file);
+        let text = text.trim().to_string();
+        Ok(if text.is_empty() { None } else { Some(text) })
+    })
+}
+
+/// Rouvre MainActivity avec l'extra « écoute vocale » (singleTop →
+/// onNewIntent quand l'app est déjà au premier plan).
+pub fn start_voice() -> Result<(), String> {
+    with_context(|env, context| {
+        let class_name = env.new_string("ai.landcapital.rubilax.MainActivity")?;
+        let pkg = env.new_string("ai.landcapital.rubilax")?;
+        let intent_class = env.find_class("android/content/Intent")?;
+        let intent = env.new_object(&intent_class, "()V", &[])?;
+        env.call_method(
+            &intent,
+            "setClassName",
+            "(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;",
+            &[JValue::Object(&pkg), JValue::Object(&class_name)],
+        )?;
+        // FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_SINGLE_TOP
+        env.call_method(
+            &intent,
+            "addFlags",
+            "(I)Landroid/content/Intent;",
+            &[JValue::Int(0x1000_0000 | 0x2000_0000)],
+        )?;
+        let key = env.new_string("rubilax_voice")?;
+        env.call_method(
+            &intent,
+            "putExtra",
+            "(Ljava/lang/String;Z)Landroid/content/Intent;",
+            &[JValue::Object(&key), JValue::Bool(1)],
+        )?;
+        env.call_method(
+            context,
+            "startActivity",
+            "(Landroid/content/Intent;)V",
+            &[JValue::Object(&intent)],
+        )?;
+        Ok(())
+    })
+}
+
 /// Ouvre l'écran système pour accorder la permission d'overlay.
 pub fn request_overlay_permission() -> Result<(), String> {
     with_context(|env, context| {

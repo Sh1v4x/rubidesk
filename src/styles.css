@@ -642,10 +642,10 @@ body.android #app {
   gap: 12px;
 }
 
-/* pas de croix de fermeture ni de voix (pour l'instant) sur téléphone,
-   et ni Eliadex ni le choix du micro n'ont de sens sur Android */
+/* pas de croix de fermeture ni de veille vocale sur téléphone (le micro,
+   lui, passe par la reconnaissance système), et ni Eliadex ni le choix
+   du micro n'ont de sens sur Android */
 body.android #btn-close,
-body.android #btn-mic,
 body.android #btn-wake,
 body.android #eliadex-section,
 body.android .switch-row[data-mod="eliadex"],
