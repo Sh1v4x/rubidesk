@@ -44,7 +44,18 @@ fn sendkeys(char_code: u16, times: u32) -> Result<(), String> {
 /// action : "up" | "down" | "mute" | "unmute" | "set:<0-100>" (set : macOS seulement)
 #[tauri::command]
 pub fn system_volume(action: String) -> Result<String, String> {
-    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    #[cfg(target_os = "android")]
+    {
+        crate::android::adjust_volume(&action)?;
+        return Ok(match action.as_str() {
+            "up" => "plus fort",
+            "down" => "moins fort",
+            "mute" => "muet",
+            _ => "son rétabli",
+        }
+        .into());
+    }
+    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "android")))]
     {
         let _ = action;
         return Err("indisponible sur mobile".into());
@@ -98,7 +109,11 @@ pub fn system_volume(action: String) -> Result<String, String> {
 /// action : "playpause" | "next" | "previous"
 #[tauri::command]
 pub fn system_media(action: String) -> Result<(), String> {
-    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    #[cfg(target_os = "android")]
+    {
+        return crate::android::media_key(&action);
+    }
+    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "android")))]
     {
         let _ = action;
         return Err("indisponible sur mobile".into());
@@ -396,4 +411,87 @@ pub fn note_clear(app: AppHandle) -> Result<(), String> {
         std::fs::remove_file(path).map_err(|e| e.to_string())?;
     }
     Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Spécifique mobile : torche, œil flottant, automatisations
+// ---------------------------------------------------------------------------
+
+/// Lampe torche (Android uniquement).
+#[tauri::command]
+pub fn system_torch(on: bool) -> Result<bool, String> {
+    #[cfg(target_os = "android")]
+    {
+        return crate::android::set_torch(on);
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        let _ = on;
+        Err("la torche, c'est sur le téléphone, mortel".into())
+    }
+}
+
+/// L'œil flottant est-il disponible (Android) et la permission accordée ?
+/// Renvoie "ok", "permission" (à demander) ou "indisponible".
+#[tauri::command]
+pub fn overlay_available() -> String {
+    #[cfg(target_os = "android")]
+    {
+        return match crate::android::can_draw_overlays() {
+            Ok(true) => "ok".into(),
+            Ok(false) => "permission".into(),
+            Err(_) => "indisponible".into(),
+        };
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        "indisponible".into()
+    }
+}
+
+/// Active/désactive l'œil flottant. Si la permission manque, ouvre l'écran
+/// système et renvoie Err("permission").
+#[tauri::command]
+pub fn overlay_set(active: bool) -> Result<(), String> {
+    #[cfg(target_os = "android")]
+    {
+        if active {
+            match crate::android::can_draw_overlays() {
+                Ok(true) => {}
+                Ok(false) => {
+                    let _ = crate::android::request_overlay_permission();
+                    return Err("permission".into());
+                }
+                Err(e) => return Err(e),
+            }
+        }
+        return crate::android::overlay_service(active);
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        let _ = active;
+        Err("indisponible ici".into())
+    }
+}
+
+fn automations_path(app: &AppHandle) -> Result<PathBuf, String> {
+    let dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    Ok(dir.join("automations.json"))
+}
+
+/// Sauvegarde la configuration des automatisations (lue aussi par le
+/// récepteur natif Android quand l'app est fermée).
+#[tauri::command]
+pub fn automations_save(app: AppHandle, json: String) -> Result<(), String> {
+    std::fs::write(automations_path(&app)?, json).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn automations_load(app: AppHandle) -> Result<String, String> {
+    let path = automations_path(&app)?;
+    if !path.exists() {
+        return Ok("{}".into());
+    }
+    std::fs::read_to_string(path).map_err(|e| e.to_string())
 }

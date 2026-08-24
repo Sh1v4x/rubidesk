@@ -1,3 +1,5 @@
+#[cfg(target_os = "android")]
+mod android;
 #[cfg(desktop)]
 mod open;
 #[cfg(desktop)]
@@ -53,18 +55,84 @@ mod stt {
 
 #[cfg(mobile)]
 mod open {
+    fn norm(s: &str) -> String {
+        s.to_lowercase()
+            .chars()
+            .map(|c| match c {
+                'à' | 'â' | 'ä' => 'a',
+                'é' | 'è' | 'ê' | 'ë' => 'e',
+                'î' | 'ï' => 'i',
+                'ô' | 'ö' => 'o',
+                'û' | 'ù' | 'ü' => 'u',
+                'ç' => 'c',
+                c => c,
+            })
+            .collect()
+    }
+
+    #[cfg(target_os = "android")]
+    fn find_package(name: &str) -> Option<(String, String)> {
+        let query = norm(name);
+        let apps = crate::android::list_apps().ok()?;
+        let mut best: Option<(i32, (String, String))> = None;
+        for (label, package) in apps {
+            let n = norm(&label);
+            let score = if n == query {
+                100
+            } else if n.split(' ').any(|w| w == query) {
+                80
+            } else if n.starts_with(&query) {
+                70
+            } else if n.contains(&query) || query.contains(&n) {
+                60
+            } else {
+                continue;
+            };
+            let better = match &best {
+                None => true,
+                Some((s, (l, _))) => score > *s || (score == *s && n.len() < norm(l).len()),
+            };
+            if better {
+                best = Some((score, (label, package)));
+            }
+        }
+        best.map(|(_, app)| app)
+    }
+
+    /// Android : recherche floue dans les applications lançables, puis lancement.
     #[tauri::command]
     pub fn open_app(name: String) -> Result<String, String> {
-        Err(format!("l'ouverture d'applications n'est pas encore disponible sur mobile ({name})"))
+        #[cfg(target_os = "android")]
+        {
+            let (label, package) =
+                find_package(&name).ok_or_else(|| format!("aucune application ne ressemble à « {name} »"))?;
+            crate::android::launch_package(&package)?;
+            return Ok(label);
+        }
+        #[cfg(not(target_os = "android"))]
+        {
+            Err(format!("l'ouverture d'applications n'est pas disponible ici ({name})"))
+        }
     }
+
     #[tauri::command]
     pub fn open_web(url: String) -> Result<(), String> {
         tauri_plugin_opener::open_url(url, None::<String>).map_err(|e| e.to_string())
     }
+
     #[tauri::command]
-    pub fn app_installed(_name: String) -> bool {
-        false
+    pub fn app_installed(name: String) -> bool {
+        #[cfg(target_os = "android")]
+        {
+            return find_package(&name).is_some();
+        }
+        #[cfg(not(target_os = "android"))]
+        {
+            let _ = name;
+            false
+        }
     }
+
     #[tauri::command]
     pub fn open_path(_path: String) -> Result<(), String> {
         Err("indisponible sur mobile".into())
@@ -195,7 +263,8 @@ pub fn run() {
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_dialog::init());
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_notification::init());
 
     #[cfg(desktop)]
     {
@@ -264,7 +333,12 @@ pub fn run() {
             system::note_list,
             system::note_update,
             system::note_delete,
-            system::note_clear
+            system::note_clear,
+            system::system_torch,
+            system::overlay_set,
+            system::overlay_available,
+            system::automations_save,
+            system::automations_load
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

@@ -24,6 +24,27 @@ import {
   type EliadexIntent,
 } from "./intent";
 import { checkForUpdates } from "./updater";
+import {
+  isPermissionGranted,
+  requestPermission,
+  sendNotification,
+  cancel as cancelNotification,
+  Schedule,
+} from "@tauri-apps/plugin-notification";
+
+const IS_ANDROID = navigator.userAgent.includes("Android");
+if (IS_ANDROID) document.body.classList.add("android");
+
+const notifId = (id: number): number => Math.abs(id % 2_000_000_000);
+
+async function ensureNotifPermission(): Promise<boolean> {
+  try {
+    if (await isPermissionGranted()) return true;
+    return (await requestPermission()) === "granted";
+  } catch {
+    return false;
+  }
+}
 import * as ha from "./ha";
 import type { HaEntity } from "./ha";
 
@@ -102,6 +123,23 @@ function armTimer(timer: StoredTimer): void {
     window.setTimeout(() => say(replies.timerFired(timer.label), "angry"), 900);
   }, Math.max(0, timer.fireAt - Date.now()));
   timerHandles.set(timer.id, handle);
+
+  // sur Android, une vraie notification système : elle sonne même app fermée
+  if (IS_ANDROID) {
+    void ensureNotifPermission().then((granted) => {
+      if (!granted) return;
+      try {
+        sendNotification({
+          id: notifId(timer.id),
+          title: "Rubilax",
+          body: `⏰ ${timer.label || "Minuteur"} — c'est l'heure, mortel !`,
+          schedule: Schedule.at(new Date(timer.fireAt)),
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    });
+  }
 }
 
 function scheduleTimer(ms: number, label: string, quiet = false): void {
@@ -118,6 +156,7 @@ function cancelTimer(id: number): void {
   timerHandles.delete(id);
   storedTimers = storedTimers.filter((t) => t.id !== id);
   saveTimers();
+  if (IS_ANDROID) void cancelNotification([notifId(id)]).catch(() => {});
 }
 
 function cancelAllTimers(): number {
@@ -245,6 +284,7 @@ function weatherLabel(code: number): string {
 }
 
 const CITY_KEY = "rubilax.city";
+let torchOn = false;
 
 async function handleSystem(intent: SystemIntent): Promise<void> {
   try {
@@ -303,6 +343,19 @@ async function handleSystem(intent: SystemIntent): Promise<void> {
           ? " Reste dans ton trou, mortel."
           : " Profite. Moi, je ne vois rien d'ici.";
         say(text + grumble);
+        return;
+      }
+      case "torch": {
+        try {
+          await invoke("system_torch", { on: intent.on });
+          torchOn = intent.on;
+          document
+            .querySelector('.dash-card[data-dash="torch"]')
+            ?.classList.toggle("on", torchOn);
+          say(replies.torch(intent.on));
+        } catch (e) {
+          say(String(e), "error");
+        }
         return;
       }
       case "noteAdd": {
@@ -649,6 +702,14 @@ $("btn-settings").addEventListener("click", () => {
     tokenInput.value = cfg.token;
   }
   eliadexPathInput.value = localStorage.getItem(ELIADEX_PATH_KEY) ?? "";
+  refreshOverlaySwitch();
+  void invoke<string>("automations_load")
+    .then((j) => {
+      const a = JSON.parse(j) as Record<string, { text?: string }>;
+      $<HTMLInputElement>("auto-plug").value = a.power_connected?.text ?? "";
+      $<HTMLInputElement>("auto-unplug").value = a.power_disconnected?.text ?? "";
+    })
+    .catch(() => {});
   settingsStatus.textContent = "";
   refreshElementButtons();
   refreshModuleButtons();
@@ -1038,6 +1099,114 @@ async function runOnboarding(): Promise<void> {
   }
   bubbleTimer = window.setTimeout(() => bubble.classList.add("hidden"), 2500);
 }
+
+// ---- accueil mobile, œil flottant, automatisations (Android) ----
+
+if (IS_ANDROID) {
+  $("dashboard").classList.remove("hidden");
+  $("dash-toggle").classList.remove("hidden");
+
+  const VIEW_KEY = "rubilax.mobileView";
+  if (localStorage.getItem(VIEW_KEY) === "sword") document.body.classList.add("sword-view");
+  $("dash-toggle").addEventListener("click", () => {
+    const swordView = document.body.classList.toggle("sword-view");
+    localStorage.setItem(VIEW_KEY, swordView ? "sword" : "dash");
+  });
+
+  $("dashboard").addEventListener("click", (e) => {
+    const card = (e.target as HTMLElement).closest<HTMLElement>(".dash-card");
+    switch (card?.dataset.dash) {
+      case "domotique":
+        input.placeholder = "Ex : allume la lumière du salon";
+        input.focus();
+        break;
+      case "apps":
+        input.value = "ouvre ";
+        input.focus();
+        break;
+      case "timers":
+      case "notes":
+        void openBook();
+        break;
+      case "meteo":
+        void handleInput("quel temps aujourd'hui");
+        break;
+      case "torch":
+        void handleSystem({ kind: "torch", on: !torchOn });
+        break;
+      case "help":
+        settingsPanel.classList.add("hidden");
+        bookPanel.classList.add("hidden");
+        $("help").classList.remove("hidden");
+        break;
+      case "settings":
+        $("btn-settings").click();
+        break;
+    }
+  });
+
+  // œil flottant relancé au démarrage s'il était actif
+  if (localStorage.getItem("rubilax.overlay") === "1") {
+    void invoke("overlay_set", { active: true }).catch(() => {});
+  }
+}
+
+const overlaySwitch = $("overlay-switch");
+
+function refreshOverlaySwitch(): void {
+  overlaySwitch.classList.toggle("active", localStorage.getItem("rubilax.overlay") === "1");
+}
+
+overlaySwitch.addEventListener("click", async () => {
+  const want = localStorage.getItem("rubilax.overlay") !== "1";
+  try {
+    await invoke("overlay_set", { active: want });
+    localStorage.setItem("rubilax.overlay", want ? "1" : "0");
+    settingsStatus.textContent = want
+      ? "L'œil flotte. Appui long dessus pour le retirer."
+      : "Œil rangé.";
+  } catch (e) {
+    settingsStatus.textContent =
+      String(e) === "permission"
+        ? "Accorde « Superposition » à Rubidesk dans l'écran ouvert, puis réactive ici."
+        : `Impossible : ${String(e)}`;
+  }
+  refreshOverlaySwitch();
+});
+
+async function resolveAutomation(text: string): Promise<Record<string, string> | null> {
+  const t = text.trim();
+  if (!t) return null;
+  const cfg = ha.loadConfig();
+  if (!cfg) throw new Error("configure Home Assistant d'abord");
+  const intent = parseIntent(t);
+  if (!intent) throw new Error(`commande incomprise : « ${t} »`);
+  const entities = await getEntities(cfg);
+  const match = findEntity(intent.query, entities);
+  if (!match) throw new Error(`appareil introuvable : « ${t} »`);
+  return {
+    text: t,
+    url: cfg.url,
+    token: cfg.token,
+    domain: "homeassistant",
+    service: ACTION_SERVICE[intent.action],
+    entity_id: match.entity.entity_id,
+  };
+}
+
+$("btn-auto-save").addEventListener("click", async () => {
+  try {
+    const config: Record<string, unknown> = {};
+    const plug = await resolveAutomation($<HTMLInputElement>("auto-plug").value);
+    const unplug = await resolveAutomation($<HTMLInputElement>("auto-unplug").value);
+    if (plug) config.power_connected = plug;
+    if (unplug) config.power_disconnected = unplug;
+    await invoke("automations_save", { json: JSON.stringify(config) });
+    settingsStatus.textContent = "Automatisations enregistrées. Elles agissent même app fermée.";
+  } catch (e) {
+    settingsStatus.textContent = `Automatisations : ${e instanceof Error ? e.message : String(e)}`;
+  }
+});
 
 // ---- élément automatique : Wakfu lancé → forme feu ----
 

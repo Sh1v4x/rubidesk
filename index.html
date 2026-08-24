@@ -2,7 +2,7 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Rubidesk</title>
   </head>
   <body>
@@ -10,6 +10,27 @@
       <button id="btn-close" title="Fermer">×</button>
 
       <div id="bubble" class="hidden"></div>
+
+      <!-- accueil mobile : les actions en grille, Rubilax en toile de fond -->
+      <div id="dashboard" class="hidden">
+        <div class="dash-head">
+          <h1>Rubilax</h1>
+          <p>Qu'est-ce que tu veux, mortel ?</p>
+        </div>
+        <div class="dash-grid">
+          <button class="dash-card" data-dash="domotique"><span class="dash-ic">🏠</span><span class="dash-txt">Domotique<small>« allume la lumière »</small></span></button>
+          <button class="dash-card" data-dash="timers"><span class="dash-ic">⏱️</span><span class="dash-txt">Minuteurs<small>et rappels</small></span></button>
+          <button class="dash-card" data-dash="notes"><span class="dash-ic">📝</span><span class="dash-txt">Notes<small>le carnet</small></span></button>
+          <button class="dash-card" data-dash="meteo"><span class="dash-ic">🌤️</span><span class="dash-txt">Météo<small>aujourd'hui</small></span></button>
+          <button class="dash-card" data-dash="torch"><span class="dash-ic">🔦</span><span class="dash-txt">Torche<small>allumer / éteindre</small></span></button>
+          <button class="dash-card" data-dash="apps"><span class="dash-ic">🚀</span><span class="dash-txt">Applications<small>« ouvre Spotify »</small></span></button>
+          <button class="dash-card" data-dash="help"><span class="dash-ic">❔</span><span class="dash-txt">Aide<small>que lui dire ?</small></span></button>
+          <button class="dash-card" data-dash="settings"><span class="dash-ic">⚙️</span><span class="dash-txt">Paramètres<small>modules, HA…</small></span></button>
+        </div>
+      </div>
+      <button id="dash-toggle" class="hidden" title="Voir Rubilax">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/></svg>
+      </button>
 
       <!-- Le Fendoir — trois formes (design « Rubilax Trois Formes.dc.html ») -->
       <div id="avatar" data-tauri-drag-region>
@@ -444,6 +465,22 @@
             <button data-el="air">Air</button>
             <button data-el="fire">Feu</button>
           </div>
+        </div>
+
+        <div class="section" id="mobile-section">
+          <p class="section-title">Téléphone</p>
+          <button class="switch-row" id="overlay-switch">
+            <span class="switch-text">Œil flottant<small>Rubilax par-dessus les autres applications</small></span>
+            <span class="switch"></span>
+          </button>
+          <p class="section-title" style="margin-top: 14px">Automatisations</p>
+          <label>Quand je branche le chargeur
+            <input id="auto-plug" type="text" placeholder="Ex : allume la lumière du salon" autocomplete="off" />
+          </label>
+          <label>Quand je débranche le chargeur
+            <input id="auto-unplug" type="text" placeholder="Ex : éteins la lumière du salon" autocomplete="off" />
+          </label>
+          <button class="action wide" id="btn-auto-save">Enregistrer les automatisations</button>
         </div>
 
         <div class="section last">

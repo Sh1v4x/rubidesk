@@ -111,6 +111,10 @@ export const replies = {
       "Capturé. C'est sur le Bureau.",
       "Clic. L'écran est immortalisé, sur le Bureau.",
     ]),
+  torch: (on: boolean): string =>
+    on
+      ? pick(["Et la lumière fut. Version de poche.", "Torche allumée. Ébloui, mortel ?"])
+      : pick(["Torche éteinte. Retour aux ténèbres — ma maison.", "Voilà, le noir. Reposant."]),
   noteAdded: (): string =>
     pick([
       "Noté. Je sers de post-it, maintenant.",

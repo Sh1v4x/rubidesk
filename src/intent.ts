@@ -116,6 +116,7 @@ export type SystemIntent =
   | { kind: "media"; action: "playpause" | "next" | "previous" }
   | { kind: "power"; action: "lock" | "sleep" }
   | { kind: "screenshot" }
+  | { kind: "torch"; on: boolean }
   | { kind: "weather"; city: string | null; tomorrow: boolean }
   | { kind: "noteAdd"; text: string }
   | { kind: "noteList" }
@@ -151,6 +152,12 @@ export function parseSystem(text: string): SystemIntent | null {
   if (/\bmets?\b.*\ben veille\b/.test(norm) && /\b(pc|ordi|ordinateur|mac|machine|ecran)\b/.test(norm))
     return { kind: "power", action: "sleep" };
   if (/\b(?:capture[s]? d ?ecran|screenshot|fais une capture)\b/.test(norm)) return { kind: "screenshot" };
+
+  // lampe torche (mobile) — « torche » explicite pour ne pas voler « lampe » à la domotique
+  if (/\b(?:torche|lampe de poche)\b/.test(norm)) {
+    const off = /\b(?:eteins?|eteindre|eteignez?|coupe[rz]?|arrete[rz]?)\b/.test(norm);
+    return { kind: "torch", on: !off };
+  }
 
   // météo
   if (/\b(?:meteo|quel temps|temperature dehors|il fait (?:beau|combien|froid|chaud) dehors)\b/.test(norm)) {
