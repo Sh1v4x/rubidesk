@@ -70,8 +70,9 @@ function refreshModuleButtons(): void {
   for (const btn of document.querySelectorAll<HTMLButtonElement>("#modules button")) {
     btn.classList.toggle("active", features[btn.dataset.mod as keyof Features]);
   }
-  // la config Home Assistant (URL + token) n'apparaît que si la domotique est active
+  // les sections de config n'apparaissent que si leur module est actif
   document.getElementById("ha-section")?.classList.toggle("hidden", !features.domotique);
+  document.getElementById("eliadex-section")?.classList.toggle("hidden", !features.eliadex);
 }
 
 // ---- minuteurs persistants ----
@@ -180,6 +181,11 @@ const KNOWN_SITES: Record<string, string> = {
   chatgpt: "https://chatgpt.com",
   claude: "https://claude.ai",
   deezer: "https://www.deezer.com",
+  spotify: "https://open.spotify.com",
+  discord: "https://discord.com/app",
+  twitter: "https://x.com",
+  x: "https://x.com",
+  instagram: "https://www.instagram.com",
 };
 
 async function handleOpen(open: { kind: "url" | "app" | "search"; target: string }): Promise<void> {
@@ -366,13 +372,10 @@ function refreshElementButtons(): void {
   }
 }
 
+const ELIADEX_PATH_KEY = "rubilax.eliadexPath";
+
 /** Ouvre Eliadex sur la recherche demandée via son deep link `eliadex://`. */
 async function handleEliadex(intent: EliadexIntent): Promise<void> {
-  const installed = await invoke<boolean>("app_installed", { name: "eliadex" }).catch(() => false);
-  if (!installed) {
-    say(replies.eliadexMissing(), "error");
-    return;
-  }
   const url =
     `eliadex://search?q=${encodeURIComponent(intent.query)}` +
     (intent.view ? `&view=${intent.view}` : "");
@@ -380,16 +383,27 @@ async function handleEliadex(intent: EliadexIntent): Promise<void> {
     // le deep link lance Eliadex s'il est fermé, et route s'il est ouvert
     await invoke("open_web", { url });
     say(replies.eliadexOpened(intent.query));
+    return;
   } catch {
-    // schéma inconnu : la version installée d'Eliadex est antérieure aux
-    // deep links — on ouvre l'app classiquement, sans routage
+    // schéma inconnu : Eliadex absent, ou version antérieure aux deep links
+  }
+  // repli : le chemin choisi par l'utilisateur dans les réglages…
+  const customPath = (localStorage.getItem(ELIADEX_PATH_KEY) ?? "").trim();
+  if (customPath) {
     try {
-      await invoke("open_app", { name: "eliadex" });
+      await invoke("open_path", { path: customPath });
       say(replies.eliadexOldVersion(intent.query), "error");
+      return;
     } catch (e) {
       console.error(e);
-      say(replies.eliadexMissing(), "error");
     }
+  }
+  // …sinon la détection automatique
+  try {
+    await invoke("open_app", { name: "eliadex" });
+    say(replies.eliadexOldVersion(intent.query), "error");
+  } catch {
+    say(replies.eliadexMissing(), "error");
   }
 }
 
@@ -414,6 +428,14 @@ async function handleInput(text: string): Promise<void> {
 
 async function handleCommand(text: string): Promise<void> {
   sword.set("think");
+
+  // « aide » : le panneau des exemples de commandes
+  if (/^\s*(?:aide|help|que sais[- ]tu faire\s*\??|tu sais faire quoi\s*\??)\s*[!?.]*\s*$/i.test(text)) {
+    settingsPanel.classList.add("hidden");
+    $("help").classList.remove("hidden");
+    say("Voilà ce que je daigne faire. Lis, mortel.", "success");
+    return;
+  }
 
   // minuteurs et rappels
   const timer = parseTimer(text);
@@ -646,11 +668,31 @@ $("btn-settings").addEventListener("click", () => {
     urlInput.value = cfg.url;
     tokenInput.value = cfg.token;
   }
+  eliadexPathInput.value = localStorage.getItem(ELIADEX_PATH_KEY) ?? "";
   settingsStatus.textContent = "";
   refreshElementButtons();
   refreshModuleButtons();
   void refreshMicList();
+  $("help").classList.add("hidden");
   settingsPanel.classList.toggle("hidden");
+});
+
+// ---- panneau d'aide ----
+
+$("btn-help").addEventListener("click", () => {
+  settingsPanel.classList.add("hidden");
+  $("help").classList.toggle("hidden");
+});
+
+for (const btn of document.querySelectorAll<HTMLButtonElement>(".panel-close")) {
+  btn.addEventListener("click", () => btn.closest(".panel")?.classList.add("hidden"));
+}
+
+// ---- chemin d'Eliadex ----
+
+const eliadexPathInput = $<HTMLInputElement>("eliadex-path");
+eliadexPathInput.addEventListener("change", () => {
+  localStorage.setItem(ELIADEX_PATH_KEY, eliadexPathInput.value.trim());
 });
 
 // ---- choix du microphone ----

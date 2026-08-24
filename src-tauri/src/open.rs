@@ -85,44 +85,49 @@ fn launch(path: &std::path::Path) -> Result<(), String> {
         .map_err(|e| e.to_string())
 }
 
+/// Windows : `Get-StartApps` liste TOUTES les applications du menu Démarrer,
+/// y compris celles du Microsoft Store (Spotify, etc.) qui n'ont pas de
+/// raccourci .lnk classique. On stocke l'AppID dans le PathBuf.
 #[cfg(target_os = "windows")]
 fn list_apps() -> Vec<(String, PathBuf)> {
-    let mut roots = Vec::new();
-    if let Some(pd) = std::env::var_os("ProgramData") {
-        roots.push(PathBuf::from(pd).join(r"Microsoft\Windows\Start Menu\Programs"));
-    }
-    if let Some(ad) = std::env::var_os("APPDATA") {
-        roots.push(PathBuf::from(ad).join(r"Microsoft\Windows\Start Menu\Programs"));
-    }
-    let mut apps = Vec::new();
-    for root in roots {
-        collect_lnk(&root, &mut apps, 0);
-    }
-    apps
-}
-
-#[cfg(target_os = "windows")]
-fn collect_lnk(dir: &std::path::Path, out: &mut Vec<(String, PathBuf)>, depth: u8) {
-    let Ok(entries) = std::fs::read_dir(dir) else {
-        return;
+    let out = Command::new("powershell")
+        .args([
+            "-NoProfile",
+            "-WindowStyle",
+            "Hidden",
+            "-Command",
+            "Get-StartApps | ForEach-Object { $_.Name + '|' + $_.AppID }",
+        ])
+        .output();
+    let Ok(out) = out else {
+        return Vec::new();
     };
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if path.extension().is_some_and(|e| e == "lnk") {
-            if let Some(stem) = path.file_stem().and_then(|s| s.to_str()) {
-                out.push((stem.to_string(), path));
+    String::from_utf8_lossy(&out.stdout)
+        .lines()
+        .filter_map(|line| {
+            let (name, appid) = line.split_once('|')?;
+            let name = name.trim();
+            let appid = appid.trim();
+            if name.is_empty() || appid.is_empty() {
+                return None;
             }
-        } else if depth < 3 && path.is_dir() {
-            collect_lnk(&path, out, depth + 1);
-        }
-    }
+            Some((name.to_string(), PathBuf::from(appid)))
+        })
+        .collect()
 }
 
+/// Windows : lance une entrée du menu Démarrer par son AppID (Win32 ou Store).
 #[cfg(target_os = "windows")]
-fn launch(path: &std::path::Path) -> Result<(), String> {
-    Command::new("cmd")
-        .args(["/C", "start", ""])
-        .arg(path)
+fn launch(appid: &std::path::Path) -> Result<(), String> {
+    let appid = appid.to_string_lossy().replace('\'', "''");
+    Command::new("powershell")
+        .args([
+            "-NoProfile",
+            "-WindowStyle",
+            "Hidden",
+            "-Command",
+            &format!("Start-Process ('shell:AppsFolder\\' + '{appid}')"),
+        ])
         .spawn()
         .map(|_| ())
         .map_err(|e| e.to_string())
@@ -218,4 +223,31 @@ pub fn open_web(url: String) -> Result<(), String> {
 #[tauri::command]
 pub fn app_installed(name: String) -> bool {
     find_app(&name).is_ok()
+}
+
+/// Ouvre un fichier/application à partir d'un chemin fourni par l'utilisateur
+/// (ex. l'emplacement d'Eliadex choisi dans les réglages).
+#[tauri::command]
+pub fn open_path(path: String) -> Result<(), String> {
+    let p = PathBuf::from(path.trim());
+    if !p.exists() {
+        return Err(format!("chemin introuvable : {}", p.display()));
+    }
+    #[cfg(target_os = "macos")]
+    {
+        Command::new("open")
+            .arg(&p)
+            .spawn()
+            .map(|_| ())
+            .map_err(|e| e.to_string())
+    }
+    #[cfg(target_os = "windows")]
+    {
+        Command::new("cmd")
+            .args(["/C", "start", ""])
+            .arg(&p)
+            .spawn()
+            .map(|_| ())
+            .map_err(|e| e.to_string())
+    }
 }

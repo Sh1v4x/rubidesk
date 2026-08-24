@@ -173,6 +173,7 @@ pub fn run() {
             open::open_app,
             open::open_web,
             open::app_installed,
+            open::open_path,
             system::system_volume,
             system::system_media,
             system::system_power,

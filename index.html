@@ -344,7 +344,10 @@
         <button id="btn-wake" title="Veille vocale : il se réveille quand tu dis « Rubilax »">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2c1.2 4.2-3.4 5.6-3.4 9.6a3.4 3.4 0 0 0 6.8 0c0-1.5-.7-2.7-1.4-3.8 2.2 1.2 4.5 3.4 4.5 6.7A6.5 6.5 0 0 1 12 21a6.5 6.5 0 0 1-6.5-6.5C5.5 8.6 10.8 6.6 12 2z"/></svg>
         </button>
-        <button id="btn-settings" title="Configuration Home Assistant">
+        <button id="btn-help" title="Exemples de commandes">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9.2" fill="none"/><path d="M9.4 9.2a2.7 2.7 0 1 1 3.6 2.6c-.8.3-1 .8-1 1.7" fill="none"/><circle cx="12" cy="16.8" r="0.4" fill="currentColor"/></svg>
+        </button>
+        <button id="btn-settings" title="Paramètres">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19.4 13a7.5 7.5 0 0 0 .06-1 7.5 7.5 0 0 0-.06-1l2.1-1.64a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.6-.22l-2.48 1a7.6 7.6 0 0 0-1.72-1l-.38-2.64A.5.5 0 0 0 14 2h-4a.5.5 0 0 0-.5.42L9.13 5.06a7.6 7.6 0 0 0-1.72 1l-2.48-1a.5.5 0 0 0-.6.22l-2 3.46a.5.5 0 0 0 .12.64L4.54 11a7.5 7.5 0 0 0 0 2l-2.1 1.64a.5.5 0 0 0-.11.64l2 3.46a.5.5 0 0 0 .6.22l2.48-1a7.6 7.6 0 0 0 1.72 1l.38 2.64A.5.5 0 0 0 10 22h4a.5.5 0 0 0 .5-.42l.37-2.64a7.6 7.6 0 0 0 1.72-1l2.48 1a.5.5 0 0 0 .6-.22l2-3.46a.5.5 0 0 0-.11-.64zM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5z"/></svg>
         </button>
       </div>
@@ -356,16 +359,32 @@
         <button data-action="quit">Quitter</button>
       </div>
 
-      <div id="settings" class="hidden">
-        <h3>Paramètres</h3>
-        <span class="field-label">Modules</span>
-        <div class="row" id="modules">
-          <button data-mod="domotique">Domotique</button>
-          <button data-mod="apps">Apps &amp; web</button>
-          <button data-mod="eliadex">Eliadex</button>
+      <div id="settings" class="panel hidden">
+        <div class="panel-head">
+          <h3>Paramètres</h3>
+          <button class="panel-close" data-close="settings">×</button>
         </div>
-        <div id="ha-section">
-          <span class="field-label">Home Assistant</span>
+
+        <div class="section">
+          <p class="section-title">Modules</p>
+          <div id="modules">
+            <button class="switch-row" data-mod="domotique">
+              <span class="switch-text">Domotique<small>Piloter la maison via Home Assistant</small></span>
+              <span class="switch"></span>
+            </button>
+            <button class="switch-row" data-mod="apps">
+              <span class="switch-text">Apps &amp; web<small>Ouvrir applications, sites et recherches</small></span>
+              <span class="switch"></span>
+            </button>
+            <button class="switch-row" data-mod="eliadex">
+              <span class="switch-text">Eliadex<small>« Où je trouve X ? » ouvre le companion Wakfu</small></span>
+              <span class="switch"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="section" id="ha-section">
+          <p class="section-title">Home Assistant</p>
           <label>URL
             <input id="ha-url" type="text" placeholder="http://homeassistant.local:8123" autocomplete="off" />
           </label>
@@ -373,23 +392,94 @@
             <input id="ha-token" type="password" placeholder="eyJhbGciOi…" autocomplete="off" />
           </label>
           <div class="row">
-            <button id="btn-save">Enregistrer</button>
-            <button id="btn-test">Tester</button>
+            <button class="action" id="btn-save">Enregistrer</button>
+            <button class="action" id="btn-test">Tester</button>
           </div>
         </div>
-        <span class="field-label">Microphone</span>
-        <select id="mic-select"></select>
-        <span class="field-label">Forme du Fendoir</span>
-        <div class="row" id="element-pref">
-          <button data-el="auto">Auto</button>
-          <button data-el="normal">Normale</button>
-          <button data-el="air">Air</button>
-          <button data-el="fire">Feu</button>
+
+        <div class="section" id="eliadex-section">
+          <p class="section-title">Eliadex</p>
+          <label>Emplacement de l'application <small class="hint">(optionnel — utile si Rubidesk ne le trouve pas tout seul)</small>
+            <input id="eliadex-path" type="text" placeholder="Ex : C:\Users\toi\AppData\Local\Eliadex\Eliadex.exe" autocomplete="off" />
+          </label>
         </div>
-        <div class="row">
-          <button id="btn-bug">🐞 Signaler un bug</button>
+
+        <div class="section">
+          <p class="section-title">Microphone</p>
+          <select id="mic-select"></select>
         </div>
-        <p id="settings-status"></p>
+
+        <div class="section">
+          <p class="section-title">Forme du Fendoir</p>
+          <div class="seg" id="element-pref">
+            <button data-el="auto">Auto</button>
+            <button data-el="normal">Normale</button>
+            <button data-el="air">Air</button>
+            <button data-el="fire">Feu</button>
+          </div>
+        </div>
+
+        <div class="section last">
+          <button class="action wide" id="btn-bug">Signaler un bug</button>
+          <p id="settings-status"></p>
+        </div>
+      </div>
+
+      <div id="help" class="panel hidden">
+        <div class="panel-head">
+          <h3>Que dire à Rubilax ?</h3>
+          <button class="panel-close" data-close="help">×</button>
+        </div>
+        <div class="section">
+          <p class="section-title">Domotique</p>
+          <ul class="cmds">
+            <li>« Allume la lumière du salon »</li>
+            <li>« Éteins le ventilateur »</li>
+            <li>« Allume la lampe et le ventilo »</li>
+          </ul>
+        </div>
+        <div class="section">
+          <p class="section-title">PC &amp; musique</p>
+          <ul class="cmds">
+            <li>« Baisse le son » · « Mets le son à 40 »</li>
+            <li>« Mets pause » · « Musique suivante »</li>
+            <li>« Verrouille l'écran » · « Capture d'écran »</li>
+            <li>« Mets le PC en veille »</li>
+          </ul>
+        </div>
+        <div class="section">
+          <p class="section-title">Apps &amp; web</p>
+          <ul class="cmds">
+            <li>« Ouvre Spotify » · « Lance Discord »</li>
+            <li>« Va sur youtube.com »</li>
+            <li>« Recherche recette tartiflette »</li>
+          </ul>
+        </div>
+        <div class="section">
+          <p class="section-title">Eliadex (Wakfu)</p>
+          <ul class="cmds">
+            <li>« Où je trouve la gelée royale ? »</li>
+            <li>« Où se trouve le boss Rushu ? »</li>
+            <li>« Recette du pain d'Incarnam »</li>
+          </ul>
+        </div>
+        <div class="section">
+          <p class="section-title">Minuteurs, notes &amp; météo</p>
+          <ul class="cmds">
+            <li>« Minuteur de 10 minutes » · « Mes minuteurs »</li>
+            <li>« Rappelle-moi dans 1 h de sortir le four »</li>
+            <li>« Note que je dois racheter des piles » · « Lis mes notes »</li>
+            <li>« Quel temps demain ? » · « Météo à Lyon »</li>
+          </ul>
+        </div>
+        <div class="section last">
+          <p class="section-title">Rubilax lui-même</p>
+          <ul class="cmds">
+            <li>« Hé Rubilax » (mot d'éveil, braise allumée)</li>
+            <li>« Passe en forme feu / air / normale » · « Forme auto »</li>
+            <li>Touche son œil. Ose.</li>
+          </ul>
+        </div>
       </div>
     </div>
     <script type="module" src="/src/main.ts"></script>
