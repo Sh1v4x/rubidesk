@@ -758,19 +758,27 @@ async function populateMoodLight(): Promise<void> {
 // ---- jumelage PC → téléphone (URL + token sans recopie) ----
 
 $("btn-pair-send").addEventListener("click", async () => {
+  const btn = $("btn-pair-send");
   const cfg = ha.loadConfig();
   if (!cfg) {
     settingsStatus.textContent = "Enregistre d'abord l'URL et le token (bouton Enregistrer).";
+    settingsStatus.scrollIntoView({ block: "nearest" });
     return;
   }
   const code = String(Math.floor(1000 + Math.random() * 9000));
   const payload = JSON.stringify({ ...cfg, moodLight: moodlight.getMoodLight() });
   try {
     await invoke<string>("pair_serve", { payload, code });
-    settingsStatus.textContent = `Sur le téléphone : Paramètres → Recevoir, code ${code} (valable 2 min).`;
+    btn.textContent = `Code : ${code}`;
+    window.setTimeout(() => {
+      if (btn.textContent === `Code : ${code}`) btn.textContent = "→ Téléphone";
+    }, 120_000);
+    settingsStatus.textContent =
+      "Sur le téléphone : Paramètres → Téléphone → Recevoir, avec ce code. Valable 2 min (re-clic = nouveau code).";
   } catch (e) {
     settingsStatus.textContent = `Partage impossible : ${String(e)}`;
   }
+  settingsStatus.scrollIntoView({ block: "nearest" });
 });
 
 $("btn-pair-receive").addEventListener("click", async () => {
@@ -795,6 +803,7 @@ $("btn-pair-receive").addEventListener("click", async () => {
   } catch (e) {
     settingsStatus.textContent = `Réception : ${e instanceof Error ? e.message : String(e)}`;
   }
+  settingsStatus.scrollIntoView({ block: "nearest" });
 });
 
 $("mood-light").addEventListener("change", () => {

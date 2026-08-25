@@ -4,13 +4,25 @@
 
 use std::io::{Read, Write};
 use std::net::{TcpListener, UdpSocket};
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::time::{Duration, Instant};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::Mutex;
+use std::time::Duration;
 
 const PAIR_PORT: u16 = 17663;
 const WINDOW_SECS: u64 = 120;
 
 static SERVING: AtomicBool = AtomicBool::new(false);
+static DEADLINE_MS: AtomicU64 = AtomicU64::new(0);
+/// (payload, code) courants — un nouveau clic remplace les deux, la
+/// fenêtre en cours sert toujours la dernière version.
+static PENDING: Mutex<Option<(String, String)>> = Mutex::new(None);
+
+fn now_ms() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis() as u64)
+        .unwrap_or(0)
+}
 
 /// IP locale de la machine sur le LAN (astuce socket UDP, rien n'est envoyé).
 fn local_ip() -> Result<String, String> {
@@ -30,8 +42,10 @@ pub fn pair_serve(payload: String, code: String) -> Result<String, String> {
     let ip = local_ip()?;
     // un HA en localhost sur le PC doit être joint par l'IP LAN du PC
     let payload = payload.replace("localhost", &ip).replace("127.0.0.1", &ip);
+    *PENDING.lock().unwrap() = Some((payload, code));
+    DEADLINE_MS.store(now_ms() + WINDOW_SECS * 1000, Ordering::SeqCst);
     if SERVING.swap(true, Ordering::SeqCst) {
-        // une fenêtre est déjà ouverte : elle servira le payload précédent
+        // fenêtre déjà ouverte : elle servira la nouvelle config/le nouveau code
         return Ok(ip);
     }
     let listener = TcpListener::bind(("0.0.0.0", PAIR_PORT)).map_err(|e| {
@@ -41,8 +55,7 @@ pub fn pair_serve(payload: String, code: String) -> Result<String, String> {
     listener.set_nonblocking(true).map_err(|e| e.to_string())?;
 
     std::thread::spawn(move || {
-        let deadline = Instant::now() + Duration::from_secs(WINDOW_SECS);
-        while Instant::now() < deadline {
+        while now_ms() < DEADLINE_MS.load(Ordering::SeqCst) {
             match listener.accept() {
                 Ok((mut stream, _)) => {
                     let _ = stream.set_read_timeout(Some(Duration::from_millis(500)));
@@ -51,23 +64,31 @@ pub fn pair_serve(payload: String, code: String) -> Result<String, String> {
                     let request = String::from_utf8_lossy(&buf[..n]);
                     let first_line = request.lines().next().unwrap_or("");
                     let is_pair = first_line.starts_with("GET /rubidesk-pair");
-                    let code_ok = first_line.contains(&format!("code={code}"));
-                    let response = if is_pair && code_ok {
-                        format!(
-                            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
-                            payload.len(),
-                            payload
-                        )
-                    } else if is_pair {
-                        // ping d'identification (scan) ou mauvais code
-                        "HTTP/1.1 403 Forbidden\r\nContent-Length: 8\r\nConnection: close\r\n\r\nrubidesk"
-                            .to_string()
+                    let mut delivered = false;
+                    let response = if is_pair {
+                        let pending = PENDING.lock().unwrap();
+                        match pending.as_ref() {
+                            Some((payload, code))
+                                if first_line.contains(&format!("code={code}")) =>
+                            {
+                                delivered = true;
+                                format!(
+                                    "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+                                    payload.len(),
+                                    payload
+                                )
+                            }
+                            // ping d'identification (scan) ou mauvais code
+                            _ => "HTTP/1.1 403 Forbidden\r\nContent-Length: 8\r\nConnection: close\r\n\r\nrubidesk"
+                                .to_string(),
+                        }
                     } else {
                         "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
                             .to_string()
                     };
                     let _ = stream.write_all(response.as_bytes());
-                    if is_pair && code_ok {
+                    if delivered {
+                        *PENDING.lock().unwrap() = None;
                         break; // livrée : on ferme la fenêtre
                     }
                 }
