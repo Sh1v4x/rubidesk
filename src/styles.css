@@ -816,6 +816,12 @@ body.android.sword-view #dash-toggle {
   border-color: rgba(var(--accent-rgb), 0.6);
 }
 
+/* un panneau ouvert (paramètres, aide, carnet) monte jusqu'en haut :
+   on range la bascule pour ne pas recouvrir sa croix de fermeture */
+body.android:has(.panel:not(.hidden)) #dash-toggle {
+  display: none;
+}
+
 /* ---- composer et bulle adaptés au pouce ---- */
 body.android #composer {
   max-width: none;
