@@ -63,3 +63,66 @@ jobs:
             Binaires non signés : voir le README pour la première ouverture.
           releaseDraft: false
           prerelease: false
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # le NDK est préinstallé sur les runners ubuntu, il suffit de le pointer
+      - name: Configurer le NDK
+        run: echo "NDK_HOME=$ANDROID_NDK_LATEST_HOME" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - run: npm ci
+
+      # même clé de signature que les builds locaux : les téléphones
+      # acceptent la mise à jour (signature identique obligatoire)
+      - name: Clé de signature Android
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_B64 }}" | base64 -d > src-tauri/gen/android/rubidesk.keystore
+          cat > src-tauri/gen/android/keystore.properties <<EOF
+          storeFile=$GITHUB_WORKSPACE/src-tauri/gen/android/rubidesk.keystore
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyAlias=rubidesk
+          keyPassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          EOF
+
+      # variante debug voulue : usesCleartextTraffic=true (Home Assistant
+      # local en http), mais signée avec la clé stable ci-dessus
+      - name: Compiler l'APK
+        run: npx tauri android build --apk --target aarch64 --debug
+
+      - name: Attacher l'APK à la release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cp src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk "Rubidesk_${VERSION}_android.apk"
+          # la release est créée par le job desktop : on patiente si besoin
+          for i in $(seq 1 40); do
+            if gh release upload "$GITHUB_REF_NAME" "Rubidesk_${VERSION}_android.apk" --clobber; then
+              exit 0
+            fi
+            echo "release pas encore créée, attente… ($i/40)"
+            sleep 30
+          done
+          echo "la release n'est jamais apparue" >&2
+          exit 1
