@@ -403,10 +403,14 @@ export class Sword {
     this.burst.style.opacity = "0";
   }
 
+  /** Prévenu à chaque forme appliquée (auto ou manuelle) — humeur → lumière. */
+  onElementChange: ((el: SwordElement) => void) | null = null;
+
   /** Accent de l'interface (barre, bulle, menus) assorti à la forme. */
   private applyBodyTheme(el: SwordElement): void {
     document.body.classList.toggle("el-air", el === "air");
     document.body.classList.toggle("el-fire", el === "fire");
+    this.onElementChange?.(el);
   }
 
   private movePokeZone(def: ElementDef): void {

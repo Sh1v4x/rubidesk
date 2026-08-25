@@ -194,11 +194,18 @@ async fn ha_call_service(
     domain: String,
     service: String,
     entity_id: String,
+    data: Option<Value>,
 ) -> Result<Value, String> {
+    // données de service optionnelles (rgb_color, brightness, transition…)
+    let mut body = match data {
+        Some(Value::Object(map)) => Value::Object(map),
+        _ => json!({}),
+    };
+    body["entity_id"] = json!(entity_id);
     let res = client()?
         .post(api_url(&base_url, &format!("services/{domain}/{service}")))
         .bearer_auth(token)
-        .json(&json!({ "entity_id": entity_id }))
+        .json(&body)
         .send()
         .await
         .map_err(|e| e.to_string())?;

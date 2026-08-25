@@ -41,6 +41,7 @@ export async function callService(
   domain: string,
   service: string,
   entityId: string,
+  data?: Record<string, unknown>,
 ): Promise<unknown> {
   return invoke("ha_call_service", {
     baseUrl: cfg.url,
@@ -48,5 +49,6 @@ export async function callService(
     domain,
     service,
     entityId,
+    data,
   });
 }

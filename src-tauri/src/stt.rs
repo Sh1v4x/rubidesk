@@ -573,6 +573,9 @@ fn matches_wake_word(text: &str) -> bool {
         .to_lowercase()
         .chars()
         .filter_map(|c| match c {
+            // remaps AVANT le motif attrape-tout, sinon ils sont inatteignables
+            'y' => Some('i'), // « ruby lax » → « rubilax »
+            'k' => Some('x'), // « rubilaks »
             'a'..='z' => Some(c),
             'à' | 'â' | 'ä' => Some('a'),
             'é' | 'è' | 'ê' | 'ë' => Some('e'),
@@ -580,8 +583,6 @@ fn matches_wake_word(text: &str) -> bool {
             'ô' | 'ö' => Some('o'),
             'û' | 'ù' | 'ü' => Some('u'),
             'ç' => Some('c'),
-            'y' => Some('i'), // « ruby lax » → « rubilax »
-            'k' => Some('x'), // « rubilaks »
             _ => None,
         })
         .collect();

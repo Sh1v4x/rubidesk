@@ -47,6 +47,7 @@ async function ensureNotifPermission(): Promise<boolean> {
 }
 import * as ha from "./ha";
 import type { HaEntity } from "./ha";
+import * as moodlight from "./moodlight";
 
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
@@ -82,10 +83,15 @@ function loadFeatures(): Features {
 
 const features = loadFeatures();
 
+// l'ampoule d'humeur suit la forme — seulement si la domotique est active
+moodlight.init(() => features.domotique);
+sword.onElementChange = (el) => moodlight.onElement(el);
+
 function setFeature(key: keyof Features, on: boolean): void {
   features[key] = on;
   localStorage.setItem(FEATURES_KEY, JSON.stringify(features));
   refreshModuleButtons();
+  moodlight.refresh(); // domotique coupée → on lâche l'ampoule
 }
 
 function refreshModuleButtons(): void {
@@ -721,9 +727,41 @@ $("btn-settings").addEventListener("click", () => {
   refreshElementButtons();
   refreshModuleButtons();
   void refreshMicList();
+  void populateMoodLight();
   $("help").classList.add("hidden");
   bookPanel.classList.add("hidden");
   settingsPanel.classList.toggle("hidden");
+});
+
+// ---- ampoule d'humeur ----
+
+async function populateMoodLight(): Promise<void> {
+  const select = $<HTMLSelectElement>("mood-light");
+  const saved = moodlight.getMoodLight();
+  select.innerHTML = `<option value="">— aucune —</option>`;
+  const cfg = ha.loadConfig();
+  if (!cfg) return;
+  try {
+    const lights = (await getEntities(cfg)).filter((e) => e.entity_id.startsWith("light."));
+    for (const light of lights) {
+      const opt = document.createElement("option");
+      opt.value = light.entity_id;
+      opt.textContent = light.attributes.friendly_name ?? light.entity_id;
+      select.append(opt);
+    }
+    select.value = lights.some((l) => l.entity_id === saved) ? saved : "";
+  } catch {
+    // HA injoignable : la liste restera vide, tant pis
+  }
+}
+
+$("mood-light").addEventListener("change", () => {
+  const chosen = $<HTMLSelectElement>("mood-light").value;
+  moodlight.setMoodLight(chosen);
+  moodlight.refresh();
+  settingsStatus.textContent = chosen
+    ? "L'ampoule suivra mes humeurs. Pauvre ampoule."
+    : "L'ampoule est libérée de mes humeurs.";
 });
 
 // ---- panneau d'aide ----
@@ -1267,6 +1305,7 @@ void pollGame();
 sword.setEnv({ muted: isMuted(), mini: localStorage.getItem(MINI_PREF) === "1" });
 if (localStorage.getItem(MINI_PREF) === "1") void setMini(true);
 restoreTimers();
+moodlight.onElement(sword.currentElement); // couleur d'ambiance initiale
 
 sword.set("wake");
 if (localStorage.getItem(ONBOARD_KEY) !== "1") {

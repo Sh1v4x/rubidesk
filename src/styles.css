@@ -367,7 +367,8 @@ body.mini #btn-close {
 }
 
 .section input:focus,
-#mic-select:focus {
+#mic-select:focus,
+#mood-light:focus {
   border-color: rgba(var(--accent-rgb), 0.6);
 }
 
@@ -502,7 +503,8 @@ button.action.wide {
   display: none;
 }
 
-#mic-select {
+#mic-select,
+#mood-light {
   width: 100%;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(var(--accent-rgb), 0.25);
@@ -514,7 +516,8 @@ button.action.wide {
   appearance: none;
 }
 
-#mic-select option {
+#mic-select option,
+#mood-light option {
   background: #1a140f;
   color: var(--ink);
 }
@@ -855,7 +858,8 @@ body.android .panel {
 }
 
 body.android .section input,
-body.android #mic-select {
+body.android #mic-select,
+#mood-light {
   font-size: 14px;
   padding: 9px 11px;
 }
