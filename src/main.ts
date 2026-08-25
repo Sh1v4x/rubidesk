@@ -725,6 +725,8 @@ $("btn-settings").addEventListener("click", () => {
       const a = JSON.parse(j) as Record<string, { text?: string }>;
       $<HTMLInputElement>("auto-plug").value = a.power_connected?.text ?? "";
       $<HTMLInputElement>("auto-unplug").value = a.power_disconnected?.text ?? "";
+      $<HTMLInputElement>("auto-batlow").value = a.battery_low?.text ?? "";
+      $<HTMLInputElement>("auto-batok").value = a.battery_okay?.text ?? "";
     })
     .catch(() => {});
   settingsStatus.textContent = "";
@@ -1305,12 +1307,19 @@ async function resolveAutomation(text: string): Promise<Record<string, string> |
 $("btn-auto-save").addEventListener("click", async () => {
   try {
     const config: Record<string, unknown> = {};
-    const plug = await resolveAutomation($<HTMLInputElement>("auto-plug").value);
-    const unplug = await resolveAutomation($<HTMLInputElement>("auto-unplug").value);
-    if (plug) config.power_connected = plug;
-    if (unplug) config.power_disconnected = unplug;
+    const rules: Array<[string, string]> = [
+      ["auto-plug", "power_connected"],
+      ["auto-unplug", "power_disconnected"],
+      ["auto-batlow", "battery_low"],
+      ["auto-batok", "battery_okay"],
+    ];
+    for (const [inputId, key] of rules) {
+      const rule = await resolveAutomation($<HTMLInputElement>(inputId).value);
+      if (rule) config[key] = rule;
+    }
     await invoke("automations_save", { json: JSON.stringify(config) });
-    settingsStatus.textContent = "Automatisations enregistrées. Elles agissent même app fermée.";
+    settingsStatus.textContent =
+      "Automatisations enregistrées. App fermée, l'œil flottant doit être actif pour qu'elles agissent.";
   } catch (e) {
     settingsStatus.textContent = `Automatisations : ${e instanceof Error ? e.message : String(e)}`;
   }

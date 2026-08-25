@@ -3,24 +3,55 @@ package ai.landcapital.rubilax
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
 /**
- * Automatisations « chargeur branché / débranché » : lit la configuration
- * écrite par l'app (automations.json) et appelle Home Assistant directement —
- * fonctionne même si l'app est fermée (broadcast exempté depuis Android 8).
+ * Automatisations téléphone → Home Assistant : chargeur branché/débranché,
+ * batterie faible/remontée. Lit la configuration écrite par l'app
+ * (automations.json) et appelle HA directement.
+ *
+ * ATTENTION : depuis Android 8, ces broadcasts ne sont PAS livrés aux
+ * receivers du manifest — ce receiver doit être enregistré dynamiquement
+ * depuis un processus vivant (FendoirOverlayService et MainActivity le font).
+ * L'entrée manifest ne sert qu'aux vieux Android.
  */
 class PowerReceiver : BroadcastReceiver() {
+
+    companion object {
+        val FILTER = IntentFilter().apply {
+            addAction(Intent.ACTION_POWER_CONNECTED)
+            addAction(Intent.ACTION_POWER_DISCONNECTED)
+            addAction(Intent.ACTION_BATTERY_LOW)
+            addAction(Intent.ACTION_BATTERY_OKAY)
+        }
+
+        // le receiver est enregistré à deux endroits (œil + app ouverte) :
+        // on dédoublonne pour ne pas appeler HA deux fois (toggle fragile)
+        private val lastFired = HashMap<String, Long>()
+
+        private fun debounced(key: String): Boolean {
+            synchronized(lastFired) {
+                val now = System.currentTimeMillis()
+                if (now - (lastFired[key] ?: 0L) < 3000) return true
+                lastFired[key] = now
+                return false
+            }
+        }
+    }
 
     override fun onReceive(context: Context, intent: Intent) {
         val key = when (intent.action) {
             Intent.ACTION_POWER_CONNECTED -> "power_connected"
             Intent.ACTION_POWER_DISCONNECTED -> "power_disconnected"
+            Intent.ACTION_BATTERY_LOW -> "battery_low"
+            Intent.ACTION_BATTERY_OKAY -> "battery_okay"
             else -> return
         }
+        if (debounced(key)) return
         val config = findConfig(context) ?: return
         val rule = config.optJSONObject(key) ?: return
         val url = rule.optString("url")

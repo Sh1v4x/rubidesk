@@ -1,6 +1,7 @@
 package ai.landcapital.rubilax
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import androidx.activity.enableEdgeToEdge
@@ -20,12 +21,30 @@ class MainActivity : TauriActivity() {
   // fournit la JavaVM et le Context au pont natif Rust (ndk-context)
   private external fun initNdk()
 
+  private val powerReceiver = PowerReceiver()
+
   override fun onCreate(savedInstanceState: Bundle?) {
     enableEdgeToEdge()
     initNdk()
     super.onCreate(savedInstanceState)
     QuipReceiver.schedule(this) // les humeurs de Rubilax reprennent
+    // automatisations chargeur/batterie aussi quand l'app est ouverte
+    // sans l'œil flottant (PowerReceiver dédoublonne si les deux vivent)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      registerReceiver(powerReceiver, PowerReceiver.FILTER, RECEIVER_NOT_EXPORTED)
+    } else {
+      @Suppress("UnspecifiedRegisterReceiverFlag")
+      registerReceiver(powerReceiver, PowerReceiver.FILTER)
+    }
     maybeStartVoice(intent)
+  }
+
+  override fun onDestroy() {
+    try {
+      unregisterReceiver(powerReceiver)
+    } catch (_: Exception) {
+    }
+    super.onDestroy()
   }
 
   override fun onNewIntent(intent: Intent) {

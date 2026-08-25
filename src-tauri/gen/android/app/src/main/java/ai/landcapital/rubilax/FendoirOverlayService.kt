@@ -25,6 +25,7 @@ class FendoirOverlayService : Service() {
 
     private var windowManager: WindowManager? = null
     private var eye: ImageView? = null
+    private val powerReceiver = PowerReceiver()
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -32,6 +33,14 @@ class FendoirOverlayService : Service() {
         super.onCreate()
         startInForeground()
         addEyeOverlay()
+        // les broadcasts chargeur/batterie n'atteignent pas le manifest
+        // depuis Android 8 : c'est ce service qui les écoute, app fermée
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(powerReceiver, PowerReceiver.FILTER, RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("UnspecifiedRegisterReceiverFlag")
+            registerReceiver(powerReceiver, PowerReceiver.FILTER)
+        }
     }
 
     // si le système nous tue (mémoire, économiseur…), qu'il nous relance
@@ -153,6 +162,10 @@ class FendoirOverlayService : Service() {
     }
 
     override fun onDestroy() {
+        try {
+            unregisterReceiver(powerReceiver)
+        } catch (_: Exception) {
+        }
         eye?.let { windowManager?.removeView(it) }
         eye = null
         super.onDestroy()
