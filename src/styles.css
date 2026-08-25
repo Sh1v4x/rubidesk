@@ -630,8 +630,15 @@ button.action.wide {
   opacity: 0.92;
 }
 
-/* la section Téléphone n'a pas sa place sur desktop */
-body:not(.android) #mobile-section {
+/* la section Téléphone, l'accueil mobile et sa bascule n'ont pas leur
+   place sur desktop — quoi qu'il arrive côté classes */
+body:not(.android) #mobile-section,
+body:not(.android) #dashboard,
+body:not(.android) #dash-toggle {
+  display: none;
+}
+
+#dashboard.hidden {
   display: none;
 }
 
