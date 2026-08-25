@@ -84,7 +84,11 @@ function loadFeatures(): Features {
 const features = loadFeatures();
 
 // l'ampoule d'humeur suit la forme — seulement si la domotique est active
-moodlight.init(() => features.domotique);
+// ET que l'interrupteur « Humeurs lumineuses » n'est pas coupé
+const MOODLIGHT_ON_KEY = "rubilax.moodLightOn";
+moodlight.init(
+  () => features.domotique && localStorage.getItem(MOODLIGHT_ON_KEY) !== "0",
+);
 sword.onElementChange = (el) => moodlight.onElement(el);
 
 function setFeature(key: keyof Features, on: boolean): void {
@@ -726,6 +730,7 @@ $("btn-settings").addEventListener("click", () => {
   settingsStatus.textContent = "";
   refreshElementButtons();
   refreshModuleButtons();
+  refreshMoodSwitch();
   void refreshMicList();
   void populateMoodLight();
   $("help").classList.add("hidden");
@@ -762,6 +767,22 @@ $("mood-light").addEventListener("change", () => {
   settingsStatus.textContent = chosen
     ? "L'ampoule suivra mes humeurs. Pauvre ampoule."
     : "L'ampoule est libérée de mes humeurs.";
+});
+
+const moodSwitch = $("moodlight-switch");
+
+function refreshMoodSwitch(): void {
+  moodSwitch.classList.toggle("active", localStorage.getItem(MOODLIGHT_ON_KEY) !== "0");
+}
+
+moodSwitch.addEventListener("click", () => {
+  const wantOn = localStorage.getItem(MOODLIGHT_ON_KEY) === "0";
+  localStorage.setItem(MOODLIGHT_ON_KEY, wantOn ? "1" : "0");
+  refreshMoodSwitch();
+  moodlight.refresh();
+  settingsStatus.textContent = wantOn
+    ? "Je rejoue avec la lumière."
+    : "Bon. Je laisse l'ampoule tranquille.";
 });
 
 // ---- panneau d'aide ----

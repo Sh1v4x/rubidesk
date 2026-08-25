@@ -436,8 +436,8 @@
           <button class="panel-close" data-close="settings">×</button>
         </div>
 
-        <div class="section">
-          <p class="section-title">Modules</p>
+        <details class="section" open>
+          <summary class="section-title">Modules</summary>
           <div id="modules">
             <button class="switch-row" data-mod="domotique">
               <span class="switch-text">Domotique<small>Piloter la maison via Home Assistant</small></span>
@@ -452,10 +452,10 @@
               <span class="switch"></span>
             </button>
           </div>
-        </div>
+        </details>
 
-        <div class="section" id="ha-section">
-          <p class="section-title">Home Assistant</p>
+        <details class="section" id="ha-section">
+          <summary class="section-title">Home Assistant</summary>
           <label>URL
             <input id="ha-url" type="text" placeholder="http://homeassistant.local:8123" autocomplete="off" />
           </label>
@@ -466,37 +466,41 @@
             <button class="action" id="btn-save">Enregistrer</button>
             <button class="action" id="btn-test">Tester</button>
           </div>
-          <label style="margin-top: 12px">Ampoule d'humeur <small class="hint">(suit la forme du Fendoir : blanc, feu vacillant, air vacillant)</small>
+          <button class="switch-row" id="moodlight-switch" style="margin-top: 8px">
+            <span class="switch-text">Humeurs lumineuses<small>L'ampoule suit la forme du Fendoir — coupe ici s'il joue trop avec</small></span>
+            <span class="switch"></span>
+          </button>
+          <label>Ampoule d'humeur <small class="hint">(blanc, feu vacillant, air vacillant)</small>
             <select id="mood-light"><option value="">— aucune —</option></select>
           </label>
-        </div>
+        </details>
 
-        <div class="section" id="eliadex-section">
-          <p class="section-title">Eliadex</p>
+        <details class="section" id="eliadex-section">
+          <summary class="section-title">Eliadex</summary>
           <label>Emplacement de l'application <small class="hint">(optionnel — utile si Rubidesk ne le trouve pas tout seul)</small></label>
           <div class="row path-row">
             <input id="eliadex-path" type="text" placeholder="Ex : C:\Users\toi\AppData\Local\Eliadex\Eliadex.exe" autocomplete="off" />
             <button class="action" id="btn-eliadex-browse">Parcourir…</button>
           </div>
-        </div>
+        </details>
 
-        <div class="section">
-          <p class="section-title">Microphone</p>
+        <details class="section" id="mic-section">
+          <summary class="section-title">Microphone</summary>
           <select id="mic-select"></select>
-        </div>
+        </details>
 
-        <div class="section">
-          <p class="section-title">Forme du Fendoir</p>
+        <details class="section">
+          <summary class="section-title">Forme du Fendoir</summary>
           <div class="seg" id="element-pref">
             <button data-el="auto">Auto</button>
             <button data-el="normal">Normale</button>
             <button data-el="air">Air</button>
             <button data-el="fire">Feu</button>
           </div>
-        </div>
+        </details>
 
-        <div class="section" id="mobile-section">
-          <p class="section-title">Téléphone</p>
+        <details class="section" id="mobile-section">
+          <summary class="section-title">Téléphone</summary>
           <button class="switch-row" id="overlay-switch">
             <span class="switch-text">Œil flottant<small>Par-dessus tout : toucher = ouvrir, appui long = lui parler</small></span>
             <span class="switch"></span>
@@ -509,7 +513,7 @@
             <input id="auto-unplug" type="text" placeholder="Ex : éteins la lumière du salon" autocomplete="off" />
           </label>
           <button class="action wide" id="btn-auto-save">Enregistrer les automatisations</button>
-        </div>
+        </details>
 
         <div class="section last">
           <button class="action wide" id="btn-bug">Signaler un bug</button>
