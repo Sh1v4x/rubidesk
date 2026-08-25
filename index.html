@@ -465,6 +465,7 @@
           <div class="row">
             <button class="action" id="btn-save">Enregistrer</button>
             <button class="action" id="btn-test">Tester</button>
+            <button class="action" id="btn-pair-send" title="Partager URL + token vers le téléphone (même réseau)">→ Téléphone</button>
           </div>
           <label style="margin-top: 12px">Ampoule d'humeur <small class="hint">(suit la forme du Fendoir : blanc, feu vacillant, air vacillant)</small>
             <select id="mood-light"><option value="">— aucune —</option></select>
@@ -497,6 +498,11 @@
 
         <div class="section" id="mobile-section">
           <p class="section-title">Téléphone</p>
+          <label>Recevoir la config du PC <small class="hint">(lance « → Téléphone » côté PC, puis tape son code)</small></label>
+          <div class="row">
+            <input id="pair-code" class="mini-num" type="text" inputmode="numeric" maxlength="4" placeholder="Code" autocomplete="off" />
+            <button class="action" id="btn-pair-receive">Recevoir</button>
+          </div>
           <button class="switch-row" id="overlay-switch">
             <span class="switch-text">Œil flottant<small>Par-dessus tout : toucher = ouvrir, appui long = lui parler</small></span>
             <span class="switch"></span>
