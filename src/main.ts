@@ -755,57 +755,6 @@ async function populateMoodLight(): Promise<void> {
   }
 }
 
-// ---- jumelage PC → téléphone (URL + token sans recopie) ----
-
-$("btn-pair-send").addEventListener("click", async () => {
-  const btn = $("btn-pair-send");
-  const cfg = ha.loadConfig();
-  if (!cfg) {
-    settingsStatus.textContent = "Enregistre d'abord l'URL et le token (bouton Enregistrer).";
-    settingsStatus.scrollIntoView({ block: "nearest" });
-    return;
-  }
-  const code = String(Math.floor(1000 + Math.random() * 9000));
-  const payload = JSON.stringify({ ...cfg, moodLight: moodlight.getMoodLight() });
-  try {
-    await invoke<string>("pair_serve", { payload, code });
-    btn.textContent = `Code : ${code}`;
-    window.setTimeout(() => {
-      if (btn.textContent === `Code : ${code}`) btn.textContent = "→ Téléphone";
-    }, 120_000);
-    settingsStatus.textContent =
-      "Sur le téléphone : Paramètres → Téléphone → Recevoir, avec ce code. Valable 2 min (re-clic = nouveau code).";
-  } catch (e) {
-    settingsStatus.textContent = `Partage impossible : ${String(e)}`;
-  }
-  settingsStatus.scrollIntoView({ block: "nearest" });
-});
-
-$("btn-pair-receive").addEventListener("click", async () => {
-  const code = $<HTMLInputElement>("pair-code").value.trim();
-  if (!/^\d{4}$/.test(code)) {
-    settingsStatus.textContent = "Tape le code à 4 chiffres affiché sur le PC.";
-    return;
-  }
-  settingsStatus.textContent = "Je fouille le réseau…";
-  try {
-    const raw = await invoke<string>("pair_fetch", { code });
-    const got = JSON.parse(raw) as { url?: string; token?: string; moodLight?: string };
-    if (!got.url || !got.token) throw new Error("config incomplète reçue");
-    ha.saveConfig({ url: got.url, token: got.token });
-    urlInput.value = got.url;
-    tokenInput.value = got.token;
-    if (got.moodLight !== undefined) moodlight.setMoodLight(got.moodLight);
-    statesCache = null; // le cache d'entités pointait sur l'ancien HA
-    moodlight.refresh();
-    void populateMoodLight();
-    settingsStatus.textContent = "Config reçue du PC. Rien recopié, tout gagné.";
-  } catch (e) {
-    settingsStatus.textContent = `Réception : ${e instanceof Error ? e.message : String(e)}`;
-  }
-  settingsStatus.scrollIntoView({ block: "nearest" });
-});
-
 $("mood-light").addEventListener("change", () => {
   const chosen = $<HTMLSelectElement>("mood-light").value;
   moodlight.setMoodLight(chosen);
@@ -1245,6 +1194,21 @@ if (IS_ANDROID) {
   if (localStorage.getItem("rubilax.overlay") === "1") {
     void invoke("overlay_set", { active: true }).catch(() => {});
   }
+
+  // config HA déposée dans le dossier privé de l'app (import par câble) :
+  // appliquée puis consommée au démarrage
+  void invoke<string | null>("config_take_pending")
+    .then((raw) => {
+      if (!raw) return;
+      const got = JSON.parse(raw) as { url?: string; token?: string; moodLight?: string };
+      if (!got.url || !got.token) return;
+      ha.saveConfig({ url: got.url, token: got.token });
+      if (got.moodLight !== undefined) moodlight.setMoodLight(got.moodLight);
+      statesCache = null;
+      moodlight.refresh();
+      say("Configuration reçue. Ta maison m'obéit aussi depuis ce téléphone, maintenant.");
+    })
+    .catch(() => {});
 
   // commande dictée (appui long sur l'œil ou bouton micro) : relevée quand
   // l'app revient au premier plan, plus quelques relances au démarrage

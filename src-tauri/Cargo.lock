@@ -3510,7 +3510,6 @@ name = "rubilax"
 version = "0.1.0"
 dependencies = [
  "cpal",
- "futures-util",
  "jni 0.21.1",
  "ndk-context",
  "reqwest 0.12.28",

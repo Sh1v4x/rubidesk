@@ -1,6 +1,5 @@
 #[cfg(target_os = "android")]
 mod android;
-mod pair;
 #[cfg(desktop)]
 mod open;
 #[cfg(desktop)]
@@ -349,8 +348,7 @@ pub fn run() {
             system::automations_load,
             system::voice_take_pending,
             system::voice_listen,
-            pair::pair_serve,
-            pair::pair_fetch
+            system::config_take_pending
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

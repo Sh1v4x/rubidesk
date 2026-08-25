@@ -320,10 +320,11 @@ pub fn can_draw_overlays() -> Result<bool, String> {
     })
 }
 
-/// Récupère et consomme la commande dictée via la reconnaissance vocale
-/// système (déposée par MainActivity dans voice_command.txt).
-pub fn take_voice_command() -> Result<Option<String>, String> {
-    with_context(|env, context| {
+/// Lit puis supprime un fichier « boîte aux lettres » du dossier files/
+/// de l'app (déposé par MainActivity, ou par câble pour l'outillage).
+fn take_pending_file(name: &str) -> Result<Option<String>, String> {
+    let name = name.to_string();
+    with_context(move |env, context| {
         let dir = env
             .call_method(context, "getFilesDir", "()Ljava/io/File;", &[])?
             .l()?;
@@ -331,7 +332,7 @@ pub fn take_voice_command() -> Result<Option<String>, String> {
             .call_method(&dir, "getAbsolutePath", "()Ljava/lang/String;", &[])?
             .l()?;
         let path: String = env.get_string(&JString::from(path))?.into();
-        let file = std::path::Path::new(&path).join("voice_command.txt");
+        let file = std::path::Path::new(&path).join(&name);
         if !file.exists() {
             return Ok(None);
         }
@@ -340,6 +341,16 @@ pub fn take_voice_command() -> Result<Option<String>, String> {
         let text = text.trim().to_string();
         Ok(if text.is_empty() { None } else { Some(text) })
     })
+}
+
+/// Commande dictée via la reconnaissance vocale système.
+pub fn take_voice_command() -> Result<Option<String>, String> {
+    take_pending_file("voice_command.txt")
+}
+
+/// Configuration Home Assistant déposée dans files/ (import silencieux).
+pub fn take_pending_config() -> Result<Option<String>, String> {
+    take_pending_file("ha_config.json")
 }
 
 /// Rouvre MainActivity avec l'extra « écoute vocale » (singleTop →

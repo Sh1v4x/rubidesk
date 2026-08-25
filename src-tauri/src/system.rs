@@ -488,6 +488,20 @@ pub fn voice_take_pending() -> Result<Option<String>, String> {
     }
 }
 
+/// Récupère (et consomme) une config Home Assistant déposée dans le dossier
+/// privé de l'app (files/ha_config.json) — import sans recopie manuelle.
+#[tauri::command]
+pub fn config_take_pending() -> Result<Option<String>, String> {
+    #[cfg(target_os = "android")]
+    {
+        return crate::android::take_pending_config();
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        Ok(None)
+    }
+}
+
 /// Déclenche l'écoute vocale native (Android uniquement).
 #[tauri::command]
 pub fn voice_listen() -> Result<(), String> {

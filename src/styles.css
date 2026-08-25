@@ -665,20 +665,10 @@ body.android #app {
    du micro n'ont de sens sur Android */
 body.android #btn-close,
 body.android #btn-wake,
-body.android #btn-pair-send,
 body.android #eliadex-section,
 body.android .switch-row[data-mod="eliadex"],
 body.android .section:has(#mic-select) {
   display: none;
-}
-
-/* champ du code de jumelage (côté téléphone) */
-#pair-code {
-  flex: none;
-  width: 90px;
-  margin-top: 0;
-  text-align: center;
-  letter-spacing: 0.2em;
 }
 
 /* la lame : estompée derrière l'accueil, pleine en vue Rubilax */
