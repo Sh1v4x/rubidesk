@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <title>Rubidesk — Rubilax sur ton bureau</title>
-  <meta name="description" content="Rubidesk : le shushu Rubilax de Wakfu vit sur ton bureau. Compagnon animé, commande vocale 100 % locale, domotique Home Assistant, minuteurs, lanceur d'applications, intégration Eliadex. Gratuit, Windows & macOS." />
+  <meta name="description" content="Rubidesk : le shushu Rubilax de Wakfu vit sur ton bureau. Compagnon animé, commande vocale 100 % locale, domotique Home Assistant, minuteurs, lanceur d'applications, intégration Eliadex. Gratuit, Windows, macOS & Android." />
   <meta name="keywords" content="rubidesk, rubilax, wakfu, assistant vocal, compagnon bureau, home assistant, shushu, wakfu app, eliadex" />
   <meta name="author" content="Shivax" />
   <meta name="application-name" content="Rubidesk" />
@@ -14,14 +14,14 @@
   <meta property="og:site_name" content="Rubidesk" />
   <meta property="og:locale" content="fr_FR" />
   <meta property="og:title" content="Rubidesk — Rubilax sur ton bureau" />
-  <meta property="og:description" content="Le shushu le plus grognon du Monde des Douze, posé sur ton bureau : voix 100 % locale, domotique, minuteurs, apps. Gratuit, Windows & macOS." />
+  <meta property="og:description" content="Le shushu le plus grognon du Monde des Douze, posé sur ton bureau : voix 100 % locale, domotique, minuteurs, apps. Gratuit, Windows, macOS & Android." />
   <meta property="og:url" content="https://sh1v4x.github.io/rubidesk/" />
   <meta property="og:image" content="https://sh1v4x.github.io/rubidesk/logo.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Rubidesk — Rubilax sur ton bureau" />
   <meta name="twitter:image" content="https://sh1v4x.github.io/rubidesk/logo.png" />
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"Rubidesk","applicationCategory":"UtilitiesApplication","operatingSystem":"Windows, macOS","description":"Compagnon de bureau animé : le shushu Rubilax de Wakfu, commande vocale 100 % locale, domotique Home Assistant, minuteurs, lanceur d'applications.","url":"https://sh1v4x.github.io/rubidesk/","image":"https://sh1v4x.github.io/rubidesk/logo.png","inLanguage":"fr","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}}
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"Rubidesk","applicationCategory":"UtilitiesApplication","operatingSystem":"Windows, macOS, Android","description":"Compagnon de bureau animé : le shushu Rubilax de Wakfu, commande vocale 100 % locale, domotique Home Assistant, minuteurs, lanceur d'applications.","url":"https://sh1v4x.github.io/rubidesk/","image":"https://sh1v4x.github.io/rubidesk/logo.png","inLanguage":"fr","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}}
   </script>
 
   <link rel="icon" type="image/png" href="logo.png" />
@@ -83,6 +83,7 @@
     .btn:hover { transform: translateY(-2px); }
     .btn-win { background: linear-gradient(135deg, var(--braise), #b4451c); color: #fff4e8; box-shadow: 0 8px 26px rgba(226, 112, 58, 0.25); }
     .btn-mac { background: linear-gradient(135deg, #3d4a2a, #232b16); color: var(--vert); border: 1px solid rgba(185, 212, 86, 0.35); }
+    .btn-android { background: linear-gradient(135deg, #1f3a2e, #14231c); color: #9fe0b4; border: 1px solid rgba(120, 220, 150, 0.35); }
     .dl-note { width: 100%; font-size: 13px; color: var(--mut); }
     .dl-note a { color: var(--mut); text-decoration: underline; }
 
@@ -179,7 +180,7 @@
 <header class="wrap">
   <div class="hero">
     <div class="hero-text">
-      <div class="kicker">Compagnon de bureau · Wakfu · Windows &amp; macOS</div>
+      <div class="kicker">Compagnon de bureau · Wakfu · Windows, macOS &amp; Android</div>
       <h1>Rubidesk<span class="dot">.</span></h1>
       <p class="tagline">Rubilax, le shushu le plus grognon du Monde des Douze, posé sur ton bureau. Il t'écoute, il obéit, il râle.</p>
       <div class="badges">
@@ -190,7 +191,8 @@
       <div class="dl">
         <a id="dl-win" class="btn btn-win" href="https://github.com/Sh1v4x/rubidesk/releases/latest"><i data-lucide="monitor" class="btn-ic"></i> Télécharger pour Windows</a>
         <a id="dl-mac" class="btn btn-mac" href="https://github.com/Sh1v4x/rubidesk/releases/latest"><i data-lucide="apple" class="btn-ic"></i> Télécharger pour macOS</a>
-        <span class="dl-note">Binaires non signés (outil indépendant) : Windows → <i>Informations complémentaires</i> → <i>Exécuter quand même</i> · macOS → clic droit → <i>Ouvrir</i>. <a href="https://github.com/Sh1v4x/rubidesk/releases">Toutes les versions</a>.</span>
+        <a id="dl-android" class="btn btn-android" href="https://github.com/Sh1v4x/rubidesk/releases/latest"><i data-lucide="smartphone" class="btn-ic"></i> Télécharger pour Android</a>
+        <span class="dl-note">Binaires non signés (outil indépendant) : Windows → <i>Informations complémentaires</i> → <i>Exécuter quand même</i> · macOS → clic droit → <i>Ouvrir</i> · Android → autoriser l'installation de sources inconnues. <a href="https://github.com/Sh1v4x/rubidesk/releases">Toutes les versions</a>.</span>
       </div>
     </div>
 
@@ -371,8 +373,10 @@
       const assets = rel.assets || [];
       const win = assets.find((a) => a.name.endsWith("-setup.exe"));
       const mac = assets.find((a) => a.name.endsWith(".dmg"));
+      const apk = assets.find((a) => a.name.endsWith(".apk"));
       if (win) document.getElementById("dl-win").href = win.browser_download_url;
       if (mac) document.getElementById("dl-mac").href = mac.browser_download_url;
+      if (apk) document.getElementById("dl-android").href = apk.browser_download_url;
     })
     .catch(() => {});
 </script>
