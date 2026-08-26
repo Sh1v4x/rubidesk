@@ -41,6 +41,36 @@ fn normalize(s: &str) -> String {
         .join(" ")
 }
 
+/// Forme sans espaces : la dictée découpe volontiers les noms collés
+/// (« Hellowork » entendu « hello work ») — on compare aussi compacté.
+fn compact(s: &str) -> String {
+    s.chars().filter(|c| !c.is_whitespace()).collect()
+}
+
+/// Score de ressemblance entre un nom d'app normalisé et la requête.
+fn match_score(norm: &str, query: &str) -> Option<i32> {
+    let norm_c = compact(norm);
+    let query_c = compact(query);
+    let score = if norm == query {
+        100
+    } else if norm_c == query_c {
+        95
+    } else if norm.split(' ').any(|w| w == query) {
+        80
+    } else if norm.starts_with(query) {
+        70
+    } else if norm.contains(query) || query.contains(norm) {
+        60
+    } else if norm_c.contains(&query_c) || query_c.contains(&norm_c) {
+        58
+    } else if levenshtein(norm, query) <= 2 {
+        40
+    } else {
+        return None;
+    };
+    Some(score)
+}
+
 #[cfg(target_os = "macos")]
 fn list_apps() -> Vec<(String, PathBuf)> {
     let mut dirs = vec![
@@ -160,17 +190,7 @@ fn find_app(name: &str) -> Result<(String, PathBuf), String> {
 
     for (display, path) in apps {
         let norm = normalize(&display);
-        let score = if norm == query {
-            100
-        } else if norm.split(' ').any(|w| w == query) {
-            80
-        } else if norm.starts_with(&query) {
-            70
-        } else if norm.contains(&query) || query.contains(&norm) {
-            60
-        } else if levenshtein(&norm, &query) <= 2 {
-            40
-        } else {
+        let Some(score) = match_score(&norm, &query) else {
             continue;
         };
 
@@ -189,7 +209,17 @@ fn find_app(name: &str) -> Result<(String, PathBuf), String> {
 
 #[cfg(all(test, target_os = "macos"))]
 mod tests {
-    use super::find_app;
+    use super::{find_app, match_score};
+
+    #[test]
+    fn espaces_ignores() {
+        // la dictée découpe les noms collés : « Hellowork » → « hello work »
+        assert!(match_score("hellowork", "hello work").unwrap() >= 90);
+        assert!(match_score("hello work", "hellowork").unwrap() >= 90);
+        // et la forme compacte partielle reste trouvable
+        assert!(match_score("hellowork emploi", "hello work").is_some());
+        assert!(match_score("zorglub", "hello work").is_none());
+    }
 
     #[test]
     fn trouve_safari() {

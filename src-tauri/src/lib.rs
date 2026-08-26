@@ -70,21 +70,34 @@ mod open {
             .collect()
     }
 
+    /// Forme sans espaces : la dictée découpe les noms collés
+    /// (« Hellowork » entendu « hello work »).
+    #[cfg(target_os = "android")]
+    fn compact(s: &str) -> String {
+        s.chars().filter(|c| !c.is_whitespace()).collect()
+    }
+
     #[cfg(target_os = "android")]
     fn find_package(name: &str) -> Option<(String, String)> {
         let query = norm(name);
+        let query_c = compact(&query);
         let apps = crate::android::list_apps().ok()?;
         let mut best: Option<(i32, (String, String))> = None;
         for (label, package) in apps {
             let n = norm(&label);
+            let n_c = compact(&n);
             let score = if n == query {
                 100
+            } else if n_c == query_c {
+                95
             } else if n.split(' ').any(|w| w == query) {
                 80
             } else if n.starts_with(&query) {
                 70
             } else if n.contains(&query) || query.contains(&n) {
                 60
+            } else if n_c.contains(&query_c) || query_c.contains(&n_c) {
+                58
             } else {
                 continue;
             };
