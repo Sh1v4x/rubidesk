@@ -1,4 +1,4 @@
-package ai.landcapital.rubilax
+package com.shivax.rubilax
 
 import android.app.Notification
 import android.app.NotificationChannel

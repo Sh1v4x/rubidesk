@@ -13,7 +13,7 @@ static NDK_READY: AtomicBool = AtomicBool::new(false);
 /// ndk-context. Sans cette initialisation, `android_context()` panique et
 /// un panic qui traverse la frontière JNI abat tout le processus.
 #[no_mangle]
-pub extern "system" fn Java_ai_landcapital_rubilax_MainActivity_initNdk(
+pub extern "system" fn Java_com_shivax_rubilax_MainActivity_initNdk(
     mut env: JNIEnv,
     activity: JObject,
 ) {
@@ -275,8 +275,8 @@ pub fn set_torch(on: bool) -> Result<bool, String> {
 /// Démarre / arrête le service natif de l'œil flottant.
 pub fn overlay_service(start: bool) -> Result<(), String> {
     with_context(|env, context| {
-        let class_name = env.new_string("ai.landcapital.rubilax.FendoirOverlayService")?;
-        let pkg = env.new_string("ai.landcapital.rubilax")?;
+        let class_name = env.new_string("com.shivax.rubilax.FendoirOverlayService")?;
+        let pkg = env.new_string("com.shivax.rubilax")?;
         let intent_class = env.find_class("android/content/Intent")?;
         let intent = env.new_object(&intent_class, "()V", &[])?;
         env.call_method(
@@ -357,8 +357,8 @@ pub fn take_pending_config() -> Result<Option<String>, String> {
 /// onNewIntent quand l'app est déjà au premier plan).
 pub fn start_voice() -> Result<(), String> {
     with_context(|env, context| {
-        let class_name = env.new_string("ai.landcapital.rubilax.MainActivity")?;
-        let pkg = env.new_string("ai.landcapital.rubilax")?;
+        let class_name = env.new_string("com.shivax.rubilax.MainActivity")?;
+        let pkg = env.new_string("com.shivax.rubilax")?;
         let intent_class = env.find_class("android/content/Intent")?;
         let intent = env.new_object(&intent_class, "()V", &[])?;
         env.call_method(
@@ -395,7 +395,7 @@ pub fn start_voice() -> Result<(), String> {
 pub fn request_overlay_permission() -> Result<(), String> {
     with_context(|env, context| {
         let action = env.new_string("android.settings.action.MANAGE_OVERLAY_PERMISSION")?;
-        let uri_str = env.new_string("package:ai.landcapital.rubilax")?;
+        let uri_str = env.new_string("package:com.shivax.rubilax")?;
         let uri_class = env.find_class("android/net/Uri")?;
         let uri = env
             .call_static_method(

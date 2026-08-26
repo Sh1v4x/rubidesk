@@ -1,4 +1,4 @@
-package ai.landcapital.rubilax
+package com.shivax.rubilax
 
 import android.app.AlarmManager
 import android.app.Notification

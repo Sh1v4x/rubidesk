@@ -319,6 +319,21 @@ pub fn run() {
 
     builder
         .setup(|app| {
+            // identifiant renommé ai.landcapital.rubilax → com.shivax.rubilax :
+            // on récupère les données de l'ancien dossier (modèles whisper,
+            // notes, automatisations) au premier lancement
+            #[cfg(desktop)]
+            {
+                use tauri::Manager;
+                if let Ok(new_dir) = app.path().app_data_dir() {
+                    if let Some(parent) = new_dir.parent() {
+                        let old_dir = parent.join("ai.landcapital.rubilax");
+                        if old_dir.is_dir() && !new_dir.exists() {
+                            let _ = std::fs::rename(&old_dir, &new_dir);
+                        }
+                    }
+                }
+            }
             stt::warm_up(app.handle());
             #[cfg(desktop)]
             setup_tray(app)?;
