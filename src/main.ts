@@ -1260,37 +1260,52 @@ if (IS_ANDROID) {
     window.setTimeout(() => void pollVoice(), delay);
   }
 
-  // mise à jour maison : pas de plugin updater sur mobile — on compare à la
-  // dernière release GitHub et on ouvre le téléchargement du nouvel APK
-  const isNewerVersion = (latest: string, current: string): boolean => {
-    const a = latest.split(".").map(Number);
-    const b = current.split(".").map(Number);
-    for (let i = 0; i < 3; i++) {
-      const diff = (a[i] || 0) - (b[i] || 0);
-      if (diff !== 0) return diff > 0;
-    }
-    return false;
-  };
-  const checkAndroidUpdate = async (): Promise<void> => {
-    try {
-      const current = await getVersion();
-      const res = await fetch("https://api.github.com/repos/Sh1v4x/rubidesk/releases/latest");
-      const rel = (await res.json()) as {
-        tag_name?: string;
-        assets?: Array<{ name: string; browser_download_url: string }>;
-      };
-      const latest = (rel.tag_name ?? "").replace(/^v/, "");
-      if (!latest || !isNewerVersion(latest, current)) return;
-      const apk = (rel.assets ?? []).find((a) => a.name.endsWith(".apk"));
-      if (!apk) return;
-      say(replies.updateFound(latest));
-      // le navigateur télécharge l'APK ; Android propose ensuite l'installation
-      window.setTimeout(() => void invoke("open_web", { url: apk.browser_download_url }), 2600);
-    } catch {
-      // hors ligne : on retentera au prochain lancement
-    }
-  };
-  window.setTimeout(() => void checkAndroidUpdate(), 5000);
+  // vérification au démarrage, puis au retour au premier plan (une app
+  // « rouverte » depuis les récents ne redémarre pas : sans ça, jamais
+  // de nouvelle vérification)
+  window.setTimeout(() => void androidUpdateCheck(), 5000);
+  const UPDATE_TS_KEY = "rubilax.lastUpdateCheck";
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) return;
+    const last = Number(localStorage.getItem(UPDATE_TS_KEY) ?? 0);
+    if (Date.now() - last < 6 * 3600_000) return;
+    localStorage.setItem(UPDATE_TS_KEY, String(Date.now()));
+    void androidUpdateCheck();
+  });
+}
+
+// mise à jour maison Android : pas de plugin updater sur mobile — on compare
+// à la dernière release GitHub et on ouvre le téléchargement du nouvel APK
+function isNewerVersion(latest: string, current: string): boolean {
+  const a = latest.split(".").map(Number);
+  const b = current.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    const diff = (a[i] || 0) - (b[i] || 0);
+    if (diff !== 0) return diff > 0;
+  }
+  return false;
+}
+
+async function androidUpdateCheck(): Promise<"found" | "none" | "error"> {
+  try {
+    const current = await getVersion();
+    const res = await fetch("https://api.github.com/repos/Sh1v4x/rubidesk/releases/latest");
+    const rel = (await res.json()) as {
+      tag_name?: string;
+      assets?: Array<{ name: string; browser_download_url: string }>;
+    };
+    const latest = (rel.tag_name ?? "").replace(/^v/, "");
+    if (!latest || !isNewerVersion(latest, current)) return "none";
+    const apk = (rel.assets ?? []).find((a) => a.name.endsWith(".apk"));
+    if (!apk) return "none";
+    say(replies.updateFound(latest));
+    // le navigateur télécharge l'APK ; Android propose ensuite l'installation
+    window.setTimeout(() => void invoke("open_web", { url: apk.browser_download_url }), 2600);
+    return "found";
+  } catch {
+    // hors ligne : on retentera plus tard
+    return "error";
+  }
 }
 
 const overlaySwitch = $("overlay-switch");
@@ -1401,3 +1416,29 @@ if (!IS_ANDROID) {
     );
   }, 10_000);
 }
+
+// vérification manuelle depuis les paramètres, avec retour explicite
+$("btn-update-check").addEventListener("click", async () => {
+  settingsStatus.textContent = "Je regarde si une version plus fraîche de moi existe…";
+  const current = await getVersion().catch(() => "?");
+  if (IS_ANDROID) {
+    const outcome = await androidUpdateCheck();
+    settingsStatus.textContent =
+      outcome === "found"
+        ? "Nouvelle version trouvée : le téléchargement s'ouvre. Installe, mortel."
+        : outcome === "none"
+          ? `Rien de neuf. Je suis déjà en ${current}, au sommet de ma forme.`
+          : "Impossible de vérifier — t'es hors ligne ou GitHub boude.";
+    return;
+  }
+  const outcome = await checkForUpdates(
+    (version) => say(replies.updateFound(version)),
+    () => say(replies.updateRestart(), "angry"),
+  );
+  settingsStatus.textContent =
+    outcome === "installing"
+      ? "Mise à jour trouvée : j'installe et je redémarre. Ne bouge pas."
+      : outcome === "none"
+        ? `Rien de neuf. Je suis déjà en ${current}, au sommet de ma forme.`
+        : "Impossible de vérifier — hors ligne, ou build de développement.";
+});
