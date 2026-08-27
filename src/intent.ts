@@ -98,12 +98,16 @@ export function formatDuration(ms: number): string {
   return parts.join(" ") || "0 seconde";
 }
 
-export type ElementChoice = "normal" | "air" | "fire" | "auto";
+export type ElementChoice = "normal" | "air" | "fire" | "volthrak" | "auto";
 
 /** « passe en forme feu », « mode air », « redeviens normal », « forme auto »… */
 export function parseElement(text: string): ElementChoice | null {
   const norm = normalize(text).replace(/[^a-z0-9 ]/g, " ");
-  if (!/\b(forme|mode|transforme|transformes?|redeviens?|element)\b/.test(norm)) return null;
+  if (!/\b(forme|mode|transforme|transformes?|redeviens?|element|sors)\b/.test(norm)) return null;
+  if (/\b(monstre|volthrak|colosse|vraie forme|epee)\b/.test(norm)) {
+    // « sors de l'épée », « forme monstre », « transforme-toi en colosse »
+    return /\bepee\b/.test(norm) && !/\bsors\b/.test(norm) ? null : "volthrak";
+  }
   if (/\b(feu|flammes?|embrase[a-z]*)\b/.test(norm)) return "fire";
   if (/\b(air|vent)\b/.test(norm)) return "air";
   if (/\b(normale?|petite|base)\b/.test(norm)) return "normal";

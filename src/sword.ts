@@ -13,6 +13,7 @@
  */
 
 import { cursorPosition, getCurrentWindow } from "@tauri-apps/api/window";
+import { mountVolthrak, VOLTHRAK_RED } from "./volthrak";
 
 export type SwordState =
   | "idle"
@@ -24,7 +25,11 @@ export type SwordState =
   | "wake"
   | "angry";
 
-export type SwordElement = "normal" | "air" | "fire";
+export type SwordElement = "normal" | "air" | "fire" | "volthrak";
+
+/** Les trois lames « classiques » (le monstre Volthrak a sa propre anatomie). */
+type BladeElement = "normal" | "air" | "fire";
+const BLADES: BladeElement[] = ["normal", "air", "fire"];
 
 interface StateDef {
   anim: string;
@@ -82,7 +87,7 @@ const STATES: Record<SwordState, StateDef> = {
 };
 
 interface ElementDef {
-  suffix: "n" | "a" | "f";
+  suffix: "n" | "a" | "f" | "v";
   color: string;
   /** centre de l'œil en coordonnées viewBox globales (260×880) */
   eyeY: number;
@@ -107,6 +112,11 @@ const ELEMENTS: Record<SwordElement, ElementDef> = {
     suffix: "f", color: "#ff6a12", eyeY: 272, eyeCy: 212, eyeR: 33, shadow: 66,
     maneOrigin: "110px 90px", maneBase: 0.92, maneAmp: 0.12,
   },
+  // le monstre : l'œil bouge avec la taille, on vise la tête au stade moyen
+  volthrak: {
+    suffix: "v", color: VOLTHRAK_RED, eyeY: 600, eyeCy: 0, eyeR: 38, shadow: 78,
+    maneOrigin: "0px 0px", maneBase: 1, maneAmp: 0,
+  },
 };
 
 const EASE = "transform .55s cubic-bezier(.34,.02,.24,1)";
@@ -118,6 +128,8 @@ export interface SwordEnv {
   game: boolean;
   muted: boolean;
   mini: boolean;
+  /** appareil branché sur le secteur → Volthrak sort de l'épée */
+  charging: boolean;
 }
 
 interface FormParts {
@@ -136,7 +148,8 @@ export class Sword {
   private element: SwordElement = "normal";
   private morphing = false;
 
-  private parts: Record<SwordElement, FormParts>;
+  private parts: Record<BladeElement, FormParts>;
+  private forms: Record<SwordElement, SVGGElement>;
   private sheens: SVGRectElement[];
   private embersN: SVGGElement;
   private embersF: SVGGElement;
@@ -147,7 +160,7 @@ export class Sword {
   private shock: SVGEllipseElement;
   private pokeZone: HTMLElement | null;
 
-  private env: SwordEnv = { game: false, muted: false, mini: false };
+  private env: SwordEnv = { game: false, muted: false, mini: false, charging: false };
   private angerUntil = 0;
   /** Préférence utilisateur : forme imposée, ou "auto" (défaut). */
   private preference: SwordElement | "auto" = "auto";
@@ -166,7 +179,7 @@ export class Sword {
 
   constructor(private svg: SVGSVGElement) {
     const q = <T>(sel: string): T => svg.querySelector(sel) as T;
-    const grab = (el: SwordElement): FormParts => {
+    const grab = (el: BladeElement): FormParts => {
       const s = ELEMENTS[el].suffix;
       return {
         form: q(`#form-${el === "fire" ? "fire" : el}`),
@@ -180,6 +193,12 @@ export class Sword {
       };
     };
     this.parts = { normal: grab("normal"), air: grab("air"), fire: grab("fire") };
+    this.forms = {
+      normal: this.parts.normal.form,
+      air: this.parts.air.form,
+      fire: this.parts.fire.form,
+      volthrak: mountVolthrak(svg),
+    };
     this.sheens = Array.from(svg.querySelectorAll(".sheen"));
     this.embersN = q("#embers-n");
     this.embersF = q("#embers-f");
@@ -194,7 +213,12 @@ export class Sword {
     this.startGlobalGaze();
 
     const savedPref = localStorage.getItem("rubilax.element");
-    if (savedPref === "normal" || savedPref === "air" || savedPref === "fire") {
+    if (
+      savedPref === "normal" ||
+      savedPref === "air" ||
+      savedPref === "fire" ||
+      savedPref === "volthrak"
+    ) {
       this.preference = savedPref;
       this.element = savedPref;
     }
@@ -284,6 +308,7 @@ export class Sword {
    */
   private desiredElement(): SwordElement {
     if (this.preference !== "auto") return this.preference;
+    if (this.env.charging) return "volthrak"; // branché : le monstre sort
     if (this.env.game) return "fire";
     if (this.env.muted || this.env.mini || this.current === "sleep") return "air";
     if (Date.now() < this.angerUntil) return "fire";
@@ -306,8 +331,8 @@ export class Sword {
     this.morphing = true;
     this.element = next;
 
-    const prevForm = this.parts[prev].form;
-    const nextForm = this.parts[next].form;
+    const prevForm = this.forms[prev];
+    const nextForm = this.forms[next];
     const def = ELEMENTS[next];
 
     // phase 1 — dislocation de l'ancienne forme
@@ -383,8 +408,8 @@ export class Sword {
   }
 
   private showElement(el: SwordElement, instant: boolean): void {
-    for (const key of Object.keys(this.parts) as SwordElement[]) {
-      const form = this.parts[key].form;
+    for (const key of Object.keys(this.forms) as SwordElement[]) {
+      const form = this.forms[key];
       form.style.transformOrigin = "130px 840px";
       if (key === el) {
         form.style.opacity = "1";
@@ -410,6 +435,7 @@ export class Sword {
   private applyBodyTheme(el: SwordElement): void {
     document.body.classList.toggle("el-air", el === "air");
     document.body.classList.toggle("el-fire", el === "fire");
+    document.body.classList.toggle("el-volthrak", el === "volthrak");
     this.onElementChange?.(el);
   }
 
@@ -438,7 +464,7 @@ export class Sword {
     }, SLEEP_AFTER_MS);
   }
 
-  private applyLids(el: SwordElement, s: StateDef, open: number): void {
+  private applyLids(el: BladeElement, s: StateDef, open: number): void {
     const def = ELEMENTS[el];
     const p = this.parts[el];
     const lid = def.eyeR * 1.7;
@@ -457,7 +483,7 @@ export class Sword {
     this.svg.style.transformOrigin = "50% 96%";
     this.svg.style.willChange = "transform";
 
-    for (const el of Object.keys(this.parts) as SwordElement[]) {
+    for (const el of BLADES) {
       const def = ELEMENTS[el];
       const p = this.parts[el];
       const origin = `110px ${def.eyeCy}px`;
@@ -512,10 +538,14 @@ export class Sword {
   private scheduleBlink(): void {
     window.setTimeout(() => {
       const s = STATES[this.current];
-      if (s.open > 0.5 && !this.morphing) {
-        this.applyLids(this.element, s, 0.03);
+      const el = this.element;
+      // Volthrak cligne tout seul (animation CSS), pas de paupières d'épée
+      if (el !== "volthrak" && s.open > 0.5 && !this.morphing) {
+        this.applyLids(el, s, 0.03);
         window.setTimeout(() => {
-          this.applyLids(this.element, STATES[this.current], STATES[this.current].open);
+          if (this.element !== "volthrak") {
+            this.applyLids(el, STATES[this.current], STATES[this.current].open);
+          }
         }, 140);
       }
       this.scheduleBlink();
@@ -568,9 +598,11 @@ export class Sword {
     const targetY = still ? 0 : this.ty;
     this.gx += (targetX - this.gx) * 0.08;
     this.gy += (targetY - this.gy) * 0.08;
-    const iris = this.parts[this.element].iris;
-    if (!STATES[this.current].scan && !this.morphing) {
-      iris.style.transform = `translate(${this.gx.toFixed(2)}px, ${this.gy.toFixed(2)}px)`;
+    if (this.element !== "volthrak") {
+      const iris = this.parts[this.element].iris;
+      if (!STATES[this.current].scan && !this.morphing) {
+        iris.style.transform = `translate(${this.gx.toFixed(2)}px, ${this.gy.toFixed(2)}px)`;
+      }
     }
     requestAnimationFrame((t) => this.tick(t));
   }

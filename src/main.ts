@@ -48,6 +48,7 @@ async function ensureNotifPermission(): Promise<boolean> {
 import * as ha from "./ha";
 import type { HaEntity } from "./ha";
 import * as moodlight from "./moodlight";
+import { updateVolthrak, VOLTHRAK_RED } from "./volthrak";
 
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
@@ -89,7 +90,11 @@ const MOODLIGHT_ON_KEY = "rubilax.moodLightOn";
 moodlight.init(
   () => features.domotique && localStorage.getItem(MOODLIGHT_ON_KEY) !== "0",
 );
-sword.onElementChange = (el) => moodlight.onElement(el);
+sword.onElementChange = (el) => {
+  moodlight.onElement(el);
+  // en forme monstre, la taille et la couleur se rafraîchissent tout de suite
+  if (el === "volthrak") void pollBattery();
+};
 
 function setFeature(key: keyof Features, on: boolean): void {
   features[key] = on;
@@ -402,7 +407,10 @@ async function handleSystem(intent: SystemIntent): Promise<void> {
 }
 
 /** Applique un choix de forme (commande vocale ou paramètres). */
-function applyElementChoice(choice: "normal" | "air" | "fire" | "auto", spoken = false): void {
+function applyElementChoice(
+  choice: "normal" | "air" | "fire" | "volthrak" | "auto",
+  spoken = false,
+): void {
   const noChange = choice !== "auto" && sword.currentElement === choice && sword.elementPreference === choice;
   sword.setPreference(choice);
   refreshElementButtons();
@@ -1371,6 +1379,47 @@ $("btn-auto-save").addEventListener("click", async () => {
     settingsStatus.textContent = `Automatisations : ${e instanceof Error ? e.message : String(e)}`;
   }
 });
+
+// ---- Volthrak : la batterie fait évoluer le monstre, l'ampoule le colore ----
+
+let volthrakTint = VOLTHRAK_RED;
+
+/** Couleur des marques : celle de l'ampoule d'humeur si la domotique est
+ *  active et l'ampoule allumée en couleur — sinon le rouge de Rubilax. */
+async function volthrakAccent(): Promise<string> {
+  if (!features.domotique) return VOLTHRAK_RED;
+  const entity = moodlight.getMoodLight();
+  const cfg = ha.loadConfig();
+  if (!entity || !cfg) return VOLTHRAK_RED;
+  try {
+    const light = (await getEntities(cfg)).find((e) => e.entity_id === entity);
+    const rgb = light?.attributes.rgb_color;
+    if (light?.state === "on" && Array.isArray(rgb) && rgb.length >= 3) {
+      const [r, g, b] = rgb as [number, number, number];
+      return `rgb(${r},${g},${b})`;
+    }
+  } catch {
+    // HA injoignable : rouge par défaut
+  }
+  return VOLTHRAK_RED;
+}
+
+async function pollBattery(): Promise<void> {
+  try {
+    const bat = await invoke<{ level: number; charging: boolean }>("battery_status");
+    sword.setEnv({ charging: bat.charging });
+    if (sword.currentElement === "volthrak") {
+      volthrakTint = await volthrakAccent();
+    }
+    // machine sans batterie (tour, Mac mini) : forme monstre = plein régime
+    updateVolthrak(bat.level < 0 ? 100 : bat.level, bat.charging, volthrakTint);
+  } catch {
+    // commande indisponible : le monstre reste tel quel
+  }
+}
+
+window.setInterval(() => void pollBattery(), 20_000);
+void pollBattery();
 
 // ---- élément automatique : Wakfu lancé → forme feu ----
 

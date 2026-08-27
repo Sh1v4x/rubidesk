@@ -376,7 +376,8 @@ pub fn run() {
             system::automations_load,
             system::voice_take_pending,
             system::voice_listen,
-            system::config_take_pending
+            system::config_take_pending,
+            system::battery_status
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

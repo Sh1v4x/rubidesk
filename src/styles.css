@@ -44,6 +44,13 @@ body.el-fire {
   --panel: rgba(26, 16, 11, 0.93);
 }
 
+body.el-volthrak {
+  --accent: #e04a2a;
+  --accent-rgb: 224, 74, 42;
+  --ink: #f4ddd0;
+  --panel: rgba(24, 13, 10, 0.93);
+}
+
 #app {
   height: 100vh;
   display: flex;
@@ -157,6 +164,19 @@ body.el-fire {
 @keyframes burst_ring2 { 0% { opacity: 0; transform: scale(0.05); } 22% { opacity: 0.9; } 100% { opacity: 0; transform: scale(5.2); } }
 @keyframes shard_out { 0% { opacity: 0; transform: scale(0.1); } 15% { opacity: 1; } 100% { opacity: 0; transform: scale(2.9); } }
 @keyframes shock { 0% { opacity: 0; transform: scale(0.2); } 20% { opacity: 0.85; } 100% { opacity: 0; transform: scale(2.6); } }
+
+/* Volthrak — le monstre de charge (portées du design Volthrak.dc.html) */
+@keyframes vk-idle { 0%, 100% { transform: translateY(0) scaleY(1); } 50% { transform: translateY(-3px) scaleY(1.012); } }
+@keyframes vk-sleep { 0%, 100% { transform: translateY(0) scaleY(1) rotate(0deg); } 50% { transform: translateY(4px) scaleY(0.975) rotate(-0.4deg); } }
+@keyframes vk-rage { 0% { transform: translate(-4px, 0) rotate(-0.6deg); } 25% { transform: translate(5px, -2px) rotate(0.7deg); } 50% { transform: translate(-5px, 1px) rotate(-0.5deg); } 75% { transform: translate(4px, -3px) rotate(0.6deg); } 100% { transform: translate(-4px, 0) rotate(-0.6deg); } }
+@keyframes vk-happy { 0%, 100% { transform: translateY(0) scaleX(1) scaleY(1); } 30% { transform: translateY(-14px) scaleX(0.97) scaleY(1.04); } 60% { transform: translateY(0) scaleX(1.04) scaleY(0.96); } 80% { transform: translateY(-4px) scaleX(1) scaleY(1); } }
+@keyframes vk-rumble { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(-2px, 1px); } 40% { transform: translate(2px, -1px); } 60% { transform: translate(-1px, -2px); } 80% { transform: translate(2px, 1px); } }
+@keyframes vk-lava { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+@keyframes vk-lavafast { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+@keyframes vk-blink { 0%, 92%, 100% { transform: scaleY(1); } 95%, 97% { transform: scaleY(0.08); } }
+@keyframes vk-grow { 0% { transform: scaleY(0.25) translateY(14px); opacity: 0.2; } 60% { transform: scaleY(1.12) translateY(-3px); opacity: 1; } 100% { transform: scaleY(1) translateY(0); opacity: 1; } }
+@keyframes vk-shock { 0% { transform: scale(0.2); opacity: 0.9; } 100% { transform: scale(1.9); opacity: 0; } }
+@keyframes vk-ground { 0%, 100% { opacity: 0.35; transform: scaleX(1); } 50% { opacity: 0.6; transform: scaleX(1.05); } }
 
 #composer {
   display: flex;

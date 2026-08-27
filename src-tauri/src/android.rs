@@ -391,6 +391,47 @@ pub fn start_voice() -> Result<(), String> {
     })
 }
 
+/// Niveau de batterie (0-100, -1 si inconnu) et secteur branché — lus dans
+/// le broadcast collant ACTION_BATTERY_CHANGED (aucun receiver requis).
+pub fn battery_status() -> Result<(i32, bool), String> {
+    with_context(|env, context| {
+        let action = env.new_string("android.intent.action.BATTERY_CHANGED")?;
+        let filter_class = env.find_class("android/content/IntentFilter")?;
+        let filter = env.new_object(
+            &filter_class,
+            "(Ljava/lang/String;)V",
+            &[JValue::Object(&action)],
+        )?;
+        let intent = env
+            .call_method(
+                context,
+                "registerReceiver",
+                "(Landroid/content/BroadcastReceiver;Landroid/content/IntentFilter;)Landroid/content/Intent;",
+                &[JValue::Object(&JObject::null()), JValue::Object(&filter)],
+            )?
+            .l()?;
+        if intent.is_null() {
+            return Ok((-1, false));
+        }
+        let mut get_int = |name: &str, dflt: i32| -> Result<i32, Box<dyn std::error::Error>> {
+            let key = env.new_string(name)?;
+            Ok(env
+                .call_method(
+                    &intent,
+                    "getIntExtra",
+                    "(Ljava/lang/String;I)I",
+                    &[JValue::Object(&key), JValue::Int(dflt)],
+                )?
+                .i()?)
+        };
+        let level = get_int("level", -1)?;
+        let scale = get_int("scale", 100)?.max(1);
+        let plugged = get_int("plugged", 0)?;
+        let pct = if level < 0 { -1 } else { level * 100 / scale };
+        Ok((pct, plugged != 0))
+    })
+}
+
 /// Ouvre l'écran système pour accorder la permission d'overlay.
 pub fn request_overlay_permission() -> Result<(), String> {
     with_context(|env, context| {

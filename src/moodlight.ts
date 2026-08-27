@@ -31,6 +31,9 @@ const PALETTES: Record<SwordElement, Array<[number, number, number]>> = {
     [125, 219, 95],
     [70, 175, 210],
   ],
+  // en forme monstre, c'est LUI qui copie la couleur de l'ampoule :
+  // on ne la pilote pas, sinon ils tourneraient en rond tous les deux
+  volthrak: [],
 };
 
 const FLICKER_MS = 4200; // battement du vacillement
@@ -55,6 +58,10 @@ async function push(): Promise<void> {
     return;
   }
   const colors = PALETTES[current];
+  if (colors.length === 0) {
+    stopTimer();
+    return;
+  }
   const rgb = colors[phase % colors.length];
   phase += 1;
   try {

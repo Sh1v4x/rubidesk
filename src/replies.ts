@@ -135,8 +135,14 @@ export const replies = {
       `${label} ? Module éteint, mortel. Rallume-le dans mes réglages si tu y tiens.`,
       `Non. ${label}, c'est désactivé. C'est toi qui as coupé, c'est toi qui rallumes.`,
     ]),
-  elementChanged: (choice: "normal" | "air" | "fire" | "auto"): string => {
+  elementChanged: (choice: "normal" | "air" | "fire" | "volthrak" | "auto"): string => {
     switch (choice) {
+      case "volthrak":
+        return pick([
+          "ENFIN ! Fini l'épée. Regarde-moi, mortel : VOILÀ Rubilax.",
+          "La vraie forme. Plus ta machine a de jus, plus je suis ÉNORME.",
+          "Je sors. Recule, tu vas prendre une pointe dans l'œil.",
+        ]);
       case "fire":
         return pick([
           "LA FLAMME ! Enfin un peu d'allure.",

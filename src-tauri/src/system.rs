@@ -414,6 +414,71 @@ pub fn note_clear(app: AppHandle) -> Result<(), String> {
 }
 
 // ---------------------------------------------------------------------------
+// Batterie : niveau + secteur branché (nourrit la forme Volthrak)
+// ---------------------------------------------------------------------------
+
+#[derive(serde::Serialize)]
+pub struct BatteryStatus {
+    /// 0-100, ou -1 si la machine n'a pas de batterie
+    pub level: i32,
+    /// branché sur le secteur
+    pub charging: bool,
+}
+
+#[tauri::command]
+pub fn battery_status() -> BatteryStatus {
+    #[cfg(target_os = "macos")]
+    {
+        let out = std::process::Command::new("pmset")
+            .args(["-g", "batt"])
+            .output()
+            .map(|o| String::from_utf8_lossy(&o.stdout).to_string())
+            .unwrap_or_default();
+        let charging = out.contains("AC Power");
+        // le niveau est le nombre juste avant le « % » (ex. « … 85%; charging; … »)
+        let level = out
+            .find('%')
+            .map(|i| {
+                let head = &out[..i];
+                let start = head
+                    .rfind(|c: char| !c.is_ascii_digit())
+                    .map(|p| p + 1)
+                    .unwrap_or(0);
+                head[start..].parse::<i32>().unwrap_or(-1)
+            })
+            .unwrap_or(-1);
+        return BatteryStatus { level, charging };
+    }
+    #[cfg(target_os = "windows")]
+    {
+        let out = std::process::Command::new("powershell")
+            .args([
+                "-NoProfile",
+                "-Command",
+                "$b=Get-CimInstance Win32_Battery|Select-Object -First 1; if($b){\"$($b.EstimatedChargeRemaining);$($b.BatteryStatus)\"}else{'-1;0'}",
+            ])
+            .output()
+            .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
+            .unwrap_or_default();
+        let mut parts = out.split(';');
+        let level = parts.next().and_then(|s| s.trim().parse::<i32>().ok()).unwrap_or(-1);
+        let status = parts.next().and_then(|s| s.trim().parse::<i32>().ok()).unwrap_or(0);
+        // 2 = sur secteur, 6-9 = variantes en charge, 3 = pleine sur secteur
+        let charging = matches!(status, 2 | 3 | 6 | 7 | 8 | 9);
+        return BatteryStatus { level, charging };
+    }
+    #[cfg(target_os = "android")]
+    {
+        let (level, charging) = crate::android::battery_status().unwrap_or((-1, false));
+        return BatteryStatus { level, charging };
+    }
+    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "android")))]
+    {
+        BatteryStatus { level: -1, charging: false }
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Spécifique mobile : torche, œil flottant, automatisations
 // ---------------------------------------------------------------------------
 
