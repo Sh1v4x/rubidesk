@@ -33,7 +33,7 @@ const PALETTES: Record<SwordElement, Array<[number, number, number]>> = {
   ],
   // en forme monstre, c'est LUI qui copie la couleur de l'ampoule :
   // on ne la pilote pas, sinon ils tourneraient en rond tous les deux
-  volthrak: [],
+  shushu: [],
 };
 
 const FLICKER_MS = 4200; // battement du vacillement

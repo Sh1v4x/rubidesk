@@ -48,7 +48,7 @@ async function ensureNotifPermission(): Promise<boolean> {
 import * as ha from "./ha";
 import type { HaEntity } from "./ha";
 import * as moodlight from "./moodlight";
-import { updateVolthrak, VOLTHRAK_RED } from "./volthrak";
+import { updateShushu, SHUSHU_RED } from "./shushu";
 
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
@@ -93,7 +93,7 @@ moodlight.init(
 sword.onElementChange = (el) => {
   moodlight.onElement(el);
   // en forme monstre, la taille et la couleur se rafraîchissent tout de suite
-  if (el === "volthrak") void pollBattery();
+  if (el === "shushu") void pollBattery();
 };
 
 function setFeature(key: keyof Features, on: boolean): void {
@@ -408,7 +408,7 @@ async function handleSystem(intent: SystemIntent): Promise<void> {
 
 /** Applique un choix de forme (commande vocale ou paramètres). */
 function applyElementChoice(
-  choice: "normal" | "air" | "fire" | "volthrak" | "auto",
+  choice: "normal" | "air" | "fire" | "shushu" | "auto",
   spoken = false,
 ): void {
   const noChange = choice !== "auto" && sword.currentElement === choice && sword.elementPreference === choice;
@@ -1380,17 +1380,17 @@ $("btn-auto-save").addEventListener("click", async () => {
   }
 });
 
-// ---- Volthrak : la batterie fait évoluer le monstre, l'ampoule le colore ----
+// ---- Shushu : la batterie fait évoluer le monstre, l'ampoule le colore ----
 
-let volthrakTint = VOLTHRAK_RED;
+let shushuTint = SHUSHU_RED;
 
 /** Couleur des marques : celle de l'ampoule d'humeur si la domotique est
  *  active et l'ampoule allumée en couleur — sinon le rouge de Rubilax. */
-async function volthrakAccent(): Promise<string> {
-  if (!features.domotique) return VOLTHRAK_RED;
+async function shushuAccent(): Promise<string> {
+  if (!features.domotique) return SHUSHU_RED;
   const entity = moodlight.getMoodLight();
   const cfg = ha.loadConfig();
-  if (!entity || !cfg) return VOLTHRAK_RED;
+  if (!entity || !cfg) return SHUSHU_RED;
   try {
     const light = (await getEntities(cfg)).find((e) => e.entity_id === entity);
     const rgb = light?.attributes.rgb_color;
@@ -1401,18 +1401,18 @@ async function volthrakAccent(): Promise<string> {
   } catch {
     // HA injoignable : rouge par défaut
   }
-  return VOLTHRAK_RED;
+  return SHUSHU_RED;
 }
 
 async function pollBattery(): Promise<void> {
   try {
     const bat = await invoke<{ level: number; charging: boolean }>("battery_status");
     sword.setEnv({ charging: bat.charging });
-    if (sword.currentElement === "volthrak") {
-      volthrakTint = await volthrakAccent();
+    if (sword.currentElement === "shushu") {
+      shushuTint = await shushuAccent();
     }
     // machine sans batterie (tour, Mac mini) : forme monstre = plein régime
-    updateVolthrak(bat.level < 0 ? 100 : bat.level, bat.charging, volthrakTint);
+    updateShushu(bat.level < 0 ? 100 : bat.level, bat.charging, shushuTint);
   } catch {
     // commande indisponible : le monstre reste tel quel
   }

@@ -1,19 +1,19 @@
 /**
- * Volthrak — la vraie forme de Rubilax, hors de l'épée. Monstre paramétrique
- * porté depuis le design « Volthrak.dc.html », rapproché du Rubilax de
- * l'animé : trapu et brun, pointes crème sur le dos et le crâne, petites
- * cornes, défenses, yeux pâles incandescents, marques lumineuses sur les
- * muscles (rouges par défaut — ou de la couleur de l'ampoule d'humeur).
+ * Rubilax hors de l'épée — sa vraie forme de shushu. (Nom de code interne :
+ * shushu, hérité du design « Volthrak.dc.html » ; pour l'utilisateur,
+ * c'est Rubilax, point.) Trapu et brun, bras plantés au sol, crête et
+ * grande pointe dorsale crème, griffes, défenses, yeux incandescents,
+ * rayures lumineuses sur les muscles (rouges — ou couleur de l'ampoule).
  *
  * Il évolue avec la batterie de l'appareil : cinq stades, de la petite
- * teigne (Cendre) au colosse (Colosse). Chaque palier franchi fait pousser
- * pointes et cornes avec une onde de choc au sol.
+ * teigne au colosse. Chaque palier franchi fait pousser pointes et cornes
+ * avec une onde de choc au sol.
  */
 
 const L = (a: number, b: number, t: number): number => a + (b - a) * t;
 const F = (n: number): number => Math.round(n * 10) / 10;
 
-export const VOLTHRAK_RED = "#e02412";
+export const SHUSHU_RED = "#e02412";
 
 export const STAGE_NAMES = ["Cendre", "Braise", "Forge", "Fournaise", "Colosse"] as const;
 
@@ -66,32 +66,32 @@ let root: SVGGElement | null = null;
 let inner: SVGGElement | null = null;
 let pct = 72;
 let charging = false;
-let accent = VOLTHRAK_RED;
+let accent = SHUSHU_RED;
 let lastStage = -1;
 let flashTimer: number | undefined;
 let renderedKey = "";
 
-/** Crée le groupe #form-volthrak (invisible) dans le SVG du personnage. */
-export function mountVolthrak(svg: SVGSVGElement): SVGGElement {
+/** Crée le groupe #form-shushu (invisible) dans le SVG du personnage. */
+export function mountShushu(svg: SVGSVGElement): SVGGElement {
   const defs = svg.querySelector("defs");
-  if (defs && !svg.querySelector("#vkbody")) {
+  if (defs && !svg.querySelector("#shbody")) {
     defs.insertAdjacentHTML(
       "beforeend",
-      `<linearGradient id="vkbody" x1="0" y1="0" x2="1" y2="1">
+      `<linearGradient id="shbody" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0" stop-color="#4a3322"/><stop offset="0.55" stop-color="#33241a"/><stop offset="1" stop-color="#201510"/>
       </linearGradient>
-      <linearGradient id="vkhorn" x1="0" y1="1" x2="0" y2="0">
+      <linearGradient id="shhorn" x1="0" y1="1" x2="0" y2="0">
         <stop offset="0" stop-color="#96794f"/><stop offset="1" stop-color="#e9d6a6"/>
       </linearGradient>
-      <filter id="vkglow" x="-80%" y="-80%" width="260%" height="260%">
+      <filter id="shglow" x="-80%" y="-80%" width="260%" height="260%">
         <feGaussianBlur stdDeviation="5" result="b"/>
         <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
       </filter>
-      <filter id="vksoft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="14"/></filter>`,
+      <filter id="shsoft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="14"/></filter>`,
     );
   }
   const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  g.setAttribute("id", "form-volthrak");
+  g.setAttribute("id", "form-shushu");
   g.style.opacity = "0";
   g.style.visibility = "hidden";
   svg.insertBefore(g, svg.querySelector("#burst"));
@@ -107,10 +107,10 @@ export function mountVolthrak(svg: SVGSVGElement): SVGGElement {
 }
 
 /** Pousse batterie / charge / couleur d'accent ; re-dessine si nécessaire. */
-export function updateVolthrak(newPct: number, newCharging: boolean, newAccent: string): void {
+export function updateShushu(newPct: number, newCharging: boolean, newAccent: string): void {
   pct = Math.max(0, Math.min(100, newPct));
   charging = newCharging;
-  accent = newAccent || VOLTHRAK_RED;
+  accent = newAccent || SHUSHU_RED;
   const stage = batteryStage(pct);
   if (lastStage >= 0 && stage !== lastStage) {
     // palier franchi : pointes qui poussent + onde de choc
@@ -226,28 +226,65 @@ function render(flash: boolean): void {
     const ang = -0.15 - 1.15 * f;
     const dx = Math.cos(ang) * len;
     const dy = Math.sin(ang) * len;
-    spikes += `<path d="${tri(px, py, dx, dy, w)}" fill="url(#vkhorn)" stroke="#17100b" stroke-width="1.6" stroke-linejoin="round"/>`;
-    spikes += `<path d="${tri(-px, py, -dx, dy, w)}" fill="url(#vkhorn)" stroke="#17100b" stroke-width="1.6" stroke-linejoin="round"/>`;
+    spikes += `<path d="${tri(px, py, dx, dy, w)}" fill="url(#shhorn)" stroke="#17100b" stroke-width="1.6" stroke-linejoin="round"/>`;
+    spikes += `<path d="${tri(-px, py, -dx, dy, w)}" fill="url(#shhorn)" stroke="#17100b" stroke-width="1.6" stroke-linejoin="round"/>`;
   }
 
-  // marques incandescentes (couleur d'accent : rouge, ou l'ampoule)
+  // rayures incandescentes, symétriques sur pectoraux/épaules/bras comme
+  // les marques rouges du shushu (couleur d'accent : rouge, ou l'ampoule)
   const rnd = prng(31);
-  const nCr = [3, 4, 6, 8, 10][st];
+  const nCr = [2, 3, 3, 4, 5][st];
   let cracks = "";
   for (let i = 0; i < nCr; i++) {
-    let x = (rnd() * 2 - 1) * sw * 0.78;
-    let y = -H * (0.12 + rnd() * 0.76);
-    let d = `M ${F(x)} ${F(y)}`;
-    const seg = 3 + Math.floor(rnd() * 3);
+    const f = nCr === 1 ? 0.5 : i / (nCr - 1);
+    const x0 = sw * (0.34 + 0.55 * f);
+    const y0 = -H * (0.52 + 0.32 * (1 - f) + rnd() * 0.08);
+    const seg = 3 + Math.floor(rnd() * 2);
+    const jag: Array<[number, number]> = [[x0, y0]];
+    let x = x0;
+    let y = y0;
     for (let j = 0; j < seg; j++) {
-      x += (rnd() * 2 - 1) * sw * 0.24;
-      y -= (rnd() - 0.35) * H * 0.1;
-      d += ` L ${F(x)} ${F(y)}`;
+      x -= sw * (0.08 + rnd() * 0.12);
+      y += H * (0.05 + rnd() * 0.07) * (j % 2 === 0 ? 1 : -0.4);
+      jag.push([x, y]);
     }
-    cracks += `<path d="${d}" stroke-width="${F(L(1.2, 3.4, t) * (0.6 + rnd() * 0.7))}"/>`;
+    const w = F(L(1.6, 4.2, t) * (0.7 + rnd() * 0.5));
+    for (const dir of [1, -1]) {
+      let d = `M ${F(dir * jag[0][0])} ${F(jag[0][1])}`;
+      for (let j = 1; j < jag.length; j++) d += ` L ${F(dir * jag[j][0])} ${F(jag[j][1])}`;
+      cracks += `<path d="${d}" stroke-width="${w}"/>`;
+    }
+  }
+  // au-delà de la Forge, les bras aussi se marquent
+  if (st >= 2) {
+    for (const dir of [1, -1]) {
+      const ax = sw * L(1.0, 1.12, t);
+      cracks += `<path d="M ${F(dir * ax)} ${F(-H * 0.58)} L ${F(dir * (ax - sw * 0.08))} ${F(-H * 0.48)} L ${F(dir * (ax + sw * 0.04))} ${F(-H * 0.38)}" stroke-width="${F(L(1.6, 3.6, t))}"/>`;
+    }
   }
 
-  // tête, cornes latérales, crête crème (3 pointes façon mohawk)
+  // grande pointe dorsale (derrière le corps, comme dans l'animé)
+  const sailH = L(24, 215, t);
+  const sail =
+    st >= 1
+      ? `<path d="${tri(0, -H * 0.78, 10, -sailH, L(9, 30, t))}" fill="url(#shhorn)" stroke="#17100b" stroke-width="2.2" stroke-linejoin="round"/>`
+      : "";
+
+  // griffes crème : trois par poing, deux par pied
+  const fistX = sw * L(0.96, 1.08, t) + armT * 0.1;
+  const fistY = armEndY + fistR2 * 0.2;
+  const clawLen = fistR2 * 0.62;
+  let claws = "";
+  for (const dir of [-1, 1]) {
+    for (const off of [-0.45, 0, 0.45]) {
+      claws += `<path d="${tri(dir * (fistX + off * fistR2 * 0.8), fistY + fistR2 * 0.55, dir * clawLen * 0.25, clawLen, clawLen * 0.22)}" fill="url(#shhorn)" stroke="#17100b" stroke-width="1.2" stroke-linejoin="round"/>`;
+    }
+    for (const off of [1.18, 1.42]) {
+      claws += `<path d="${tri(dir * hw * off, -6, dir * hw * 0.22, 4, L(2.5, 6, t))}" fill="url(#shhorn)" stroke="#17100b" stroke-width="1.2" stroke-linejoin="round"/>`;
+    }
+  }
+
+  // tête, cornes latérales, crête crème (5 pointes façon mohawk)
   const head = smoothClosed([
     [-headR * 0.92, headY + headR * 0.5],
     [-headR, headY - headR * 0.2],
@@ -267,21 +304,27 @@ function render(flash: boolean): void {
   const hornL = tri(-headR * 0.88, headY - headR * 0.32, -hl * 0.85, -hl * 0.75, L(4, 9, t));
   const hornR = tri(headR * 0.88, headY - headR * 0.32, hl * 0.85, -hl * 0.75, L(4, 9, t));
   const crestTop = headY - headR * 0.62;
-  const crestH = L(16, 130, t);
+  const crestH = L(14, 78, t);
   let crest = "";
   for (const [fx, fh] of [
-    [-0.5, 0.52],
+    [-0.8, 0.42],
+    [-0.4, 0.72],
     [0, 1],
-    [0.5, 0.62],
+    [0.4, 0.72],
+    [0.8, 0.42],
   ] as Array<[number, number]>) {
-    crest += `<path d="${tri(headR * fx * 0.9, crestTop, headR * fx * 0.5, -crestH * fh, L(4, 13, t) * (0.6 + 0.4 * fh))}" fill="url(#vkhorn)" stroke="#17100b" stroke-width="2" stroke-linejoin="round"/>`;
+    crest += `<path d="${tri(headR * fx * 0.95, crestTop + headR * 0.14 * Math.abs(fx), headR * fx * 0.4, -crestH * fh, L(3.5, 11, t) * (0.55 + 0.45 * fh))}" fill="url(#shhorn)" stroke="#17100b" stroke-width="2" stroke-linejoin="round"/>`;
   }
 
   // petites défenses qui dépassent de la mâchoire
   const tuskH = headR * L(0.4, 0.9, t);
   const tusks =
-    `<path d="${tri(-headR * 0.38, headY + headR * 0.72, -2, -tuskH, L(2.5, 6, t))}" fill="url(#vkhorn)" stroke="#17100b" stroke-width="1.6" stroke-linejoin="round"/>` +
-    `<path d="${tri(headR * 0.38, headY + headR * 0.72, 2, -tuskH, L(2.5, 6, t))}" fill="url(#vkhorn)" stroke="#17100b" stroke-width="1.6" stroke-linejoin="round"/>`;
+    `<path d="${tri(-headR * 0.38, headY + headR * 0.72, -2, -tuskH, L(2.5, 6, t))}" fill="url(#shhorn)" stroke="#17100b" stroke-width="1.6" stroke-linejoin="round"/>` +
+    `<path d="${tri(headR * 0.38, headY + headR * 0.72, 2, -tuskH, L(2.5, 6, t))}" fill="url(#shhorn)" stroke="#17100b" stroke-width="1.6" stroke-linejoin="round"/>`;
+
+  // rictus mauvais sous les yeux
+  const mouthY = headY + headR * 0.52;
+  const mouth = `M ${F(-headR * 0.5)} ${F(mouthY + 3)} L ${F(-headR * 0.2)} ${F(mouthY)} L ${F(headR * 0.2)} ${F(mouthY)} L ${F(headR * 0.5)} ${F(mouthY + 3)}`;
 
   const eyeY = headY - headR * 0.12;
   const ew = L(6.5, 10, t);
@@ -293,26 +336,26 @@ function render(flash: boolean): void {
 
   const eyeColor = critical ? "#ff5238" : charging ? "#ffd27a" : "#ffeccb";
   const moodAnim = critical
-    ? "vk-rage .16s linear infinite"
+    ? "sh-rage .16s linear infinite"
     : charging
-      ? "vk-happy 1.5s cubic-bezier(.3,.7,.3,1) infinite"
+      ? "sh-happy 1.5s cubic-bezier(.3,.7,.3,1) infinite"
       : dozing
-        ? "vk-sleep 5.4s ease-in-out infinite"
+        ? "sh-sleep 5.4s ease-in-out infinite"
         : st >= 3
-          ? "vk-idle 3.2s ease-in-out infinite, vk-rumble .22s linear infinite"
-          : "vk-idle 3.4s ease-in-out infinite";
-  const lavaAnim = critical ? "vk-lavafast .45s ease-in-out infinite" : "vk-lava 2.6s ease-in-out infinite";
-  const growAnim = flash ? "animation:vk-grow .7s cubic-bezier(.2,1.3,.4,1)" : "";
+          ? "sh-idle 3.2s ease-in-out infinite, sh-rumble .22s linear infinite"
+          : "sh-idle 3.4s ease-in-out infinite";
+  const lavaAnim = critical ? "sh-lavafast .45s ease-in-out infinite" : "sh-lava 2.6s ease-in-out infinite";
+  const growAnim = flash ? "animation:sh-grow .7s cubic-bezier(.2,1.3,.4,1)" : "";
 
   const eyes = dozing
     ? `<g stroke="#5a4130" stroke-width="3" stroke-linecap="round" fill="none"><path d="${lidL}"/><path d="${lidR}"/></g>`
-    : `<g filter="url(#vkglow)" style="animation:vk-blink 5.2s ease-in-out infinite;transform-origin:0px ${F(eyeY)}px">
+    : `<g filter="url(#shglow)" style="animation:sh-blink 5.2s ease-in-out infinite;transform-origin:0px ${F(eyeY)}px">
         <path d="${eyeL}" fill="${eyeColor}"/><path d="${eyeR}" fill="${eyeColor}"/>
       </g>`;
 
   inner.innerHTML = `
-    <ellipse cx="0" cy="4" rx="${F(sw * 1.5 * k)}" ry="15" fill="${accent}" opacity="0.15" filter="url(#vksoft)" style="animation:vk-ground 3.4s ease-in-out infinite"/>
-    ${flash ? `<ellipse cx="0" cy="2" rx="150" ry="32" fill="none" stroke="${accent}" stroke-width="3" style="animation:vk-shock .7s ease-out forwards;transform-origin:0px 0px"/>` : ""}
+    <ellipse cx="0" cy="4" rx="${F(sw * 1.5 * k)}" ry="15" fill="${accent}" opacity="0.15" filter="url(#shsoft)" style="animation:sh-ground 3.4s ease-in-out infinite"/>
+    ${flash ? `<ellipse cx="0" cy="2" rx="150" ry="32" fill="none" stroke="${accent}" stroke-width="3" style="animation:sh-shock .7s ease-out forwards;transform-origin:0px 0px"/>` : ""}
     <g style="animation:${moodAnim};transform-origin:0px 0px">
       <g transform="scale(${k})">
         <g fill="none" stroke="#17100b" stroke-linecap="round">
@@ -323,30 +366,33 @@ function render(flash: boolean): void {
           <path d="${armPath(-1)}" stroke-width="${F(armT * 1.9)}"/>
           <path d="${armPath(1)}" stroke-width="${F(armT * 1.9)}"/>
         </g>
+        <g style="${growAnim};transform-origin:0px ${F(-H * 0.78)}px">${sail}</g>
         <path d="${foot(-1)}" fill="#2c1f16" stroke="#17100b" stroke-width="2.2" stroke-linejoin="round"/>
         <path d="${foot(1)}" fill="#2c1f16" stroke="#17100b" stroke-width="2.2" stroke-linejoin="round"/>
-        <path d="${legs}" fill="url(#vkbody)" stroke="#17100b" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="${legs}" fill="url(#shbody)" stroke="#17100b" stroke-width="2.5" stroke-linejoin="round"/>
         <path d="${legGap}" fill="#140d0a" opacity="0.95"/>
-        <path d="${body}" fill="url(#vkbody)" stroke="#17100b" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="${body}" fill="url(#shbody)" stroke="#17100b" stroke-width="2.5" stroke-linejoin="round"/>
         <path d="${shoulderL}" fill="#3b2a1e" stroke="#17100b" stroke-width="2.2" stroke-linejoin="round"/>
         <path d="${shoulderR}" fill="#3b2a1e" stroke="#17100b" stroke-width="2.2" stroke-linejoin="round"/>
         <path d="${fistL}" fill="#43301f" stroke="#17100b" stroke-width="2.2" stroke-linejoin="round"/>
         <path d="${fistR}" fill="#43301f" stroke="#17100b" stroke-width="2.2" stroke-linejoin="round"/>
+        ${claws}
         <path d="${plate}" fill="#251811" opacity="0.85"/>
-        <g fill="none" stroke="${accent}" stroke-linecap="round" filter="url(#vkglow)" style="animation:${lavaAnim}">${cracks}</g>
+        <g fill="none" stroke="${accent}" stroke-linecap="round" filter="url(#shglow)" style="animation:${lavaAnim}">${cracks}</g>
         <g style="${growAnim};transform-origin:0px 0px">${spikes}</g>
         <g style="${growAnim};transform-origin:0px ${F(headY)}px">${crest}</g>
-        <path d="${hornL}" fill="url(#vkhorn)" stroke="#17100b" stroke-width="2" stroke-linejoin="round"/>
-        <path d="${hornR}" fill="url(#vkhorn)" stroke="#17100b" stroke-width="2" stroke-linejoin="round"/>
+        <path d="${hornL}" fill="url(#shhorn)" stroke="#17100b" stroke-width="2" stroke-linejoin="round"/>
+        <path d="${hornR}" fill="url(#shhorn)" stroke="#17100b" stroke-width="2" stroke-linejoin="round"/>
         <path d="${head}" fill="#3a2a1e" stroke="#17100b" stroke-width="2.5" stroke-linejoin="round"/>
         <path d="${brow}" fill="#1c120c" opacity="0.95"/>
+        <path d="${mouth}" fill="none" stroke="#17100b" stroke-width="2.6" stroke-linecap="round"/>
         ${tusks}
         ${eyes}
       </g>
     </g>`;
 }
 
-/** Le groupe SVG du monstre (après mountVolthrak). */
-export function volthrakForm(): SVGGElement | null {
+/** Le groupe SVG du monstre (après mountShushu). */
+export function shushuForm(): SVGGElement | null {
   return root;
 }

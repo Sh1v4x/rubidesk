@@ -13,7 +13,7 @@
  */
 
 import { cursorPosition, getCurrentWindow } from "@tauri-apps/api/window";
-import { mountVolthrak, VOLTHRAK_RED } from "./volthrak";
+import { mountShushu, SHUSHU_RED } from "./shushu";
 
 export type SwordState =
   | "idle"
@@ -25,9 +25,9 @@ export type SwordState =
   | "wake"
   | "angry";
 
-export type SwordElement = "normal" | "air" | "fire" | "volthrak";
+export type SwordElement = "normal" | "air" | "fire" | "shushu";
 
-/** Les trois lames « classiques » (le monstre Volthrak a sa propre anatomie). */
+/** Les trois lames « classiques » (le monstre Shushu a sa propre anatomie). */
 type BladeElement = "normal" | "air" | "fire";
 const BLADES: BladeElement[] = ["normal", "air", "fire"];
 
@@ -113,8 +113,8 @@ const ELEMENTS: Record<SwordElement, ElementDef> = {
     maneOrigin: "110px 90px", maneBase: 0.92, maneAmp: 0.12,
   },
   // le monstre : l'œil bouge avec la taille, on vise la tête au stade moyen
-  volthrak: {
-    suffix: "v", color: VOLTHRAK_RED, eyeY: 600, eyeCy: 0, eyeR: 38, shadow: 78,
+  shushu: {
+    suffix: "v", color: SHUSHU_RED, eyeY: 600, eyeCy: 0, eyeR: 38, shadow: 78,
     maneOrigin: "0px 0px", maneBase: 1, maneAmp: 0,
   },
 };
@@ -128,7 +128,7 @@ export interface SwordEnv {
   game: boolean;
   muted: boolean;
   mini: boolean;
-  /** appareil branché sur le secteur → Volthrak sort de l'épée */
+  /** appareil branché sur le secteur → Shushu sort de l'épée */
   charging: boolean;
 }
 
@@ -197,7 +197,7 @@ export class Sword {
       normal: this.parts.normal.form,
       air: this.parts.air.form,
       fire: this.parts.fire.form,
-      volthrak: mountVolthrak(svg),
+      shushu: mountShushu(svg),
     };
     this.sheens = Array.from(svg.querySelectorAll(".sheen"));
     this.embersN = q("#embers-n");
@@ -212,12 +212,13 @@ export class Sword {
     window.addEventListener("mousemove", (e) => this.updateGaze(e.clientX, e.clientY));
     this.startGlobalGaze();
 
-    const savedPref = localStorage.getItem("rubilax.element");
+    let savedPref = localStorage.getItem("rubilax.element");
+    if (savedPref === "volthrak") savedPref = "shushu"; // ancien nom de code
     if (
       savedPref === "normal" ||
       savedPref === "air" ||
       savedPref === "fire" ||
-      savedPref === "volthrak"
+      savedPref === "shushu"
     ) {
       this.preference = savedPref;
       this.element = savedPref;
@@ -308,7 +309,7 @@ export class Sword {
    */
   private desiredElement(): SwordElement {
     if (this.preference !== "auto") return this.preference;
-    if (this.env.charging) return "volthrak"; // branché : le monstre sort
+    if (this.env.charging) return "shushu"; // branché : le monstre sort
     if (this.env.game) return "fire";
     if (this.env.muted || this.env.mini || this.current === "sleep") return "air";
     if (Date.now() < this.angerUntil) return "fire";
@@ -435,7 +436,7 @@ export class Sword {
   private applyBodyTheme(el: SwordElement): void {
     document.body.classList.toggle("el-air", el === "air");
     document.body.classList.toggle("el-fire", el === "fire");
-    document.body.classList.toggle("el-volthrak", el === "volthrak");
+    document.body.classList.toggle("el-shushu", el === "shushu");
     this.onElementChange?.(el);
   }
 
@@ -539,11 +540,11 @@ export class Sword {
     window.setTimeout(() => {
       const s = STATES[this.current];
       const el = this.element;
-      // Volthrak cligne tout seul (animation CSS), pas de paupières d'épée
-      if (el !== "volthrak" && s.open > 0.5 && !this.morphing) {
+      // Shushu cligne tout seul (animation CSS), pas de paupières d'épée
+      if (el !== "shushu" && s.open > 0.5 && !this.morphing) {
         this.applyLids(el, s, 0.03);
         window.setTimeout(() => {
-          if (this.element !== "volthrak") {
+          if (this.element !== "shushu") {
             this.applyLids(el, STATES[this.current], STATES[this.current].open);
           }
         }, 140);
@@ -598,7 +599,7 @@ export class Sword {
     const targetY = still ? 0 : this.ty;
     this.gx += (targetX - this.gx) * 0.08;
     this.gy += (targetY - this.gy) * 0.08;
-    if (this.element !== "volthrak") {
+    if (this.element !== "shushu") {
       const iris = this.parts[this.element].iris;
       if (!STATES[this.current].scan && !this.morphing) {
         iris.style.transform = `translate(${this.gx.toFixed(2)}px, ${this.gy.toFixed(2)}px)`;

@@ -414,7 +414,7 @@ pub fn note_clear(app: AppHandle) -> Result<(), String> {
 }
 
 // ---------------------------------------------------------------------------
-// Batterie : niveau + secteur branché (nourrit la forme Volthrak)
+// Batterie : niveau + secteur branché (nourrit la forme Shushu)
 // ---------------------------------------------------------------------------
 
 #[derive(serde::Serialize)]
