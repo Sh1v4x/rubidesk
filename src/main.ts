@@ -988,7 +988,7 @@ $("modules").addEventListener("click", (e) => {
 
 $("element-pref").addEventListener("click", (e) => {
   const el = (e.target as HTMLElement).dataset.el;
-  if (el === "auto" || el === "normal" || el === "air" || el === "fire") {
+  if (el === "auto" || el === "normal" || el === "air" || el === "fire" || el === "shushu") {
     applyElementChoice(el);
   }
 });
