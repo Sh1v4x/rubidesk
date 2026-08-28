@@ -13,7 +13,6 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
-import android.widget.ImageView
 import kotlin.math.abs
 
 /**
@@ -24,7 +23,7 @@ import kotlin.math.abs
 class FendoirOverlayService : Service() {
 
     private var windowManager: WindowManager? = null
-    private var eye: ImageView? = null
+    private var eye: EyeView? = null
     private val powerReceiver = PowerReceiver()
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -103,10 +102,8 @@ class FendoirOverlayService : Service() {
         params.x = resources.displayMetrics.widthPixels - size - (12 * density).toInt()
         params.y = (140 * density).toInt()
 
-        // le PNG de premier plan : l'œil seul, sur transparence (l'icône
-        // adaptive, elle, a un fond sombre — pas question de carré noir)
-        val view = ImageView(this)
-        view.setImageResource(R.mipmap.ic_launcher_foreground)
+        // l'œil vivant : il cligne, sa pupille vagabonde, il réagit
+        val view = EyeView(this)
         view.elevation = 8f
 
         var downX = 0f
@@ -126,6 +123,7 @@ class FendoirOverlayService : Service() {
                         startY = params.y
                         moved = false
                         downAt = System.currentTimeMillis()
+                        view.pressedLook = true
                         return true
                     }
                     MotionEvent.ACTION_MOVE -> {
@@ -138,6 +136,7 @@ class FendoirOverlayService : Service() {
                         return true
                     }
                     MotionEvent.ACTION_UP -> {
+                        view.pressedLook = false
                         val pressTime = System.currentTimeMillis() - downAt
                         if (!moved) {
                             val intent = Intent(this@FendoirOverlayService, MainActivity::class.java)
@@ -147,6 +146,8 @@ class FendoirOverlayService : Service() {
                             if (pressTime > 600) {
                                 // appui long : ouvrir en écoute vocale
                                 intent.putExtra(MainActivity.EXTRA_VOICE, true)
+                                view.listeningLook = true
+                                view.postDelayed({ view.listeningLook = false }, 4000)
                             }
                             startActivity(intent)
                         }

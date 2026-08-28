@@ -215,6 +215,47 @@ export const replies = {
       "Je capte pas ta maison. Vérifie l'URL et le token, mortel.",
       "Ta forteresse ne répond pas. C'est vexant, même pour moi.",
     ]),
+  // vie spontanée : il commente ce qu'il voit, sans qu'on lui demande
+  lifeLateNight: (): string =>
+    pick([
+      "Il est TARD, mortel. Même Rushu dort, c'est dire.",
+      "Encore debout ? Ta machine et moi, on aimerait bien dormir, nous.",
+      "Tu comptes travailler jusqu'à l'aube ? Les mortels sont fragiles, je te rappelle.",
+    ]),
+  lifeMorning: (weather: string): string =>
+    pick([
+      `Debout, mortel. Dehors : ${weather}. Moi je reste dans mon épée.`,
+      `Bonjour, paraît-il. ${weather}. Voilà, tu sais tout, file.`,
+      `Nouveau jour, mêmes corvées. ${weather}, si ça t'intéresse.`,
+    ]),
+  lifeLowBattery: (level: number): string =>
+    pick([
+      `${level} % de batterie. Branche-nous, je refuse de m'éteindre comme une vulgaire lampe.`,
+      `Ta machine agonise (${level} %). Un shushu ça ne meurt pas, mais ça déteste les coupures.`,
+    ]),
+  lifeQuip: (): string =>
+    pick([
+      "Je suis sûr que tu as encore cinquante onglets ouverts. Je le SENS d'ici.",
+      "Ton écran est sale. Je vois TOUT, je te rappelle.",
+      "On s'ennuie ferme, là-dedans. Donne-moi un ordre, ou une baffe à distribuer.",
+      "Pinpin aurait déjà cassé quelque chose, lui, au moins.",
+      "Je surveille. Quoi ? Aucune idée. Mais je surveille.",
+      "Tu tapes fort sur ce clavier. Respecte le matériel, mortel — j'en suis.",
+      "Rappelle-moi pourquoi je sers de presse-papier de luxe, déjà ?",
+    ]),
+  // le poke devient un jeu dangereux
+  pokeWarn: (): string =>
+    pick([
+      "Tu INSISTES ?! Compte tes doigts, mortel, il t'en manquera bientôt.",
+      "Encore une fois et je sors de l'épée. Pour de vrai. Tu ne veux PAS ça.",
+      "Trois fois. TROIS. Ma patience a la taille de ton courage : minuscule.",
+    ]),
+  pokeRage: (): string =>
+    pick([
+      "ÇA SUFFIT ! TU L'AURAS VOULU, MORTEL !",
+      "GRAAAH ! Le shushu est LÂCHÉ !",
+      "TU AS RÉVEILLÉ LE MONSTRE ! Cours.",
+    ]),
   poked: (): string =>
     pick([
       "AÏE ! Bas les pattes, mortel !",

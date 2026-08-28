@@ -272,6 +272,85 @@ pub fn set_torch(on: bool) -> Result<bool, String> {
     })
 }
 
+/// Démarre / arrête l'écoute du mot d'éveil (service Vosk). Si la
+/// permission micro manque, ouvre l'app pour la demander et renvoie
+/// Err("permission").
+pub fn wake_native(start: bool) -> Result<(), String> {
+    with_context(|env, context| {
+        if start {
+            let perm = env.new_string("android.permission.RECORD_AUDIO")?;
+            let granted = env
+                .call_method(
+                    context,
+                    "checkSelfPermission",
+                    "(Ljava/lang/String;)I",
+                    &[JValue::Object(&perm)],
+                )?
+                .i()?
+                == 0;
+            if !granted {
+                // MainActivity demandera la permission puis lancera le service
+                let class_name = env.new_string("com.shivax.rubilax.MainActivity")?;
+                let pkg = env.new_string("com.shivax.rubilax")?;
+                let intent_class = env.find_class("android/content/Intent")?;
+                let intent = env.new_object(&intent_class, "()V", &[])?;
+                env.call_method(
+                    &intent,
+                    "setClassName",
+                    "(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;",
+                    &[JValue::Object(&pkg), JValue::Object(&class_name)],
+                )?;
+                env.call_method(
+                    &intent,
+                    "addFlags",
+                    "(I)Landroid/content/Intent;",
+                    &[JValue::Int(0x1000_0000 | 0x2000_0000)],
+                )?;
+                let key = env.new_string("rubilax_req_mic")?;
+                env.call_method(
+                    &intent,
+                    "putExtra",
+                    "(Ljava/lang/String;Z)Landroid/content/Intent;",
+                    &[JValue::Object(&key), JValue::Bool(1)],
+                )?;
+                env.call_method(
+                    context,
+                    "startActivity",
+                    "(Landroid/content/Intent;)V",
+                    &[JValue::Object(&intent)],
+                )?;
+                return Err("permission".into());
+            }
+        }
+        let class_name = env.new_string("com.shivax.rubilax.WakeService")?;
+        let pkg = env.new_string("com.shivax.rubilax")?;
+        let intent_class = env.find_class("android/content/Intent")?;
+        let intent = env.new_object(&intent_class, "()V", &[])?;
+        env.call_method(
+            &intent,
+            "setClassName",
+            "(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;",
+            &[JValue::Object(&pkg), JValue::Object(&class_name)],
+        )?;
+        if start {
+            env.call_method(
+                context,
+                "startForegroundService",
+                "(Landroid/content/Intent;)Landroid/content/ComponentName;",
+                &[JValue::Object(&intent)],
+            )?;
+        } else {
+            env.call_method(
+                context,
+                "stopService",
+                "(Landroid/content/Intent;)Z",
+                &[JValue::Object(&intent)],
+            )?;
+        }
+        Ok(())
+    })
+}
+
 /// Démarre / arrête le service natif de l'œil flottant.
 pub fn overlay_service(start: bool) -> Result<(), String> {
     with_context(|env, context| {

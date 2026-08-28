@@ -162,6 +162,8 @@ export class Sword {
 
   private env: SwordEnv = { game: false, muted: false, mini: false, charging: false };
   private angerUntil = 0;
+  /** poke de trop : le shushu sort de force, quelle que soit la préférence */
+  private rageUntil = 0;
   /** Préférence utilisateur : forme imposée, ou "auto" (défaut). */
   private preference: SwordElement | "auto" = "auto";
   /** En mode auto, errance : de temps en temps il change de forme sans raison. */
@@ -285,6 +287,19 @@ export class Sword {
     this.wakeChain = window.setTimeout(() => this.set("idle"), ms);
   }
 
+  /** Poke de trop : le shushu jaillit de l'épée pour un temps, fou de rage. */
+  rage(ms = 20_000): void {
+    window.clearTimeout(this.wakeChain);
+    this.rageUntil = Date.now() + ms;
+    this.angerUntil = Date.now() + ANGER_ELEMENT_MS;
+    this.transition("angry");
+    this.wakeChain = window.setTimeout(() => this.set("idle"), Math.min(ms, 5000));
+    this.armSleepTimer();
+    this.refreshElement();
+    // retour à la forme d'avant une fois calmé
+    window.setTimeout(() => this.refreshElement(), ms + 100);
+  }
+
   /** Clic sur l'œil : réveil brutal puis colère, comme dans le design. */
   poke(): void {
     window.clearTimeout(this.wakeChain);
@@ -308,6 +323,7 @@ export class Sword {
    * de temps en temps, il se transforme juste parce que ça lui chante.
    */
   private desiredElement(): SwordElement {
+    if (Date.now() < this.rageUntil) return "shushu"; // la rage passe avant TOUT
     if (this.preference !== "auto") return this.preference;
     if (this.env.charging) return "shushu"; // branché : le monstre sort
     if (this.env.game) return "fire";

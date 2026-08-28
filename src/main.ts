@@ -49,6 +49,7 @@ import * as ha from "./ha";
 import type { HaEntity } from "./ha";
 import * as moodlight from "./moodlight";
 import { updateShushu, SHUSHU_RED } from "./shushu";
+import { initLife } from "./life";
 
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
@@ -881,6 +882,11 @@ async function openBook(): Promise<void> {
   $("help").classList.add("hidden");
   await renderNotes();
   renderTimers();
+  const stats = pokeStats();
+  $("poke-stats").textContent =
+    stats.pokes === 0
+      ? "Personne n'a encore osé toucher son œil."
+      : `Pokes subis : ${stats.pokes} · Crises de rage : ${stats.rages}. Il n'oublie RIEN.`;
   bookPanel.classList.remove("hidden");
 }
 
@@ -1026,17 +1032,52 @@ $("btn-close").addEventListener("click", () => {
   void getCurrentWindow().close();
 });
 
-// toucher l'œil : réveil brutal, puis colère
+// toucher l'œil : réveil brutal, puis colère — et à force, le shushu sort
+const POKE_STATS_KEY = "rubilax.pokeStats";
+let pokeTimes: number[] = [];
+
+function pokeStats(): { pokes: number; rages: number } {
+  try {
+    return { pokes: 0, rages: 0, ...JSON.parse(localStorage.getItem(POKE_STATS_KEY) ?? "{}") };
+  } catch {
+    return { pokes: 0, rages: 0 };
+  }
+}
+
 $("poke-zone").addEventListener("click", () => {
-  sword.poke();
-  window.setTimeout(() => {
+  const now = Date.now();
+  pokeTimes = pokeTimes.filter((t) => now - t < 30_000);
+  pokeTimes.push(now);
+  const stats = pokeStats();
+  stats.pokes += 1;
+
+  const count = pokeTimes.length;
+  if (count >= 5) {
+    // il pète un plomb : le shushu jaillit et cogne l'écran
+    stats.rages += 1;
+    pokeTimes = [];
+    sword.rage(20_000);
+    document.body.classList.add("quake");
+    window.setTimeout(() => document.body.classList.remove("quake"), 900);
     window.clearTimeout(bubbleTimer);
-    bubble.textContent = replies.poked();
+    bubble.textContent = replies.pokeRage();
     bubble.classList.remove("hidden");
     speak(bubble.textContent, undefined, () => {
-      bubbleTimer = window.setTimeout(() => bubble.classList.add("hidden"), 2000);
+      bubbleTimer = window.setTimeout(() => bubble.classList.add("hidden"), 2200);
     });
-  }, 950);
+  } else {
+    sword.poke();
+    const line = count >= 3 ? replies.pokeWarn() : replies.poked();
+    window.setTimeout(() => {
+      window.clearTimeout(bubbleTimer);
+      bubble.textContent = line;
+      bubble.classList.remove("hidden");
+      speak(bubble.textContent, undefined, () => {
+        bubbleTimer = window.setTimeout(() => bubble.classList.add("hidden"), 2000);
+      });
+    }, 950);
+  }
+  localStorage.setItem(POKE_STATS_KEY, JSON.stringify(stats));
 });
 
 // ---- raccourci global & icône de la barre des menus ----
@@ -1221,9 +1262,12 @@ if (IS_ANDROID) {
     }
   });
 
-  // œil flottant relancé au démarrage s'il était actif
+  // œil flottant et mot d'éveil relancés au démarrage s'ils étaient actifs
   if (localStorage.getItem("rubilax.overlay") === "1") {
     void invoke("overlay_set", { active: true }).catch(() => {});
+  }
+  if (localStorage.getItem("rubilax.wakeNative") === "1") {
+    void invoke("wake_native_set", { active: true }).catch(() => {});
   }
 
   // config HA déposée dans le dossier privé de l'app (import par câble) :
@@ -1317,10 +1361,33 @@ async function androidUpdateCheck(): Promise<"found" | "none" | "error"> {
 }
 
 const overlaySwitch = $("overlay-switch");
+const wakeNativeSwitch = $("wake-native-switch");
 
 function refreshOverlaySwitch(): void {
   overlaySwitch.classList.toggle("active", localStorage.getItem("rubilax.overlay") === "1");
+  wakeNativeSwitch.classList.toggle(
+    "active",
+    localStorage.getItem("rubilax.wakeNative") === "1",
+  );
 }
+
+wakeNativeSwitch.addEventListener("click", async () => {
+  const want = localStorage.getItem("rubilax.wakeNative") !== "1";
+  try {
+    await invoke("wake_native_set", { active: want });
+    localStorage.setItem("rubilax.wakeNative", want ? "1" : "0");
+    settingsStatus.textContent = want
+      ? "J'écoute. Dis « Hé Rubilax » n'importe quand (premier lancement : je télécharge mes oreilles, ~41 Mo)."
+      : "Je me bouche les oreilles.";
+  } catch (e) {
+    settingsStatus.textContent =
+      String(e) === "permission"
+        ? "Accorde le micro à Rubidesk dans la fenêtre qui s'ouvre — l'écoute démarrera toute seule ensuite."
+        : `Impossible : ${String(e)}`;
+    if (String(e) === "permission") localStorage.setItem("rubilax.wakeNative", "1");
+  }
+  refreshOverlaySwitch();
+});
 
 overlaySwitch.addEventListener("click", async () => {
   const want = localStorage.getItem("rubilax.overlay") !== "1";
@@ -1383,6 +1450,7 @@ $("btn-auto-save").addEventListener("click", async () => {
 // ---- Shushu : la batterie fait évoluer le monstre, l'ampoule le colore ----
 
 let shushuTint = SHUSHU_RED;
+let lastBattery: { level: number; charging: boolean } | null = null;
 
 /** Couleur des marques : celle de l'ampoule d'humeur si la domotique est
  *  active et l'ampoule allumée en couleur — sinon le rouge de Rubilax. */
@@ -1407,6 +1475,7 @@ async function shushuAccent(): Promise<string> {
 async function pollBattery(): Promise<void> {
   try {
     const bat = await invoke<{ level: number; charging: boolean }>("battery_status");
+    lastBattery = bat;
     sword.setEnv({ charging: bat.charging });
     if (sword.currentElement === "shushu") {
       shushuTint = await shushuAccent();
@@ -1420,6 +1489,25 @@ async function pollBattery(): Promise<void> {
 
 window.setInterval(() => void pollBattery(), 20_000);
 void pollBattery();
+
+// ---- vie spontanée : il commente sans qu'on lui demande ----
+
+initLife({
+  say: (text) => say(text, "angry"),
+  getCity: () => localStorage.getItem(CITY_KEY),
+  fetchWeather: async (city) => {
+    try {
+      const data = await invoke<{
+        current: { temperature_2m: number; weather_code: number };
+      }>("weather", { city });
+      return `${Math.round(data.current.temperature_2m)} degrés, ${weatherLabel(data.current.weather_code)}`;
+    } catch {
+      return null;
+    }
+  },
+  getBattery: () => lastBattery,
+  isBusy: () => listeningNow || !bubble.classList.contains("hidden") || sword.state === "listen",
+});
 
 // ---- élément automatique : Wakfu lancé → forme feu ----
 

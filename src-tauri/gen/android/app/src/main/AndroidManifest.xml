@@ -5,6 +5,9 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- mot d'éveil : écoute continue locale -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
 
     <!-- visibilité des applications lançables (Android 11+) -->
     <queries>
@@ -52,6 +55,13 @@
         </service>
 
         <!-- automatisations : chargeur branché / débranché -->
+        <!-- mot d'éveil « Hé Rubilax » : écoute continue locale (Vosk) -->
+        <service
+            android:name=".WakeService"
+            android:exported="false"
+            android:stopWithTask="false"
+            android:foregroundServiceType="microphone" />
+
         <!-- humeurs grognonnes périodiques (alarme auto-reprogrammée) -->
         <receiver android:name=".QuipReceiver" android:exported="false" />
 

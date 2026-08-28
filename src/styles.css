@@ -178,6 +178,21 @@ body.el-shushu {
 @keyframes sh-shock { 0% { transform: scale(0.2); opacity: 0.9; } 100% { transform: scale(1.9); opacity: 0; } }
 @keyframes sh-ground { 0%, 100% { opacity: 0.35; transform: scaleX(1); } 50% { opacity: 0.6; transform: scaleX(1.05); } }
 
+/* le shushu cogne l'écran (poke de trop) */
+@keyframes quake {
+  0%, 100% { transform: translate(0, 0); }
+  15% { transform: translate(-9px, 4px) rotate(-0.7deg); }
+  30% { transform: translate(8px, -5px) rotate(0.6deg); }
+  45% { transform: translate(-7px, -3px) rotate(-0.5deg); }
+  60% { transform: translate(6px, 4px) rotate(0.4deg); }
+  75% { transform: translate(-4px, 2px) rotate(-0.2deg); }
+  90% { transform: translate(2px, -1px); }
+}
+
+body.quake #app {
+  animation: quake 0.85s ease-out;
+}
+
 #composer {
   display: flex;
   align-items: center;

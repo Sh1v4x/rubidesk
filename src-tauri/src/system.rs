@@ -567,6 +567,21 @@ pub fn config_take_pending() -> Result<Option<String>, String> {
     }
 }
 
+/// Active/désactive le mot d'éveil natif Android (« Hé Rubilax », Vosk).
+/// Renvoie Err("permission") si le micro doit d'abord être accordé.
+#[tauri::command]
+pub fn wake_native_set(active: bool) -> Result<(), String> {
+    #[cfg(target_os = "android")]
+    {
+        return crate::android::wake_native(active);
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        let _ = active;
+        Err("le mot d'éveil natif, c'est sur le téléphone".into())
+    }
+}
+
 /// Déclenche l'écoute vocale native (Android uniquement).
 #[tauri::command]
 pub fn voice_listen() -> Result<(), String> {

@@ -80,6 +80,9 @@ rust {
 }
 
 dependencies {
+    // mot d'éveil « Hé Rubilax » : reconnaissance locale Vosk
+    implementation("com.alphacephei:vosk-android:0.3.47")
+    implementation("net.java.dev.jna:jna:5.13.0@aar")
     implementation("androidx.webkit:webkit:1.14.0")
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.activity:activity-ktx:1.10.1")
