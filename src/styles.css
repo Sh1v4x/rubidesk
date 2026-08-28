@@ -564,6 +564,7 @@ button.action.wide {
 }
 
 #ha-section.hidden,
+#auto-section.hidden,
 #eliadex-section.hidden {
   display: none;
 }

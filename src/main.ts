@@ -110,6 +110,7 @@ function refreshModuleButtons(): void {
   }
   // les sections de config n'apparaissent que si leur module est actif
   document.getElementById("ha-section")?.classList.toggle("hidden", !features.domotique);
+  document.getElementById("auto-section")?.classList.toggle("hidden", !features.domotique);
   document.getElementById("eliadex-section")?.classList.toggle("hidden", !features.eliadex);
 }
 
@@ -1440,8 +1441,10 @@ $("btn-auto-save").addEventListener("click", async () => {
       if (rule) config[key] = rule;
     }
     await invoke("automations_save", { json: JSON.stringify(config) });
-    settingsStatus.textContent =
-      "Automatisations enregistrées. App fermée, l'œil flottant doit être actif pour qu'elles agissent.";
+    await reloadAutoRules();
+    settingsStatus.textContent = IS_ANDROID
+      ? "Automatisations enregistrées. App fermée, l'œil flottant doit être actif pour qu'elles agissent."
+      : "Automatisations enregistrées. Elles agissent tant que Rubidesk tourne.";
   } catch (e) {
     settingsStatus.textContent = `Automatisations : ${e instanceof Error ? e.message : String(e)}`;
   }
@@ -1472,10 +1475,66 @@ async function shushuAccent(): Promise<string> {
   return SHUSHU_RED;
 }
 
+// exécution des automatisations côté desktop (sur Android, le récepteur
+// natif s'en charge — même app fermée)
+interface AutoRule {
+  url?: string;
+  token?: string;
+  domain?: string;
+  service?: string;
+  entity_id?: string;
+}
+let autoRules: Record<string, AutoRule> = {};
+let prevCharging: boolean | null = null;
+let batteryLowFired = false;
+
+async function reloadAutoRules(): Promise<void> {
+  try {
+    autoRules = JSON.parse(await invoke<string>("automations_load")) as Record<string, AutoRule>;
+  } catch {
+    autoRules = {};
+  }
+}
+void reloadAutoRules();
+
+async function fireAutoRule(key: string): Promise<void> {
+  const rule = autoRules[key];
+  if (!rule?.url || !rule.token || !rule.entity_id) return;
+  try {
+    await invoke("ha_call_service", {
+      baseUrl: rule.url,
+      token: rule.token,
+      domain: rule.domain ?? "homeassistant",
+      service: rule.service ?? "turn_on",
+      entityId: rule.entity_id,
+    });
+  } catch {
+    // HA injoignable : tant pis pour cette fois
+  }
+}
+
+function runDesktopAutomations(bat: { level: number; charging: boolean }): void {
+  if (IS_ANDROID) return;
+  if (prevCharging !== null && bat.charging !== prevCharging) {
+    void fireAutoRule(bat.charging ? "power_connected" : "power_disconnected");
+  }
+  prevCharging = bat.charging;
+  if (bat.level >= 0) {
+    if (!batteryLowFired && bat.level <= 20 && !bat.charging) {
+      batteryLowFired = true;
+      void fireAutoRule("battery_low");
+    } else if (batteryLowFired && bat.level >= 30) {
+      batteryLowFired = false;
+      void fireAutoRule("battery_okay");
+    }
+  }
+}
+
 async function pollBattery(): Promise<void> {
   try {
     const bat = await invoke<{ level: number; charging: boolean }>("battery_status");
     lastBattery = bat;
+    runDesktopAutomations(bat);
     sword.setEnv({ charging: bat.charging });
     if (sword.currentElement === "shushu") {
       shushuTint = await shushuAccent();

@@ -505,17 +505,9 @@
           <label style="margin-top: 8px"><small class="hint">Shushu : Rubilax hors de l'épée, sa vraie forme. Il en sort quand l'appareil est branché (en Auto) et grandit avec la batterie.</small></label>
         </details>
 
-        <details class="section" id="mobile-section">
-          <summary class="section-title">Téléphone</summary>
-          <button class="switch-row" id="overlay-switch">
-            <span class="switch-text">Œil flottant<small>Par-dessus tout : toucher = ouvrir, appui long = lui parler</small></span>
-            <span class="switch"></span>
-          </button>
-          <button class="switch-row" id="wake-native-switch">
-            <span class="switch-text">Mot d'éveil « Hé Rubilax »<small>Écoute continue 100 % locale (~41 Mo au premier lancement, consomme un peu de batterie)</small></span>
-            <span class="switch"></span>
-          </button>
-          <p class="section-title" style="margin-top: 14px">Automatisations</p>
+        <details class="section" id="auto-section">
+          <summary class="section-title">Automatisations</summary>
+          <label><small class="hint">Une commande en français, exécutée quand l'appareil change d'état. Sur PC : tant que Rubidesk tourne. Sur téléphone : même app fermée, si l'œil flottant est actif.</small></label>
           <label>Quand je branche le chargeur
             <input id="auto-plug" type="text" placeholder="Ex : allume la lumière du salon" autocomplete="off" />
           </label>
@@ -529,6 +521,18 @@
             <input id="auto-batok" type="text" placeholder="Ex : éteins la lampe du bureau" autocomplete="off" />
           </label>
           <button class="action wide" id="btn-auto-save">Enregistrer les automatisations</button>
+        </details>
+
+        <details class="section" id="mobile-section">
+          <summary class="section-title">Téléphone</summary>
+          <button class="switch-row" id="overlay-switch">
+            <span class="switch-text">Œil flottant<small>Par-dessus tout : toucher = ouvrir, appui long = lui parler</small></span>
+            <span class="switch"></span>
+          </button>
+          <button class="switch-row" id="wake-native-switch">
+            <span class="switch-text">Mot d'éveil « Hé Rubilax »<small>Écoute continue 100 % locale (~41 Mo au premier lancement, consomme un peu de batterie)</small></span>
+            <span class="switch"></span>
+          </button>
         </details>
 
         <div class="section last">
