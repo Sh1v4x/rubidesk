@@ -32,9 +32,57 @@ class WakeService : Service() {
         private const val MODEL_URL =
             "https://alphacephei.com/vosk/models/vosk-model-small-fr-0.22.zip"
         private const val MODEL_DIR = "vosk-model-small-fr-0.22"
-        private val TRIGGERS = listOf(
-            "rubilax", "roubilax", "rubi lax", "ruby lax", "rubis lax", "rubilaxe",
-        )
+
+        /**
+         * « Rubilax » n'existe pas dans le vocabulaire du modèle : Vosk
+         * transcrit les mots réels les plus proches (« rubis lax », « rue
+         * bila », « roubaix »…). On matche donc en flou : texte compacté,
+         * fenêtres glissantes, distance de Levenshtein — la même recette
+         * que le mot d'éveil Whisper du desktop.
+         */
+        private const val WAKE = "rubilax"
+
+        fun matchesWake(raw: String): Boolean {
+            val clean = buildString {
+                for (ch in raw.lowercase()) {
+                    when (ch) {
+                        in 'a'..'z' -> append(if (ch == 'y') 'i' else if (ch == 'k') 'x' else ch)
+                        'é', 'è', 'ê', 'ë' -> append('e')
+                        'à', 'â' -> append('a')
+                        'î', 'ï' -> append('i')
+                        else -> {} // espaces et ponctuation : compactés
+                    }
+                }
+            }
+            if (clean.contains(WAKE) || clean.contains("roubilax")) return true
+            // fin distinctive quand l'attaque est avalée
+            if (clean.contains("bilax")) return true
+            // fenêtres glissantes tolérantes (lev ≤ 2), ancrées sur une
+            // attaque plausible pour limiter les faux positifs
+            val anchors = listOf("rub", "roub", "rib", "rueb")
+            for (start in clean.indices) {
+                if (anchors.none { clean.startsWith(it, start) }) continue
+                for (len in 6..9) {
+                    if (start + len > clean.length) break
+                    if (levenshtein(clean.substring(start, start + len), WAKE) <= 2) return true
+                }
+            }
+            return false
+        }
+
+        private fun levenshtein(a: String, b: String): Int {
+            val prev = IntArray(b.length + 1) { it }
+            val cur = IntArray(b.length + 1)
+            for (i in 1..a.length) {
+                cur[0] = i
+                for (j in 1..b.length) {
+                    val cost = if (a[i - 1] == b[j - 1]) 0 else 1
+                    cur[j] = minOf(cur[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost)
+                }
+                cur.copyInto(prev)
+            }
+            return prev[b.length]
+        }
     }
 
     private var speechService: SpeechService? = null
@@ -155,11 +203,12 @@ class WakeService : Service() {
     }
 
     private fun check(hypothesis: String?) {
-        val text = hypothesis?.lowercase() ?: return
-        if (TRIGGERS.none { text.contains(it) }) return
+        val text = hypothesis ?: return
+        if (!matchesWake(text)) return
         val now = System.currentTimeMillis()
         if (now - lastFire < 8000) return
         lastFire = now
+        vibrate() // « je t'ai entendu, mortel »
         // pause pendant que la reconnaissance système écoute la commande
         speechService?.setPause(true)
         val intent = Intent(this, MainActivity::class.java)
@@ -167,6 +216,27 @@ class WakeService : Service() {
             .putExtra(MainActivity.EXTRA_VOICE, true)
         startActivity(intent)
         android.os.Handler(mainLooper).postDelayed({ speechService?.setPause(false) }, 9000)
+    }
+
+    @Suppress("DEPRECATION")
+    private fun vibrate() {
+        try {
+            val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                (getSystemService(VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager).defaultVibrator
+            } else {
+                getSystemService(VIBRATOR_SERVICE) as android.os.Vibrator
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(
+                    android.os.VibrationEffect.createOneShot(
+                        160, android.os.VibrationEffect.DEFAULT_AMPLITUDE
+                    )
+                )
+            } else {
+                vibrator.vibrate(160)
+            }
+        } catch (_: Exception) {
+        }
     }
 
     override fun onDestroy() {

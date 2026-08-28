@@ -8,6 +8,7 @@
     <!-- mot d'éveil : écoute continue locale -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- visibilité des applications lançables (Android 11+) -->
     <queries>
