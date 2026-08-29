@@ -595,6 +595,13 @@ button.action.wide {
   opacity: 0.85;
 }
 
+#settings-version {
+  margin-top: 6px;
+  font-size: 10px;
+  text-align: center;
+  opacity: 0.45;
+}
+
 /* carnet : notes & minuteurs éditables */
 .book-list {
   display: flex;

@@ -754,6 +754,9 @@ $("btn-settings").addEventListener("click", () => {
     })
     .catch(() => {});
   settingsStatus.textContent = "";
+  void getVersion()
+    .then((v) => ($("settings-version").textContent = `Rubidesk v${v} — le shushu le plus à jour du Monde des Douze`))
+    .catch(() => {});
   refreshElementButtons();
   refreshModuleButtons();
   refreshMoodSwitch();
