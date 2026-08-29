@@ -616,3 +616,47 @@ pub fn automations_load(app: AppHandle) -> Result<String, String> {
     }
     std::fs::read_to_string(path).map_err(|e| e.to_string())
 }
+
+/// Mise à jour Android intégrée : télécharge l'APK dans le cache (progression
+/// émise sur `update-download`) puis ouvre l'installateur système dessus.
+#[tauri::command]
+pub async fn update_install_apk(app: AppHandle, url: String) -> Result<(), String> {
+    #[cfg(target_os = "android")]
+    {
+        use std::io::Write;
+        use tauri::Emitter;
+        let path = PathBuf::from(crate::android::cache_dir()?).join("rubidesk-update.apk");
+        // un reste de mise à jour précédente ne doit jamais être installé
+        let _ = std::fs::remove_file(&path);
+        let mut res = reqwest::Client::new()
+            .get(&url)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+        if !res.status().is_success() {
+            return Err(format!("téléchargement échoué : HTTP {}", res.status()));
+        }
+        let total = res.content_length().unwrap_or(0);
+        let mut file = std::fs::File::create(&path).map_err(|e| e.to_string())?;
+        let mut downloaded: u64 = 0;
+        let mut last_pct: u64 = 0;
+        while let Some(chunk) = res.chunk().await.map_err(|e| e.to_string())? {
+            file.write_all(&chunk).map_err(|e| e.to_string())?;
+            downloaded += chunk.len() as u64;
+            if total > 0 {
+                let pct = downloaded * 100 / total;
+                if pct != last_pct {
+                    last_pct = pct;
+                    let _ = app.emit("update-download", pct);
+                }
+            }
+        }
+        drop(file);
+        return crate::android::install_apk(&path.to_string_lossy());
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        let _ = (app, url);
+        Err("la mise à jour intégrée, c'est sur le téléphone".into())
+    }
+}

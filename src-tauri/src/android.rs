@@ -511,6 +511,76 @@ pub fn battery_status() -> Result<(i32, bool), String> {
     })
 }
 
+/// Chemin absolu du dossier cache de l'app (pour l'APK de mise à jour).
+pub fn cache_dir() -> Result<String, String> {
+    with_context(|env, context| {
+        let dir = env
+            .call_method(context, "getCacheDir", "()Ljava/io/File;", &[])?
+            .l()?;
+        let path = env
+            .call_method(&dir, "getAbsolutePath", "()Ljava/lang/String;", &[])?
+            .l()?;
+        Ok(env.get_string(&JString::from(path))?.into())
+    })
+}
+
+/// Ouvre l'installateur système sur un APK local (dialogue « Mettre à jour
+/// cette appli ? ») via l'URI content:// du FileProvider déclaré au manifest.
+pub fn install_apk(path: &str) -> Result<(), String> {
+    let path = path.to_string();
+    with_context(move |env, context| {
+        let file_class = env.find_class("java/io/File")?;
+        let jpath = env.new_string(&path)?;
+        let file = env.new_object(
+            &file_class,
+            "(Ljava/lang/String;)V",
+            &[JValue::Object(&jpath)],
+        )?;
+        let provider = env.find_class("androidx/core/content/FileProvider")?;
+        let authority = env.new_string("com.shivax.rubilax.fileprovider")?;
+        let uri = env
+            .call_static_method(
+                provider,
+                "getUriForFile",
+                "(Landroid/content/Context;Ljava/lang/String;Ljava/io/File;)Landroid/net/Uri;",
+                &[
+                    JValue::Object(context),
+                    JValue::Object(&authority),
+                    JValue::Object(&file),
+                ],
+            )?
+            .l()?;
+        let action = env.new_string("android.intent.action.VIEW")?;
+        let intent_class = env.find_class("android/content/Intent")?;
+        let intent = env.new_object(
+            &intent_class,
+            "(Ljava/lang/String;)V",
+            &[JValue::Object(&action)],
+        )?;
+        let mime = env.new_string("application/vnd.android.package-archive")?;
+        env.call_method(
+            &intent,
+            "setDataAndType",
+            "(Landroid/net/Uri;Ljava/lang/String;)Landroid/content/Intent;",
+            &[JValue::Object(&uri), JValue::Object(&mime)],
+        )?;
+        // FLAG_ACTIVITY_NEW_TASK | FLAG_GRANT_READ_URI_PERMISSION
+        env.call_method(
+            &intent,
+            "addFlags",
+            "(I)Landroid/content/Intent;",
+            &[JValue::Int(0x1000_0000 | 0x0000_0001)],
+        )?;
+        env.call_method(
+            context,
+            "startActivity",
+            "(Landroid/content/Intent;)V",
+            &[JValue::Object(&intent)],
+        )?;
+        Ok(())
+    })
+}
+
 /// Ouvre l'écran système pour accorder la permission d'overlay.
 pub fn request_overlay_permission() -> Result<(), String> {
     with_context(|env, context| {

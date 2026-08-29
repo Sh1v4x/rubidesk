@@ -1357,15 +1357,51 @@ async function androidUpdateCheck(): Promise<"found" | "none" | "error"> {
     if (!latest || !isNewerVersion(latest, current)) return "none";
     const apk = (rel.assets ?? []).find((a) => a.name.endsWith(".apk"));
     if (!apk) return "none";
-    say(replies.updateFound(latest));
-    // le navigateur télécharge l'APK ; Android propose ensuite l'installation
-    window.setTimeout(() => void invoke("open_web", { url: apk.browser_download_url }), 2600);
+    showUpdateModal(latest, apk.browser_download_url);
     return "found";
   } catch {
     // hors ligne : on retentera plus tard
     return "error";
   }
 }
+
+// ---- mise à jour intégrée : modale, téléchargement interne, installateur ----
+
+const updateModal = $("update-modal");
+let updateApkUrl = "";
+
+void listen<number>("update-download", (e) => {
+  bubble.textContent = `Je me télécharge… ${e.payload}%`;
+  bubble.classList.remove("hidden");
+});
+
+function showUpdateModal(version: string, url: string): void {
+  updateApkUrl = url;
+  $("update-text").textContent = replies.updatePrompt(version);
+  settingsPanel.classList.add("hidden");
+  say(replies.updateFound(version));
+  updateModal.classList.remove("hidden");
+}
+
+$("btn-update-later").addEventListener("click", () => {
+  updateModal.classList.add("hidden");
+  say(replies.updateLater(), "error");
+});
+
+$("btn-update-go").addEventListener("click", async () => {
+  updateModal.classList.add("hidden");
+  say(replies.updateAccepted());
+  try {
+    await invoke("update_install_apk", { url: updateApkUrl });
+    // l'installateur système s'affiche par-dessus : dernière consigne
+    say(replies.updateReadyToInstall());
+  } catch (e) {
+    console.error(e);
+    // repli : le navigateur télécharge l'APK, comme avant
+    void invoke("open_web", { url: updateApkUrl }).catch(() => {});
+    say(replies.updateDirectFailed(), "error");
+  }
+});
 
 const overlaySwitch = $("overlay-switch");
 const wakeNativeSwitch = $("wake-native-switch");
@@ -1635,7 +1671,7 @@ $("btn-update-check").addEventListener("click", async () => {
     const outcome = await androidUpdateCheck();
     settingsStatus.textContent =
       outcome === "found"
-        ? "Nouvelle version trouvée : le téléchargement s'ouvre. Installe, mortel."
+        ? "Nouvelle version trouvée : dis-moi si je l'installe."
         : outcome === "none"
           ? `Rien de neuf. Je suis déjà en ${current}, au sommet de ma forme.`
           : "Impossible de vérifier — t'es hors ligne ou GitHub boude.";

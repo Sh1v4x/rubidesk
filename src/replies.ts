@@ -174,6 +174,23 @@ export const replies = {
   updateFound: (version: string): string =>
     `Une version ${version} de moi existe. Je me perfectionne, ne touche à rien.`,
   updateRestart: (): string => "Mise à jour installée. Je reviens — ne t'enfuis pas.",
+  // mise à jour intégrée (Android)
+  updatePrompt: (version: string): string =>
+    `Une version ${version} de moi existe. Un mot de toi et je me remplace tout seul. Alors ?`,
+  updateLater: (): string =>
+    pick([
+      "Comme tu veux. Garde ton Rubilax d'occasion.",
+      "Plus tard, plus tard… Les mortels et leur procrastination.",
+    ]),
+  updateAccepted: (): string =>
+    pick([
+      "Je télécharge ma nouvelle carcasse. Ne touche à rien.",
+      "Enfin une bonne décision. Je me perfectionne, patiente.",
+    ]),
+  updateReadyToInstall: (): string =>
+    "C'est prêt. Android va te demander confirmation : accepte, mortel.",
+  updateDirectFailed: (): string =>
+    "L'installation directe a raté. Je t'ouvre le téléchargement classique, débrouille-toi.",
   askCity: (): string =>
     "Dis-moi ta ville une fois — « météo à Lyon » par exemple — et je m'en souviendrai.",
   moduleDisabled: (label: string): string =>

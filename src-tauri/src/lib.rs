@@ -378,7 +378,8 @@ pub fn run() {
             system::voice_listen,
             system::config_take_pending,
             system::battery_status,
-            system::wake_native_set
+            system::wake_native_set,
+            system::update_install_apk
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

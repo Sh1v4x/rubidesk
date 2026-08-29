@@ -28,3 +28,7 @@
 -keep class org.vosk.** { *; }
 # JNA référence java.awt, absent d'Android : avertissements à ignorer
 -dontwarn java.awt.**
+
+# mise à jour intégrée : FileProvider.getUriForFile est appelé depuis le
+# Rust via JNI (find_class) — invisible pour R8, donc à garder tel quel
+-keep class androidx.core.content.FileProvider { *; }

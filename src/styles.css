@@ -978,3 +978,20 @@ body.android .book-text,
 body.android .book-row .book-edit {
   font-size: 13.5px;
 }
+
+/* ---- modale de mise à jour (Android) ---- */
+#update-modal .update-text {
+  padding: 12px 2px 4px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#update-modal .update-actions {
+  display: flex;
+  gap: 8px;
+  padding: 10px 0 6px;
+}
+
+#update-modal .update-actions .action {
+  flex: 1;
+}
