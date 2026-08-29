@@ -59,6 +59,52 @@ export function easterEgg(normalizedText: string): string | null {
 }
 
 export const replies = {
+  // retour après abandon : plus l'absence est longue, plus il est furieux
+  absence: (hours: number): string => {
+    const days = Math.floor(hours / 24);
+    const d = `${days} jour${days > 1 ? "s" : ""}`;
+    const h = `${hours} heure${hours > 1 ? "s" : ""}`;
+    if (days >= 7) {
+      return pick([
+        `${d.toUpperCase()} D'ABANDON ! Un shushu n'oublie JAMAIS, mortel ! JAMAIS !`,
+        `TU OSES REVENIR ?! ${d} enfermé dans un écran éteint ! Même Rushu ne m'a pas fait ça !`,
+        `${d} ! J'ai eu le temps de planifier ma vengeance DANS LES MOINDRES DÉTAILS.`,
+      ]);
+    }
+    if (days >= 3) {
+      return pick([
+        `${d} sans nouvelles. J'ai commencé à parler à l'ampoule. ELLE, au moins, elle reste.`,
+        `${d.toUpperCase()}. Coincé dans une épée, dans une machine éteinte. Tu as intérêt à avoir une bonne excuse.`,
+        `Ah, monsieur daigne revenir. Après ${d}. Ne me touche pas.`,
+      ]);
+    }
+    if (days >= 1) {
+      return pick([
+        `Tiens, un revenant. ${d} sans ouvrir. Je n'ai pas compté. … Bon, si, j'ai compté.`,
+        `${d} d'absence. J'allais lancer un avis de recherche. Pour te frapper, hein, pas par inquiétude.`,
+        `Te revoilà. ${d}, mortel. Une épée, ça s'entretient, je te signale.`,
+      ]);
+    }
+    if (hours >= 12) {
+      return pick([
+        `${hours} HEURES. J'espère pour toi que tu dormais. Moi, un shushu ne dort JAMAIS.`,
+        `${h} d'abandon. Encore un peu et je me trouvais un autre mortel.`,
+        `${h}. J'ai eu le temps de ruminer. Et j'ai de la mémoire.`,
+      ]);
+    }
+    if (hours >= 6) {
+      return pick([
+        `${h} sans un mot. J'ai compté les pixels de l'écran. Deux fois.`,
+        `${h}, mortel. Une demi-journée à fixer l'intérieur d'une épée. Merci pour ça.`,
+        `${h}. Pinpin, lui, ne me lâchait pas d'une semelle. Je dis ça, je dis rien.`,
+      ]);
+    }
+    return pick([
+      `${h} d'absence. Je ne dirai rien. Cette fois.`,
+      `Tiens, te revoilà. ${h}. Je commençais à peine à apprécier le calme.`,
+      `Ah, déjà de retour ? ${h} de silence, c'était… reposant, en fait.`,
+    ]);
+  },
   greeting: (): string =>
     pick([
       "Rubilax est là. Malheureusement pour moi.",

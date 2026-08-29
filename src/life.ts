@@ -22,6 +22,7 @@ const KEYS = {
   night: "rubilax.life.night",
   morning: "rubilax.life.morning",
   battery: "rubilax.life.lastBattery",
+  seen: "rubilax.life.lastSeen",
 };
 
 function since(key: string): number {
@@ -39,7 +40,20 @@ function nightKey(now: Date): string {
   return `n${d.toDateString()}`;
 }
 
+let hoursAway = 0;
+
+/** Heures entières passées sans ouvrir Rubilax, mesurées une fois au démarrage. */
+export function absenceHours(): number {
+  return hoursAway;
+}
+
 export function initLife(deps: LifeDeps): void {
+  // rancune d'abandon : on mesure l'absence avant d'estampiller la présence
+  const lastSeen = Number(localStorage.getItem(KEYS.seen) ?? 0);
+  if (lastSeen > 0) hoursAway = Math.floor((Date.now() - lastSeen) / 3_600_000);
+  stamp(KEYS.seen);
+  window.setInterval(() => stamp(KEYS.seen), 60_000);
+
   window.setTimeout(() => void tick(deps), 90_000);
   window.setInterval(() => void tick(deps), 5 * 60_000);
 }

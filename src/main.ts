@@ -49,7 +49,7 @@ import * as ha from "./ha";
 import type { HaEntity } from "./ha";
 import * as moodlight from "./moodlight";
 import { updateShushu, SHUSHU_RED } from "./shushu";
-import { initLife } from "./life";
+import { initLife, absenceHours } from "./life";
 
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
@@ -216,6 +216,20 @@ function say(text: string, state: SwordState = "success"): void {
       bubbleTimer = window.setTimeout(() => bubble.classList.add("hidden"), 2500);
     },
   );
+}
+
+/** Crise de rage : le shushu jaillit, l'écran tremble, la réplique claque.
+ *  Passe à côté de say() pour ne pas écraser l'état « rage » de la lame. */
+function rageSay(line: string): void {
+  sword.rage(20_000);
+  document.body.classList.add("quake");
+  window.setTimeout(() => document.body.classList.remove("quake"), 900);
+  window.clearTimeout(bubbleTimer);
+  bubble.textContent = line;
+  bubble.classList.remove("hidden");
+  speak(bubble.textContent, undefined, () => {
+    bubbleTimer = window.setTimeout(() => bubble.classList.add("hidden"), 2200);
+  });
 }
 
 async function getEntities(cfg: ha.HaConfig): Promise<HaEntity[]> {
@@ -1057,15 +1071,7 @@ $("poke-zone").addEventListener("click", () => {
     // il pète un plomb : le shushu jaillit et cogne l'écran
     stats.rages += 1;
     pokeTimes = [];
-    sword.rage(20_000);
-    document.body.classList.add("quake");
-    window.setTimeout(() => document.body.classList.remove("quake"), 900);
-    window.clearTimeout(bubbleTimer);
-    bubble.textContent = replies.pokeRage();
-    bubble.classList.remove("hidden");
-    speak(bubble.textContent, undefined, () => {
-      bubbleTimer = window.setTimeout(() => bubble.classList.add("hidden"), 2200);
-    });
+    rageSay(replies.pokeRage());
   } else {
     sword.poke();
     const line = count >= 3 ? replies.pokeWarn() : replies.poked();
@@ -1599,7 +1605,15 @@ sword.set("wake");
 if (localStorage.getItem(ONBOARD_KEY) !== "1") {
   window.setTimeout(() => void runOnboarding(), 1100);
 } else {
-  window.setTimeout(() => say(replies.greeting(), "angry"), 900);
+  // abandonné trop longtemps ? Il accueille en boudant — voire en explosant
+  const away = absenceHours();
+  if (away >= 7 * 24) {
+    window.setTimeout(() => rageSay(replies.absence(away)), 900);
+  } else if (away >= 1) {
+    window.setTimeout(() => say(replies.absence(away), "angry"), 900);
+  } else {
+    window.setTimeout(() => say(replies.greeting(), "angry"), 900);
+  }
 }
 
 // mise à jour automatique (silencieuse s'il n'y a rien) — desktop
