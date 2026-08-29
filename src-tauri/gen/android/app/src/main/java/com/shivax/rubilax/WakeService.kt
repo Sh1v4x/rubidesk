@@ -209,13 +209,21 @@ class WakeService : Service() {
         if (now - lastFire < 8000) return
         lastFire = now
         vibrate() // « je t'ai entendu, mortel »
+        // l'utterance en cours contient « rubilax » et ne se clôt qu'au
+        // prochain silence : sans reset, chaque son suivant produirait un
+        // partiel contenant encore le mot d'éveil → re-déclenchement
+        speechService?.reset()
         // pause pendant que la reconnaissance système écoute la commande
         speechService?.setPause(true)
         val intent = Intent(this, MainActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             .putExtra(MainActivity.EXTRA_VOICE, true)
         startActivity(intent)
-        android.os.Handler(mainLooper).postDelayed({ speechService?.setPause(false) }, 9000)
+        android.os.Handler(mainLooper).postDelayed({
+            // repartir d'une utterance vierge au retour d'écoute
+            speechService?.reset()
+            speechService?.setPause(false)
+        }, 9000)
     }
 
     @Suppress("DEPRECATION")

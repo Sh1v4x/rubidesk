@@ -19,3 +19,12 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Vosk (mot d'éveil) passe par JNA, dont le code natif retrouve classes,
+# champs (Pointer.peer) et méthodes PAR NOM : R8 ne doit ni les renommer
+# ni les élaguer, sinon UnsatisfiedLinkError au démarrage du WakeService.
+-keep class com.sun.jna.** { *; }
+-keepclassmembers class * extends com.sun.jna.Structure { *; }
+-keep class org.vosk.** { *; }
+# JNA référence java.awt, absent d'Android : avertissements à ignorer
+-dontwarn java.awt.**
