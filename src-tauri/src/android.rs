@@ -524,6 +524,29 @@ pub fn cache_dir() -> Result<String, String> {
     })
 }
 
+/// Charge une classe embarquée dans l'APK (androidx…) via le ClassLoader du
+/// Context : FindClass depuis un thread natif attaché ne voit que les
+/// classes du framework, jamais celles de l'application.
+fn load_app_class<'a>(
+    env: &mut JNIEnv<'a>,
+    context: &JObject,
+    name: &str,
+) -> Result<jni::objects::JClass<'a>, Box<dyn std::error::Error>> {
+    let loader = env
+        .call_method(context, "getClassLoader", "()Ljava/lang/ClassLoader;", &[])?
+        .l()?;
+    let jname = env.new_string(name)?;
+    let class = env
+        .call_method(
+            &loader,
+            "loadClass",
+            "(Ljava/lang/String;)Ljava/lang/Class;",
+            &[JValue::Object(&jname)],
+        )?
+        .l()?;
+    Ok(jni::objects::JClass::from(class))
+}
+
 /// Ouvre l'installateur système sur un APK local (dialogue « Mettre à jour
 /// cette appli ? ») via l'URI content:// du FileProvider déclaré au manifest.
 pub fn install_apk(path: &str) -> Result<(), String> {
@@ -536,7 +559,7 @@ pub fn install_apk(path: &str) -> Result<(), String> {
             "(Ljava/lang/String;)V",
             &[JValue::Object(&jpath)],
         )?;
-        let provider = env.find_class("androidx/core/content/FileProvider")?;
+        let provider = load_app_class(env, context, "androidx.core.content.FileProvider")?;
         let authority = env.new_string("com.shivax.rubilax.fileprovider")?;
         let uri = env
             .call_static_method(
