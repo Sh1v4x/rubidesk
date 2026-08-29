@@ -134,12 +134,19 @@ function render(flash: boolean): void {
   renderedKey = key;
 
   const t = st / 4;
-  const H = L(176, 342, t);
-  const sw = L(66, 190, t);
-  const hw = L(46, 126, t);
-  const headR = L(26, 46, t);
+  // Cendre → Fournaise : croissance sage et bien étagée. Colosse : hors
+  // gabarit — près du double de la Fournaise — mais calibré pour remplir
+  // la fenêtre sans en sortir : bras ≤ ±240 unités viewBox (bord visible
+  // ≈ ±241 avec l'avatar 184×620), crête et pointe dorsale sous y=0
+  // (le sol est ancré à y=846). Silhouette plus étroite que haute, sinon
+  // la largeur des bras crève le cadre avant que la hauteur n'impressionne.
+  const colosse = st === 4;
+  const u = Math.min(st, 3) / 3;
+  const H = colosse ? 600 : L(150, 320, u);
+  const sw = colosse ? 155 : L(60, 118, u);
+  const hw = colosse ? 105 : L(42, 82, u);
+  const headR = colosse ? 54 : L(26, 46, t);
   const headY = -H * L(0.9, 0.84, t);
-  const k = F(L(1.22, 1.0, t));
 
   const blob = (cx: number, cy: number, rx: number, ry: number): string =>
     `M ${F(cx - rx)} ${F(cy)} A ${F(rx)} ${F(ry)} 0 0 1 ${F(cx + rx)} ${F(cy)} A ${F(rx)} ${F(ry)} 0 0 1 ${F(cx - rx)} ${F(cy)} Z`;
@@ -221,8 +228,8 @@ function render(flash: boolean): void {
     const f = nSp === 1 ? 0.85 : i / (nSp - 1);
     const px = sw * L(1.02, 0.72, f);
     const py = -H * (0.52 + 0.44 * f);
-    const len = L(18, 68, t) * (0.5 + 0.6 * f);
-    const w = L(3.5, 9, t) * (0.65 + 0.45 * (1 - f));
+    const len = L(18, 68, t) * (colosse ? 1.6 : 1) * (0.5 + 0.6 * f);
+    const w = L(3.5, 9, t) * (colosse ? 1.3 : 1) * (0.65 + 0.45 * (1 - f));
     const ang = -0.15 - 1.15 * f;
     const dx = Math.cos(ang) * len;
     const dy = Math.sin(ang) * len;
@@ -264,7 +271,7 @@ function render(flash: boolean): void {
   }
 
   // grande pointe dorsale (derrière le corps, comme dans l'animé)
-  const sailH = L(24, 215, t);
+  const sailH = colosse ? 310 : L(24, 215, t);
   const sail =
     st >= 1
       ? `<path d="${tri(0, -H * 0.78, 10, -sailH, L(9, 30, t))}" fill="url(#shhorn)" stroke="#17100b" stroke-width="2.2" stroke-linejoin="round"/>`
@@ -304,7 +311,7 @@ function render(flash: boolean): void {
   const hornL = tri(-headR * 0.88, headY - headR * 0.32, -hl * 0.85, -hl * 0.75, L(4, 9, t));
   const hornR = tri(headR * 0.88, headY - headR * 0.32, hl * 0.85, -hl * 0.75, L(4, 9, t));
   const crestTop = headY - headR * 0.62;
-  const crestH = L(14, 78, t);
+  const crestH = colosse ? 115 : L(14, 78, t);
   let crest = "";
   for (const [fx, fh] of [
     [-0.8, 0.42],
@@ -354,10 +361,10 @@ function render(flash: boolean): void {
       </g>`;
 
   inner.innerHTML = `
-    <ellipse cx="0" cy="4" rx="${F(sw * 1.5 * k)}" ry="15" fill="${accent}" opacity="0.15" filter="url(#shsoft)" style="animation:sh-ground 3.4s ease-in-out infinite"/>
+    <ellipse cx="0" cy="4" rx="${F(sw * 1.5)}" ry="15" fill="${accent}" opacity="0.15" filter="url(#shsoft)" style="animation:sh-ground 3.4s ease-in-out infinite"/>
     ${flash ? `<ellipse cx="0" cy="2" rx="150" ry="32" fill="none" stroke="${accent}" stroke-width="3" style="animation:sh-shock .7s ease-out forwards;transform-origin:0px 0px"/>` : ""}
     <g style="animation:${moodAnim};transform-origin:0px 0px">
-      <g transform="scale(${k})">
+      <g>
         <g fill="none" stroke="#17100b" stroke-linecap="round">
           <path d="${armPath(-1)}" stroke-width="${F(armT * 1.9 + 5)}"/>
           <path d="${armPath(1)}" stroke-width="${F(armT * 1.9 + 5)}"/>
